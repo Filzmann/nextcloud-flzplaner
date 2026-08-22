@@ -9,6 +9,7 @@ runJavaScriptSuite({
     testFiles: [
         'tests/js/admin-smoke.js',
         'tests/js/assignment-control-smoke.js',
+        'tests/js/local-test-account-password-contract.js',
         'tests/js/main-workflow-smoke.js',
         'tests/js/model-smoke.js',
         'tests/js/month-plan-smoke.js',

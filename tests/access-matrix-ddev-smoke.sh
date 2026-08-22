@@ -4,7 +4,6 @@ set -euo pipefail
 base_url="${ADP_BASE_URL:-https://nextcloud-dev.ddev.site}"
 ddev_project="${ADP_DDEV_PROJECT:-$(cd "$(dirname "$0")/../../nextcloud-dev" && pwd)}"
 suffix="$(date +%s)-$$"
-password="$(php -r 'echo bin2hex(random_bytes(24));')"
 team_code="Smoke$$"
 team_group="ad-ASN-$team_code"
 created_users=()
@@ -24,7 +23,7 @@ trap cleanup EXIT
 
 create_user() {
     local uid="$1"
-    (cd "$ddev_project" && ddev exec -d /var/www/html/html env OC_PASS="$password" php occ user:add --password-from-env "$uid") >/dev/null
+    (cd "$ddev_project" && ddev exec -d /var/www/html/html env OC_PASS="$uid" php occ user:add --password-from-env "$uid") >/dev/null
     created_users+=("$uid")
     occ group:adduser "$team_group" "$uid" >/dev/null
 }
@@ -35,7 +34,7 @@ foreign="adp-smoke-${suffix}-foreign"
 create_user "$actor"
 create_user "$foreign"
 
-ADP_BASE_URL="$base_url" ADP_USER="$actor" ADP_PASSWORD="$password" \
+ADP_BASE_URL="$base_url" ADP_USER="$actor" ADP_PASSWORD="$actor" \
     ADP_TEAM_CODE="$team_code" ADP_FOREIGN_UID="$foreign" \
     "$(dirname "$0")/access-http-smoke.sh"
 

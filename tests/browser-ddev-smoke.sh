@@ -7,7 +7,6 @@ suffix="$(date +%s)$$"
 team_code="P${suffix: -15}"
 team_group="ad-ASN-$team_code"
 month='2098-11'
-password="$(php -r 'echo bin2hex(random_bytes(24));')"
 actor="adp-browser-$suffix-eb"
 assistant="adp-browser-$suffix-assistant"
 member="adp-browser-$suffix-member"
@@ -52,7 +51,7 @@ trap 'cleanup || report_failed_cleanup' EXIT
 
 create_user() {
     local uid="$1"
-    (cd "$ddev_project" && ddev exec -d /var/www/html/html env OC_PASS="$password" php occ user:add --password-from-env "$uid") >/dev/null
+    (cd "$ddev_project" && ddev exec -d /var/www/html/html env OC_PASS="$uid" php occ user:add --password-from-env "$uid") >/dev/null
     created_users+=("$uid")
     occ group:adduser "$team_group" "$uid" >/dev/null
 }
@@ -99,7 +98,6 @@ ADP_BASE_URL="$base_url" \
 ADP_BROWSER_EB="$actor" \
 ADP_BROWSER_ASSISTANT="$assistant" \
 ADP_BROWSER_MEMBER="$member" \
-ADP_BROWSER_PASSWORD="$password" \
 ADP_BROWSER_TEAM="$team_code" \
 ADP_BROWSER_MONTH="$month" \
 ADP_BROWSER_SCREENSHOT="$screenshot" \

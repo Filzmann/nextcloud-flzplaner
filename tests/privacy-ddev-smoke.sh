@@ -8,7 +8,6 @@ team_code="P${suffix: -15}"
 team_group="ad-ASN-$team_code"
 month='2098-11'
 work_date="$month-03"
-password="$(php -r 'echo bin2hex(random_bytes(24));')"
 actor="adp-privacy-$suffix-eb"
 active="adp-privacy-$suffix-active"
 disabled="adp-privacy-$suffix-disabled"
@@ -45,7 +44,7 @@ trap 'cleanup || report_failed_cleanup' EXIT
 
 create_user() {
     local uid="$1"
-    (cd "$ddev_project" && ddev exec -d /var/www/html/html env OC_PASS="$password" php occ user:add --password-from-env "$uid") >/dev/null
+    (cd "$ddev_project" && ddev exec -d /var/www/html/html env OC_PASS="$uid" php occ user:add --password-from-env "$uid") >/dev/null
     created_users+=("$uid")
     occ group:adduser "$team_group" "$uid" >/dev/null
 }
@@ -67,7 +66,7 @@ cookies="$workdir/cookies.txt"
 plan="$workdir/plan.json"
 response="$workdir/response.json"
 
-curl --fail --silent --show-error --insecure --user "$actor:$password" \
+curl --fail --silent --show-error --insecure --user "$actor:$actor" \
     --cookie-jar "$cookies" "$base_url/index.php/apps/adplaner/" --output "$page"
 token="$(sed -n 's/.*data-requesttoken="\([^"]*\)".*/\1/p' "$page" | head -n 1)"
 if [[ -z "$token" ]]; then
@@ -76,7 +75,7 @@ if [[ -z "$token" ]]; then
 fi
 
 plan_endpoint="$base_url/index.php/apps/adplaner/api/teams/$team_code/months/$month"
-curl --fail --silent --show-error --insecure --user "$actor:$password" \
+curl --fail --silent --show-error --insecure --user "$actor:$actor" \
     --cookie "$cookies" --cookie-jar "$cookies" -H "requesttoken: $token" \
     "$plan_endpoint" --output "$plan"
 
@@ -94,7 +93,7 @@ foreach ([$argv[3], $argv[4]] as $forbiddenUid) {
 ' "$plan" "$active" "$disabled" "$actor"
 
 before="$(run_probe snapshot "$team_code" "$month")"
-curl --fail --silent --show-error --insecure --user "$actor:$password" \
+curl --fail --silent --show-error --insecure --user "$actor:$actor" \
     --cookie "$cookies" --cookie-jar "$cookies" -H "requesttoken: $token" \
     "$plan_endpoint" --output "$plan"
 after="$(run_probe snapshot "$team_code" "$month")"
@@ -110,12 +109,12 @@ if ($after["updatedByUid"] !== $before["updatedByUid"] || $after["updatedAt"] !=
 ' "$before" "$after"
 
 note_endpoint="$plan_endpoint/days/$work_date/note"
-curl --fail --silent --show-error --insecure --user "$actor:$password" \
+curl --fail --silent --show-error --insecure --user "$actor:$actor" \
     --cookie "$cookies" --cookie-jar "$cookies" -H "requesttoken: $token" -H 'Content-Type: application/json' \
     -X POST --data '{"note":"Synthetische Prüfbemerkung"}' "$note_endpoint" --output "$response"
 run_probe assert-note-present "$team_code" "$month" "$work_date" >/dev/null
 
-curl --fail --silent --show-error --insecure --user "$actor:$password" \
+curl --fail --silent --show-error --insecure --user "$actor:$actor" \
     --cookie "$cookies" --cookie-jar "$cookies" -H "requesttoken: $token" -H 'Content-Type: application/json' \
     -X POST --data '{"note":"   "}' "$note_endpoint" --output "$response"
 run_probe assert-note-absent "$team_code" "$month" "$work_date" >/dev/null

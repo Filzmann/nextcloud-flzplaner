@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { writeFile } from 'node:fs/promises';
 
-const required = ['ADP_CDP_PORT', 'ADP_BASE_URL', 'ADP_BROWSER_EB', 'ADP_BROWSER_ASSISTANT', 'ADP_BROWSER_MEMBER', 'ADP_BROWSER_PASSWORD', 'ADP_BROWSER_TEAM', 'ADP_BROWSER_MONTH', 'ADP_BROWSER_SCREENSHOT'];
+const required = ['ADP_CDP_PORT', 'ADP_BASE_URL', 'ADP_BROWSER_EB', 'ADP_BROWSER_ASSISTANT', 'ADP_BROWSER_MEMBER', 'ADP_BROWSER_TEAM', 'ADP_BROWSER_MONTH', 'ADP_BROWSER_SCREENSHOT'];
 for (const name of required) {
     if (!process.env[name]) throw new Error(`${name} fehlt.`);
 }
@@ -11,7 +11,6 @@ const baseUrl = process.env.ADP_BASE_URL.replace(/\/$/, '');
 const ebUid = process.env.ADP_BROWSER_EB;
 const assistantUid = process.env.ADP_BROWSER_ASSISTANT;
 const memberUid = process.env.ADP_BROWSER_MEMBER;
-const password = process.env.ADP_BROWSER_PASSWORD;
 const teamCode = process.env.ADP_BROWSER_TEAM;
 const month = process.env.ADP_BROWSER_MONTH;
 const screenshotPath = process.env.ADP_BROWSER_SCREENSHOT;
@@ -93,7 +92,7 @@ async function navigateAs(uid) {
         const user = form.querySelector('#user');
         const password = form.querySelector('#password');
         user.value = ${JSON.stringify(uid)};
-        password.value = ${JSON.stringify(password)};
+        password.value = ${JSON.stringify(uid)};
         user.dispatchEvent(new Event('input', {bubbles: true}));
         password.dispatchEvent(new Event('input', {bubbles: true}));
         form.requestSubmit();

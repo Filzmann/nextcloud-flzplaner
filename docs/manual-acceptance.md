@@ -143,9 +143,10 @@ direkten serverseitigen Negativfall aus C3 ab.
 Auch die technischen Korrekturen zu A4 und A6 sind automatisiert belegt:
 direkte Vor-/Zurücknavigation und ein begrenzter, horizontal wie vertikal
 scrollbarer Plan-Viewport mit sichtbarer rechter Aktionsspalte. Die manuelle
-visuelle und fachliche Wiederholungsabnahme sowie die konkrete fachliche
-Wirkung der optionalen Hinweise auf Wünsche und Zuweisungen bleiben vor einer
-Produktfreigabe erforderlich.
+visuelle und fachliche Wiederholungsabnahme bleibt vor einer Produktfreigabe
+erforderlich. Die fachliche Wirkung der optionalen Hinweise ist inzwischen
+verbindlich festgelegt: Sie sind ausschließlich read-only und blockieren oder
+verändern weder Wünsche noch Zuweisungen.
 
 Für `0.4.0-rc.2` belegen zusätzliche Repository-, Service-, Routen- und
 JavaScript-Tests die Serialisierung konkurrierender Planänderungen, strikte
@@ -179,3 +180,10 @@ mit dem Browserprofil gelöscht. Eine unabhängige Nachprüfung fand danach kein
 synthetischen Konten oder über deren Bearbeiterkennung auffindbaren Plan- und
 Bemerkungsdaten. Nicht Bestandteil dieses Laufs war das Umschalten von
 OrgSuite oder optionalen Provider-Apps.
+
+Am 22.08.2026 wurden Rechtematrix, Datenschutz-Runtime und die vollständige
+Headless-Chrome-Abnahme erneut gegen Nextcloud 34 ausgeführt. Alle drei Läufe
+waren grün und bestätigten zugleich den lokalen Testkontenvertrag
+Benutzername = Passwort. Die anschließenden Cleanup-Prüfungen fanden keine
+synthetischen Konten, Gruppen oder Plandaten. Die historische manuelle
+Gesamtentscheidung vom 02.08.2026 bleibt als damaliger Befund unverändert.
