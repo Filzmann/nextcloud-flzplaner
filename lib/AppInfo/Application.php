@@ -7,7 +7,11 @@ namespace OCA\AdPlaner\AppInfo;
 use OCA\AdPlaner\Listener\IntegrationCapabilityQueryListener;
 use OCA\AdPlaner\Listener\StandaloneNavigationListener;
 use OCA\AdPlaner\Privacy\PlanerPrivacyProviderListener;
+use OCA\AdPlaner\Permission\PlanerPermissionProviderListener;
+use OCA\AdPlaner\Permission\PlanerPermissionSourceInterface;
+use OCA\AdPlaner\Permission\NextcloudPlanerPermissionSource;
 use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
+use OCA\FilzmannPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
 use OCA\LocalBase\Integration\IntegrationCapabilityQueryEvent;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -27,6 +31,8 @@ class Application extends App implements IBootstrap {
         $context->registerEventListener(IntegrationCapabilityQueryEvent::class, IntegrationCapabilityQueryListener::class);
         $context->registerEventListener(LoadAdditionalEntriesEvent::class, StandaloneNavigationListener::class);
         $context->registerEventListener(RegisterPersonalDataProvidersEvent::class, PlanerPrivacyProviderListener::class);
+        $context->registerEventListener(RegisterPermissionProvidersEvent::class, PlanerPermissionProviderListener::class);
+        $context->registerServiceAlias(PlanerPermissionSourceInterface::class, NextcloudPlanerPermissionSource::class);
     }
 
     public function boot(IBootContext $context): void {
