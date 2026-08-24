@@ -32,7 +32,7 @@
                     <h2>${esc(team.displayName || team.code)}</h2>
                 </div>
                 <form id="settings-form" class="adp-settings-form">
-                    <label>Anzeigename <input name="displayName" type="text" maxlength="255" value="${esc(team.displayName || team.code)}"></label>
+                    <label>Anzeigename <input name="displayName" type="text" maxlength="255" required value="${esc(team.displayName || team.code)}"></label>
                     <label>Assistentinnentreffen <input name="meetingDay" type="date" value="${esc(settings.meetingDay || '')}"></label>
                     <fieldset>
                         <legend>Schichten</legend>

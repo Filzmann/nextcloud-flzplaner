@@ -62,7 +62,7 @@ class TeamAccessService {
         )));
     }
 
-    public function teamForCode(string $teamCode): ?Team {
+    private function teamForCode(string $teamCode): ?Team {
         $teamCode = $this->normalizeTeamCode($teamCode);
         $groupName = $this->teamGroupName($teamCode);
         $group = $this->groupManager->get($groupName);
@@ -84,8 +84,13 @@ class TeamAccessService {
     }
 
     public function assertTeamAccess(string $teamCode): Team {
+        $teamCode = $this->normalizeTeamCode($teamCode);
+        if (!$this->currentUserInGroup($this->teamGroupName($teamCode))) {
+            throw new \DomainException('Kein Zugriff auf dieses Assistenzteam.');
+        }
+
         $team = $this->teamForCode($teamCode);
-        if ($team === null || !$this->currentUserInGroup($team->groupName)) {
+        if ($team === null) {
             throw new \DomainException('Kein Zugriff auf dieses Assistenzteam.');
         }
 
@@ -133,6 +138,10 @@ class TeamAccessService {
     private function assistantsForGroup($group): array {
         $assistants = [];
         foreach ($group->getUsers() as $user) {
+            if (!$user->isEnabled()) {
+                continue;
+            }
+
             $isEb = $this->userHasEbGroup($user);
             $assistants[] = Assistant::fromUser($user, $isEb);
         }

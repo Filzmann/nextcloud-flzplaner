@@ -38,6 +38,12 @@
             });
         }
 
+        transitionStatus(teamCode, month, targetStatus) {
+            return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/status', {
+                targetStatus
+            });
+        }
+
         saveSettings(teamCode, displayName, meetingDay, shifts) {
             return this.post(this.teamPath(teamCode) + '/settings', {
                 displayName,

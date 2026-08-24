@@ -1,5 +1,5 @@
 (function() {
-    const { esc } = window.ADPlaner.ui;
+    const { esc, dateShort } = window.ADPlaner.ui;
 
     function render(day, canCoordinate) {
         if (!canCoordinate) {
@@ -7,8 +7,8 @@
         }
 
         return `
-            <textarea rows="2" data-note-date="${esc(day.date)}">${esc(day.note || '')}</textarea>
-            <button type="button" class="adp-small adp-icon-button" title="Bemerkung speichern" data-action="save-note" data-date="${esc(day.date)}">&#10003;</button>
+            <textarea rows="2" maxlength="2000" aria-label="Bemerkung für ${esc(dateShort(day.date))}" data-note-date="${esc(day.date)}">${esc(day.note || '')}</textarea>
+            <button type="button" class="adp-small adp-icon-button" aria-label="Bemerkung für ${esc(dateShort(day.date))} speichern" data-action="save-note" data-date="${esc(day.date)}">&#10003;</button>
         `;
     }
 

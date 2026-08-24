@@ -37,7 +37,11 @@
             </label>
             <label>
                 Monat
-                <input id="month-input" type="month">
+                <span class="adp-month-control">
+                    <button type="button" id="month-prev" class="adp-icon-button" aria-label="Vorheriger Monat">‹</button>
+                    <input id="month-input" type="month" min="2000-01" max="2100-12" required>
+                    <button type="button" id="month-next" class="adp-icon-button" aria-label="Nächster Monat">›</button>
+                </span>
             </label>
         </div>
     </header>

@@ -34,7 +34,7 @@
                 <label>Von <input name="shiftStart" type="time" required value="${esc(shift.startsAt || '08:00')}"></label>
                 <label>Bis <input name="shiftEnd" type="time" required value="${esc(shift.endsAt || '14:00')}"></label>
                 <label class="adp-check"><input name="shiftEnabled" type="checkbox" ${shift.enabled === false ? '' : 'checked'}> aktiv</label>
-                <button type="button" class="adp-small" title="Schicht entfernen" data-action="remove-shift-row">x</button>
+                <button type="button" class="adp-small" aria-label="Schicht ${esc(shift.label || ('Schicht ' + (index + 1)))} entfernen" data-action="remove-shift-row">&times;</button>
             </div>
         `;
     }

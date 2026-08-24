@@ -69,6 +69,10 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
 - AdPlaner und AD Urlaub verwenden dieselben Assistenzteam-Gruppen; separate Suffix-Gruppen werden nicht unterstützt.
 - Der app-eigene Adminabschnitt installiert Demo-Inhalte nur nach ausdrücklicher Bestätigung. Das Pack legt Team A, Team B und Team C mit ausschließlich synthetischen lokalen Konten und Standardschichten an; WordPress-Bestandsdaten werden nicht importiert.
 - Fremde oder LDAP-verwaltete Konten werden nicht als Demokonten übernommen. Bestehende read-only LDAP-Team- oder Rollengruppen brechen die Demo-Installation im Preflight vor jeder Mutation ab.
+- Ausschließlich lokal erzeugte Test- und Demokonten erhalten initial ihr
+  jeweiliges Benutzerkürzel als Passwort. Diese bewusst einfache Vorgabe darf
+  nicht auf Staging, Produktion, echte Konten oder externe Benutzer-Backends
+  übertragen werden.
 - Schichten werden ausschließlich über die strukturierte Schichtkonfiguration verwaltet. Frühere einzelne Legacy-Parameter für Früh-, Spät- oder Nachtschichten werden nicht weitergeführt.
 - Die Schichtkonfiguration eines Assistenzteams ist eine delegierte fachliche Teamkonfiguration und wird durch die zuständige EB im AdPlaner gepflegt. Sie ist keine ausschließlich für Nextcloud-Admins bestimmte organisationsweite Einstellung und gehört deshalb nicht in den Suite-Adminbereich.
 
@@ -84,6 +88,10 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
 - Gemeinsame Bausteine werden erst nach LocalBase verschoben, wenn mindestens
   zwei Apps denselben semantischen und testbaren Vertrag benötigen.
 - WordPress-Kompatibilität und parallele Urlaubspersistenz sind unzulässig.
+- Der `PersonalDataProvider` weist eigene Schichtwünsche/-zuweisungen sowie
+  interne Bearbeitungsreferenzen an Zuweisungen, Tagesnotizen und Monatsplänen
+  aus. Fremde Personenkennungen und unkontrollierte freie Tagesnotiztexte
+  werden nicht in die Self-Service-Auskunft übernommen.
 
 ## Verbindliche Navigation und optionale Integration
 
@@ -117,3 +125,22 @@ Einzelne Checks, die durch die Testlaeufer gebuendelt werden:
     node tests/js/model-smoke.js
     node tests/js/plan-repository-smoke.js
     for f in tests/Service/*.php; do php "$f"; done
+
+## Parent-Governance-Vertrag: 1
+
+- Die für dieses Subrepository anwendbaren Regeln des Parent-Workspaces sind
+  verbindlich. Dazu gehören insbesondere app-übergreifende ADRs und
+  öffentliche Verträge, Repositorygrenzen sowie Workspace-, Delivery- und
+  Release-Gates.
+- Diese lokale `AGENTS.md` und die lokalen Skills bleiben die vollständige,
+  ohne Parent-Checkout arbeitsfähige Repository-Steuerung. Die anwendbaren
+  Parent-Regeln werden dafür hier oder in den lokalen Skills mitgeführt.
+- Repository-lokale Regeln dürfen Parent-Verträge konkretisieren und verschärfen,
+  aber nicht abschwächen oder umgehen.
+- Bei einem Widerspruch gilt bis zur Klärung die strengere Regel. Die Arbeit
+  stoppt, bis die kanonische Quelle bestimmt, die Regelprojektionen
+  synchronisiert und eine erforderliche Entscheidung dokumentiert ist.
+- Ist der Parent-Workspace nicht verfügbar, bleibt die lokale Steuerung
+  wirksam. Vor Cross-App-, Release- oder Delivery-Arbeit muss ein vermuteter
+  neuerer Parent-Stand oder eine Regelungslücke zuerst gegen den Parent
+  geprüft werden.

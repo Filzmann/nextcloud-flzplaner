@@ -15,6 +15,10 @@ class ShiftPlanStore {
     ) {
     }
 
+    public function transactional(callable $operation): mixed {
+        return $this->repository->transactional($operation);
+    }
+
     public function slotsForMonth(string $teamCode, string $month): array {
         return ShiftSlot::get_all($this->repository->findSlotsForMonth($teamCode, $month));
     }
@@ -43,6 +47,34 @@ class ShiftPlanStore {
         }
 
         return $notes;
+    }
+
+    public function monthStatus(string $teamCode, string $month): string {
+        return $this->repository->monthStatus($teamCode, $month) ?? 'draft';
+    }
+
+    public function ensureMonthStatus(string $teamCode, string $month, string $updatedByUid): void {
+        $this->repository->ensureMonthStatus($teamCode, $month, $updatedByUid);
+    }
+
+    public function lockMonthStatus(string $teamCode, string $month, array $expectedStatuses): ?string {
+        return $this->repository->lockMonthStatus($teamCode, $month, $expectedStatuses);
+    }
+
+    public function transitionMonthStatus(
+        string $teamCode,
+        string $month,
+        string $expectedStatus,
+        string $targetStatus,
+        string $updatedByUid
+    ): bool {
+        return $this->repository->transitionMonthStatus(
+            $teamCode,
+            $month,
+            $expectedStatus,
+            $targetStatus,
+            $updatedByUid
+        );
     }
 
     public function insertSlot(
@@ -81,5 +113,9 @@ class ShiftPlanStore {
 
     public function saveDayNote(string $teamCode, string $workDate, string $note, string $updatedByUid): void {
         $this->repository->saveDayNote($teamCode, $workDate, $note, $updatedByUid);
+    }
+
+    public function deleteDayNote(string $teamCode, string $workDate): void {
+        $this->repository->deleteDayNote($teamCode, $workDate);
     }
 }

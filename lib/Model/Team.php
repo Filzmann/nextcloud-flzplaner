@@ -48,7 +48,13 @@ class Team {
     }
 
     public function assistantsArray(): array {
-        return array_map(static fn(Assistant $assistant): array => $assistant->toArray(), $this->assistants);
+        return array_values(array_map(
+            static fn(Assistant $assistant): array => $assistant->toArray(),
+            array_filter(
+                $this->assistants,
+                static fn(Assistant $assistant): bool => $assistant->canReceiveShifts
+            )
+        ));
     }
 
     public function assistantLabelMap(): array {

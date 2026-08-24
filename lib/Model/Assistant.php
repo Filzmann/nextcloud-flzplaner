@@ -28,10 +28,11 @@ class Assistant {
 
     public static function fromUser($user, bool $isEb): self {
         $uid = $user->getUID();
+        $displayName = (string)$user->getDisplayName();
 
         return new self(
             $uid,
-            $user->getDisplayName() ?: $uid,
+            $displayName === '' ? $uid : $displayName,
             $isEb,
             !$isEb
         );

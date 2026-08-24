@@ -6,22 +6,20 @@
         const assistants = (team.assistants || []).filter(assistant => {
             return assistant.canReceiveShifts !== false && !assigned.has(assistant.uid);
         });
+        const pickerId = `adp-assignment-picker-${esc(slot.id)}`;
 
         return `
             <span class="adp-assignment-control" data-assignment-control="${esc(slot.id)}">
-                <button type="button" class="adp-small adp-icon-button" title="Assistenz zuteilen" data-action="open-assignment-picker" data-slot-id="${esc(slot.id)}">+</button>
-                <span class="adp-assignment-picker" data-assignment-picker="${esc(slot.id)}" hidden>
-                    <select data-add-select="${esc(slot.id)}" ${assistants.length === 0 ? 'disabled' : ''}>
-                        ${assistants.map(option).join('')}
-                    </select>
-                    <button type="button" class="adp-small adp-icon-button" title="Zuteilen" data-action="add-selected" data-slot-id="${esc(slot.id)}" ${assistants.length === 0 ? 'disabled' : ''}>&#10003;</button>
+                <button type="button" class="adp-small adp-icon-button" aria-label="Assistenz zuteilen" aria-controls="${pickerId}" aria-expanded="false" data-action="open-assignment-picker" data-assignment-trigger="${esc(slot.id)}" data-slot-id="${esc(slot.id)}" ${assistants.length === 0 ? 'disabled' : ''}>+</button>
+                <span id="${pickerId}" class="adp-assignment-picker" role="group" aria-label="Assistenz auswählen" data-assignment-picker="${esc(slot.id)}" hidden>
+                    ${assistants.length === 0 ? '<span>Keine Assistenz verfügbar</span>' : assistants.map(assistant => option(assistant, slot.id)).join('')}
                 </span>
             </span>
         `;
     }
 
-    function option(assistant) {
-        return `<option value="${esc(assistant.uid)}">${esc(assistant.displayName || assistant.uid)}</option>`;
+    function option(assistant, slotId) {
+        return `<button type="button" class="adp-small" data-action="add-selected" data-slot-id="${esc(slotId)}" data-target-uid="${esc(assistant.uid)}">${esc(assistant.displayName || assistant.uid)}</button>`;
     }
 
     function open(button) {
@@ -30,14 +28,33 @@
             return;
         }
 
-        document.querySelectorAll('[data-assignment-picker]').forEach(picker => {
-            picker.hidden = picker.dataset.assignmentPicker !== slotId;
-        });
-
         const picker = document.querySelector(`[data-assignment-picker="${CSS.escape(slotId)}"]`);
-        const select = picker ? picker.querySelector('select') : null;
-        if (select) {
-            select.focus();
+        const shouldOpen = !!picker && picker.hidden;
+        document.querySelectorAll('[data-assignment-picker]').forEach(candidate => {
+            candidate.hidden = true;
+        });
+        document.querySelectorAll('[data-assignment-trigger]').forEach(trigger => {
+            trigger.setAttribute('aria-expanded', 'false');
+        });
+        if (!shouldOpen) {
+            return;
+        }
+
+        picker.hidden = false;
+        button.setAttribute('aria-expanded', 'true');
+        if (!picker.dataset.escapeBound) {
+            picker.addEventListener('keydown', event => {
+                if (event.key !== 'Escape') return;
+                event.preventDefault();
+                picker.hidden = true;
+                button.setAttribute('aria-expanded', 'false');
+                button.focus();
+            });
+            picker.dataset.escapeBound = 'true';
+        }
+        const firstOption = picker ? picker.querySelector('button[data-action="add-selected"]') : null;
+        if (firstOption) {
+            firstOption.focus();
         }
     }
 

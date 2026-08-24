@@ -111,6 +111,10 @@ class ShiftConfigService {
             throw new \InvalidArgumentException('Mindestens eine Schicht muss konfiguriert sein.');
         }
 
+        if (!array_is_list($shifts)) {
+            throw new \InvalidArgumentException('Schichten müssen als Liste übergeben werden.');
+        }
+
         if (count($shifts) > 64) {
             throw new \InvalidArgumentException('Höchstens 64 Schichten können konfiguriert werden.');
         }
@@ -129,10 +133,14 @@ class ShiftConfigService {
 
             $label = trim((string)($shift['label'] ?? ''));
             if ($label === '') {
-                $label = 'Schicht ' . ($index + 1);
+                throw new \InvalidArgumentException('Schichtnamen dürfen nicht leer sein.');
             }
 
-            if (strlen($label) > 64) {
+            $labelLength = preg_match_all('/./us', $label);
+            if ($labelLength === false) {
+                throw new \InvalidArgumentException('Schichtnamen müssen gültiges UTF-8 enthalten.');
+            }
+            if ($labelLength > 64) {
                 throw new \InvalidArgumentException('Schichtnamen dürfen höchstens 64 Zeichen lang sein.');
             }
 
@@ -183,14 +191,22 @@ class ShiftConfigService {
         }
 
         if (is_int($value)) {
-            return $value !== 0;
+            if ($value === 0 || $value === 1) {
+                return $value === 1;
+            }
         }
 
         if (is_string($value)) {
-            return in_array(strtolower($value), ['1', 'true', 'yes', 'on'], true);
+            $value = strtolower(trim($value));
+            if (in_array($value, ['1', 'true', 'yes', 'on'], true)) {
+                return true;
+            }
+            if (in_array($value, ['0', 'false', 'no', 'off'], true)) {
+                return false;
+            }
         }
 
-        return (bool)$value;
+        throw new \InvalidArgumentException('Der Aktivstatus einer Schicht muss eindeutig wahr oder falsch sein.');
     }
 
     private function shift(string $key, string $label, string $startsAt, string $endsAt, bool $enabled): array {

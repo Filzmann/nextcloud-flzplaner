@@ -17,8 +17,16 @@ AdPlaner funktioniert einzeln; optionale Abwesenheits- oder Kalenderhinweise ent
 
 Assistenzteams werden aus den zentral konfigurierten Nextcloud-Gruppen abgeleitet. Teambezogene Schichtkonfigurationen werden durch berechtigte Einsatzbegleitungen gepflegt.
 
+Die zuständige Einsatzbegleitung führt Monatspläne kontrolliert von `draft` über `planned` nach `approved`. Genehmigte Pläne sind bis zu einer ausdrücklichen Rücknahme gegen Wünsche, Zuweisungen und Bemerkungsänderungen gesperrt. Optionale Urlaubs- und Kalenderprovider liefern ausschließlich datensparsame, schreibgeschützte Planungshinweise.
+
+Genehmigte Pläne frieren die damaligen Schichtdefinitionen ein, speichern aber keine zusätzlichen historischen Personenstammdaten. Zuweisungen werden weiterhin nur für aktuell schichtfähige Mitglieder des jeweiligen Assistenzteams angezeigt.
+
 ## Roadmap
 
 Geplante Erweiterungen und offene Produktentscheidungen stehen in der [Roadmap](ROADMAP.md).
+
+Für die fachliche, visuelle und sicherheitsbezogene Staging-Prüfung steht ein
+ausfüllbares [manuelles Abnahmeformular](docs/manual-acceptance.md) bereit.
+Zugangsdaten und personenbezogene Echtdaten werden darin nicht dokumentiert.
 
 Installations-, Betriebs- und Abnahmeunterlagen stehen im öffentlichen [AD-Suite-Projekt](https://github.com/Filzmann/ad-suite).

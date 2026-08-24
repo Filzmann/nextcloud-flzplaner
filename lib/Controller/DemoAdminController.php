@@ -17,13 +17,14 @@ use Psr\Log\LoggerInterface;
 /** Zweck: Startet den Assistenzplaner-Demo-Pack ausschließlich mit Admin- und CSRF-Schutz. */
 final class DemoAdminController extends Controller {
     public function __construct(IRequest $request, private IUserSession $session, private IGroupManager $groups, private PlanerDemoPackService $demoPack, private LoggerInterface $logger) { parent::__construct(Application::APP_ID, $request); }
-    public function install(): JSONResponse {
+    public function install(mixed $confirmed = false): JSONResponse {
         if (!$this->isAdmin()) return new JSONResponse(['error' => 'Keine Berechtigung.'], Http::STATUS_FORBIDDEN);
+        if ($confirmed !== true) return new JSONResponse(['error' => 'Die Installation muss ausdrücklich bestätigt werden.'], Http::STATUS_BAD_REQUEST);
         try {
             return new JSONResponse(['result' => $this->demoPack->install()]);
         } catch (\Throwable $error) {
             $this->logger->error('Assistenzplaner-Demo-Pack konnte nicht installiert werden.', ['exception' => $error]);
-            return new JSONResponse(['error' => $error->getMessage()], Http::STATUS_BAD_REQUEST);
+            return new JSONResponse(['error' => 'Demo-Daten konnten nicht installiert werden.'], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
     private function isAdmin(): bool {

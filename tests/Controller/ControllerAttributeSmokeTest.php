@@ -35,8 +35,7 @@ namespace OCA\AdPlaner\AppInfo {
 }
 
 namespace {
-    require __DIR__ . '/../../lib/Controller/PageController.php';
-    require __DIR__ . '/../../lib/Controller/ApiController.php';
+    require_once dirname(__DIR__) . '/bootstrap.php';
 
     use OCA\AdPlaner\Controller\ApiController;
     use OCA\AdPlaner\Controller\PageController;
@@ -58,6 +57,7 @@ namespace {
         'saveDayNote',
         'addShiftCandidate',
         'removeShiftCandidate',
+        'transitionMonthStatus',
     ];
 
     foreach ($apiActions as $action) {

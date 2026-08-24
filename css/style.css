@@ -26,6 +26,8 @@
 .adp-controls,
 .adp-tabs,
 .adp-section-head,
+.adp-plan-meta,
+.adp-plan-status,
 .adp-cell-actions {
     display: flex;
     align-items: center;
@@ -101,6 +103,7 @@
 .adp-table-wrap {
     overflow: auto;
     max-width: 100%;
+    max-height: calc(100vh - 260px);
 }
 
 .adp-table {
@@ -133,6 +136,18 @@
     border-left: 1px solid var(--color-border);
 }
 
+.adp-month-table th:last-child,
+.adp-month-table td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    box-shadow: -1px 0 0 var(--color-border);
+}
+
+.adp-month-table thead th:last-child {
+    z-index: 4;
+}
+
 .adp-table small,
 .adp-day small {
     display: block;
@@ -154,6 +169,25 @@
     display: block;
     font-size: 1.15em;
     color: var(--color-main-text);
+}
+
+.adp-day-hints {
+    display: grid;
+    gap: 3px;
+    margin-top: 6px;
+}
+
+.adp-day .adp-hint {
+    display: inline-flex;
+    width: max-content;
+    max-width: 160px;
+    border-radius: 6px;
+    padding: 1px 5px;
+    background: var(--color-background-hover);
+    color: var(--color-main-text);
+    font-size: .8rem;
+    font-weight: 600;
+    white-space: normal;
 }
 
 .adp-candidates {
@@ -199,15 +233,48 @@
     text-align: center;
 }
 
-.adp-assignment-control,
-.adp-assignment-picker {
+.adp-month-control {
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
-.adp-assignment-picker select {
-    width: 150px;
+.adp-month-control .adp-icon-button {
+    min-height: 34px;
+    margin: 0;
+}
+
+.adp-assignment-control {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.adp-assignment-picker {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 4px);
+    z-index: 5;
+    display: grid;
+    gap: 4px;
+    min-width: 180px;
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 6px;
+    background: var(--color-main-background);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .18);
+}
+
+.adp-assignment-picker[hidden] {
+    display: none;
+}
+
+.adp-assignment-picker .adp-small {
+    width: 100%;
+    text-align: left;
 }
 
 .adp-note-cell textarea {

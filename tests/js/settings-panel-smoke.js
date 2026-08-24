@@ -42,11 +42,14 @@ const editorHtml = settingsPanel.render({
 });
 
 assert(editorHtml.includes('id="settings-form"'));
+assert(editorHtml.includes('name="displayName" type="text" maxlength="255" required'));
 assert(editorHtml.includes('value="Team &lt;Settings&gt;"'));
 assert(editorHtml.includes('value="early"'));
 assert(editorHtml.includes('value="Früh &lt;A&gt;"'));
 assert(editorHtml.includes('data-action="add-shift-row"'));
 assert(editorHtml.includes('data-action="remove-shift-row"'));
+assert(editorHtml.includes('aria-label="Schicht Früh &lt;A&gt; entfernen"'));
+assert(!editorHtml.includes('aria-label="Schicht Früh <A> entfernen"'));
 assert(editorHtml.includes('<button type="submit">Speichern</button>'));
 
 const collectForm = {

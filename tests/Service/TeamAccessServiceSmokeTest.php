@@ -10,14 +10,7 @@ namespace {
         eval('namespace OCP; interface IUserSession { public function getUser(); }');
     }
 
-    require __DIR__ . '/helpers.php';
-    require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
-    require __DIR__ . '/../../../localbase/lib/Organization/AdOrganizationDefinition.php';
-    require __DIR__ . '/../../lib/Model/Assistant.php';
-    require __DIR__ . '/../../lib/Model/Team.php';
-    require __DIR__ . '/../../lib/Model/TeamSettings.php';
-    require __DIR__ . '/../../lib/Service/TeamSettingsService.php';
-    require __DIR__ . '/../../lib/Service/TeamAccessService.php';
+    require_once dirname(__DIR__) . '/bootstrap.php';
 
     use OCA\AdPlaner\Model\TeamSettings;
     use OCA\AdPlaner\Service\TeamAccessService;
@@ -46,6 +39,10 @@ namespace {
         public function getEMailAddress(): string {
             return $this->email;
         }
+
+        public function isEnabled(): bool {
+            return true;
+        }
     };
     $bob = new class('bob', 'Bob EB', 'bob@example.invalid') {
         public function __construct(
@@ -66,6 +63,15 @@ namespace {
         public function getEMailAddress(): string {
             return $this->email;
         }
+
+        public function isEnabled(): bool {
+            return true;
+        }
+    };
+    $disabledAssistant = new class {
+        public function getUID(): string { return 'disabled-assistant'; }
+        public function getDisplayName(): string { return 'Disabled Assistant'; }
+        public function isEnabled(): bool { return false; }
     };
     $legacyEb = new class('legacy-eb', 'Legacy EB', '') {
         public function __construct(private string $uid, private string $displayName, private string $email) {}
@@ -73,12 +79,24 @@ namespace {
         public function getDisplayName(): string { return $this->displayName; }
         public function getEMailAddress(): string { return $this->email; }
     };
+    $zeroNameUser = new class {
+        public function getUID(): string { return 'zero-name'; }
+        public function getDisplayName(): string { return '0'; }
+    };
+    assertSameValue(
+        '0',
+        \OCA\AdPlaner\Model\Assistant::fromUser($zeroNameUser, false)->displayName,
+        'The valid Nextcloud display name "0" must not be replaced with the uid.'
+    );
 
-    $teamGroup = new class([$alice, $bob]) {
+    $teamGroup = new class([$alice, $bob, $disabledAssistant]) {
+        public int $getUsersCalls = 0;
+
         public function __construct(private array $users) {
         }
 
         public function getUsers(): array {
+            $this->getUsersCalls++;
             return $this->users;
         }
     };
@@ -126,10 +144,13 @@ namespace {
     };
 
     $settings = new class extends TeamSettingsService {
+        public int $settingsCalls = 0;
+
         public function __construct() {
         }
 
         public function settingsForTeam(string $teamCode): TeamSettings {
+            $this->settingsCalls++;
             return new TeamSettings($teamCode, $teamCode === 'TeamB' ? 'Team B' : $teamCode, ['meetingDay' => '2026-07-15']);
         }
     };
@@ -140,11 +161,17 @@ namespace {
     assertSameValue('TeamB', $service->normalizeTeamCode(' TeamB '), 'Team codes should be trimmed.');
     assertSameValue(true, $service->currentUserIsEbForTeam('TeamB'), 'EB users should be detected through ad-EB groups.');
 
-    $team = $service->teamForCode('TeamB');
+    $team = $service->assertTeamAccess('TeamB');
     assertSameValue('Team B', $team->displayName, 'Team display name should come from team settings.');
     assertSameValue('ad-ASN-TeamB', $team->groupName, 'Team group name should follow the AD schema.');
     assertSameValue(['Alice Assistenz', 'Bob EB'], array_map(static fn($assistant): string => $assistant->displayName, $team->assistants()), 'Assistants should be sorted by display name.');
+    assertSameValue(null, $team->assistantByUid('disabled-assistant'), 'Disabled Nextcloud users must not be exposed as current shift-capable team members.');
     assertSameValue(false, $team->assistantByUid('bob')->canReceiveShifts, 'EB users should not receive shifts.');
+    assertSameValue(
+        ['alice'],
+        array_column($team->toArray()['assistants'] ?? [], 'uid'),
+        'Public team payloads should contain only current shift-capable assistants.'
+    );
     assertSameValue(['alice' => 'Alice Assistenz', 'bob' => 'Bob EB'], $service->assistantLabelMap($team->assistants()), 'Assistant label maps should expose display names by uid.');
     assertSameValue(
         ['carla' => 'Carla Assistenz'],
@@ -188,10 +215,15 @@ namespace {
     $session->setUser(null);
     assertSameValue([], $service->teamsForCurrentUser(), 'Anonymous sessions should not expose teams.');
     assertSameValue(false, $service->currentUserIsEbForTeam('TeamB'), 'Anonymous sessions should not receive EB rights.');
+    $settings->settingsCalls = 0;
+    $teamGroup->getUsersCalls = 0;
     assertDomainException(
         static fn() => $service->assertTeamAccess('TeamB'),
         'Anonymous sessions should not access an existing team.'
     );
+    assertSameValue(0, $settings->settingsCalls, 'Denied team access must not load protected team settings.');
+    assertSameValue(0, $teamGroup->getUsersCalls, 'Denied team access must not enumerate protected team members.');
+    assertSameValue(true, (new \ReflectionMethod(TeamAccessService::class, 'teamForCode'))->isPrivate(), 'The unguarded team loader must not remain a public service path.');
     try {
         $service->currentUserId();
         throw new RuntimeException('Anonymous sessions received a user id.');

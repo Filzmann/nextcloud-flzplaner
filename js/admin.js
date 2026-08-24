@@ -7,13 +7,13 @@
     const client = new window.LocalBase.api.ApiClient({ appId: 'adplaner' });
     confirmation.addEventListener('change', () => { button.disabled = !confirmation.checked; });
     button.addEventListener('click', async () => {
-        if (!confirmation.checked) return;
+        if (!confirmation.checked || button.disabled) return;
         button.disabled = true;
         notice.hidden = false;
         notice.className = 'adp-admin-notice';
         notice.textContent = 'Demo-Pack wird geprüft und installiert …';
         try {
-            const response = await client.request('/api/admin/demo-pack/install', { method: 'POST', body: '{}' });
+            const response = await client.request('/api/admin/demo-pack/install', { method: 'POST', body: '{"confirmed":true}' });
             notice.classList.add('is-success');
             notice.textContent = `${response.result.teams.join(', ')} wurden als Demoteams angelegt.`;
             confirmation.checked = false;

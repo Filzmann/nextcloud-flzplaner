@@ -34,11 +34,17 @@ assert.strictEqual(assistant.displayName, 'Anna Assistenz');
 const candidate = ShiftCandidate.get({
     slot_id: 7,
     assistant_uid: 'anna',
-    display_name: 'Anna Assistenz'
+    display_name: 'Anna Assistenz',
+    createdByUid: 'internal-coordinator',
+    created_at: '2026-08-09T10:00:00Z'
 });
 
 assert(candidate instanceof ShiftCandidate);
 assert.strictEqual(candidate.uid, 'anna');
+assert.strictEqual(Object.hasOwn(candidate, 'createdByUid'), false);
+assert.strictEqual(Object.hasOwn(candidate, 'createdAt'), false);
+assert.strictEqual(Object.hasOwn(candidate.toArray(), 'createdByUid'), false);
+assert.strictEqual(Object.hasOwn(candidate.toArray(), 'createdAt'), false);
 
 const definition = ShiftDefinition.get({
     key: 'day',

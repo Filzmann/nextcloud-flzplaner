@@ -2,10 +2,7 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/helpers.php';
-require __DIR__ . '/../../../localbase/lib/Model/ModelApiTrait.php';
-require __DIR__ . '/../../lib/Model/ShiftDefinition.php';
-require __DIR__ . '/../../lib/Service/ShiftConfigService.php';
+require_once dirname(__DIR__) . '/bootstrap.php';
 
 use OCA\AdPlaner\Service\ShiftConfigService;
 use function OCA\AdPlaner\Tests\assertSameValue;
@@ -50,6 +47,7 @@ $customSettings = $service->normalize([
 ]);
 $customSegments = $service->segments($customSettings);
 $days = $service->monthDays('2026-02');
+$leapDays = $service->monthDays('2028-02');
 
 assertSameValue('2026-07-15', $customSettings['meetingDay'], 'Meeting day should be preserved.');
 assertSameValue(['first', 'overlap', 'night'], array_column($customSegments, 'key'), 'Custom shifts should keep their configured order.');
@@ -60,6 +58,27 @@ assertSameValue('08:00', $customSegments[2]['endsAt'], 'Cross-midnight custom sh
 assertSameValue(false, $customSegments[2]['enabled'], 'Disabled custom shifts should be preserved.');
 assertSameValue(28, count($days), 'February 2026 should have 28 days.');
 assertSameValue('2026-02-01', $days[0]['date'], 'First month day should be correct.');
+assertSameValue(29, count($leapDays), 'A leap-year February should have 29 days.');
+assertSameValue('2028-02-29', $leapDays[28]['date'] ?? null, 'The leap day should occur exactly once at the end of February 2028.');
+
+$gappedSegments = $service->segments($service->normalize(['shifts' => [
+    ['key' => 'morning', 'label' => 'Vormittag', 'startsAt' => '08:00', 'endsAt' => '10:00', 'enabled' => true],
+    ['key' => 'afternoon', 'label' => 'Nachmittag', 'startsAt' => '12:00', 'endsAt' => '14:00', 'enabled' => true],
+]]));
+assertSameValue(
+    [['08:00', '10:00'], ['12:00', '14:00']],
+    array_map(static fn(array $shift): array => [$shift['startsAt'], $shift['endsAt']], $gappedSegments),
+    'A deliberate gap between shifts should remain valid and must not be closed automatically.'
+);
+
+$unicodeBoundary = $service->normalize(['shifts' => [[
+    'key' => 'unicode',
+    'label' => str_repeat('Ä', 64),
+    'startsAt' => '08:00',
+    'endsAt' => '09:00',
+    'enabled' => true,
+]]]);
+assertSameValue(str_repeat('Ä', 64), $unicodeBoundary['shifts'][0]['label'], 'A 64-character Unicode shift label should be valid.');
 
 $assertInvalidArgument = static function (callable $operation, string $message): void {
     try {
@@ -75,6 +94,18 @@ $assertInvalidArgument(
     'Non-list shift settings should be rejected.'
 );
 $assertInvalidArgument(
+    static fn() => $service->normalize(['shifts' => [
+        'named-shift' => [
+            'key' => 'day',
+            'label' => 'Tag',
+            'startsAt' => '08:00',
+            'endsAt' => '16:00',
+            'enabled' => true,
+        ],
+    ]]),
+    'JSON objects must not be silently reinterpreted as ordered shift lists.'
+);
+$assertInvalidArgument(
     static fn() => $service->monthDays('2026-13'),
     'Out-of-range months should be rejected.'
 );
@@ -86,5 +117,55 @@ $assertInvalidArgument(
     static fn() => $service->normalizeDate('30.02.2026'),
     'Non-ISO calendar dates should be rejected.'
 );
+$assertInvalidArgument(
+    static fn() => $service->normalize(['shifts' => [[
+        'key' => 'blank-label',
+        'label' => '   ',
+        'startsAt' => '08:00',
+        'endsAt' => '09:00',
+        'enabled' => true,
+    ]]]),
+    'A blank shift label must be rejected instead of silently replaced.'
+);
+$assertInvalidArgument(
+    static fn() => $service->normalize(['shifts' => [[
+        'key' => 'too-long',
+        'label' => str_repeat('Ä', 65),
+        'startsAt' => '08:00',
+        'endsAt' => '09:00',
+        'enabled' => true,
+    ]]]),
+    'A Unicode shift label longer than 64 characters should be rejected.'
+);
+$assertInvalidArgument(
+    static fn() => $service->normalize(['shifts' => [[
+        'key' => 'invalid-utf8',
+        'label' => "\xC3\x28",
+        'startsAt' => '08:00',
+        'endsAt' => '09:00',
+        'enabled' => true,
+    ]]]),
+    'An invalid UTF-8 shift label should be rejected.'
+);
+$invalidEnabledShift = static fn(mixed $enabled): array => ['shifts' => [[
+    'key' => 'typed-enabled',
+    'label' => 'Typisiert',
+    'startsAt' => '08:00',
+    'endsAt' => '09:00',
+    'enabled' => $enabled,
+]]];
+$assertInvalidArgument(
+    static fn() => $service->normalize($invalidEnabledShift('irgendwie')),
+    'Unknown enabled strings must not silently disable a shift.'
+);
+$assertInvalidArgument(
+    static fn() => $service->normalize($invalidEnabledShift([])),
+    'Structured enabled values must be rejected instead of coerced.'
+);
+$assertInvalidArgument(
+    static fn() => $service->normalize($invalidEnabledShift(2)),
+    'Enabled integers other than zero and one must be rejected.'
+);
+assertSameValue(false, $service->normalize($invalidEnabledShift('false'))['shifts'][0]['enabled'], 'The explicit false string remains supported.');
 
 echo 'AdPlaner shift config smoke tests passed' . PHP_EOL;

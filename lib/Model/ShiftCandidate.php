@@ -37,7 +37,6 @@ class ShiftCandidate {
             'id' => $this->id,
             'uid' => $this->assistantUid,
             'displayName' => $assistantLabels[$this->assistantUid] ?? ($this->displayName !== '' ? $this->displayName : $this->assistantUid),
-            'createdByUid' => $this->createdByUid,
             'isSelf' => $this->isSelf || $this->assistantUid === $currentUid,
         ];
     }

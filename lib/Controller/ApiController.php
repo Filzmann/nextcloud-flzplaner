@@ -56,6 +56,25 @@ class ApiController extends Controller {
     }
 
     #[NoAdminRequired]
+    public function transitionMonthStatus(string $teamCode, string $month, string $targetStatus): DataResponse {
+        return $this->responder->respond(function () use ($teamCode, $month, $targetStatus): array {
+            $team = $this->teamAccess->assertCanCoordinate($teamCode);
+            $status = $this->scheduleService->transitionMonthStatus(
+                $team,
+                $month,
+                $targetStatus,
+                $this->teamAccess->currentUserId()
+            );
+
+            return ['ok' => true, 'status' => $status];
+        }, [$this->logger, 'error'], 'transition_month_status', [
+            'team_code' => $teamCode,
+            'month' => $month,
+            'target_status' => $targetStatus,
+        ]);
+    }
+
+    #[NoAdminRequired]
     public function saveTeamSettings(
         string $teamCode,
         string $displayName = '',
@@ -79,9 +98,9 @@ class ApiController extends Controller {
 
     #[NoAdminRequired]
     public function saveDayNote(string $teamCode, string $month, string $workDate, string $note = ''): DataResponse {
-        return $this->responder->respond(function () use ($teamCode, $workDate, $note): array {
+        return $this->responder->respond(function () use ($teamCode, $month, $workDate, $note): array {
             $team = $this->teamAccess->assertCanCoordinate($teamCode);
-            $this->scheduleService->saveDayNote($team, $workDate, $note, $this->teamAccess->currentUserId());
+            $this->scheduleService->saveDayNote($team, $month, $workDate, $note, $this->teamAccess->currentUserId());
 
             return ['ok' => true];
         }, [$this->logger, 'error'], 'save_day_note', [

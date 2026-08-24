@@ -28,10 +28,14 @@ class TeamSettingsStore {
         if (!is_array($decoded)) {
             $decoded = [];
         }
+        $displayName = trim((string)($row['display_name'] ?? ''));
+        if ($displayName === '') {
+            $displayName = $this->defaultDisplayName($teamCode);
+        }
 
         return new TeamSettings(
             $teamCode,
-            (string)($row['display_name'] ?: $this->defaultDisplayName($teamCode)),
+            $displayName,
             $this->shiftConfig->normalize($decoded)
         );
     }
@@ -39,7 +43,14 @@ class TeamSettingsStore {
     public function save(string $teamCode, string $displayName, array $config): TeamSettings {
         $displayName = trim($displayName);
         if ($displayName === '') {
-            $displayName = $this->defaultDisplayName($teamCode);
+            throw new \InvalidArgumentException('Der Anzeigename darf nicht leer sein.');
+        }
+        $displayNameLength = preg_match_all('/./us', $displayName);
+        if ($displayNameLength === false) {
+            throw new \InvalidArgumentException('Der Anzeigename muss gültiges UTF-8 enthalten.');
+        }
+        if ($displayNameLength > 255) {
+            throw new \InvalidArgumentException('Der Anzeigename darf höchstens 255 Zeichen lang sein.');
         }
 
         $normalized = $this->shiftConfig->normalize($config);

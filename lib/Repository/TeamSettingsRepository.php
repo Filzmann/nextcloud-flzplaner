@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\AdPlaner\Repository;
 
 use DateTimeImmutable;
+use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -43,8 +44,14 @@ class TeamSettingsRepository {
                     'created_at' => $qb->createNamedParameter($now, IQueryBuilder::PARAM_DATETIME_IMMUTABLE),
                     'updated_at' => $qb->createNamedParameter($now, IQueryBuilder::PARAM_DATETIME_IMMUTABLE),
                 ]);
-            $qb->executeStatement();
-            return;
+            try {
+                $qb->executeStatement();
+                return;
+            } catch (Exception $exception) {
+                if ($exception->getReason() !== Exception::REASON_UNIQUE_CONSTRAINT_VIOLATION) {
+                    throw $exception;
+                }
+            }
         }
 
         $qb = $this->db->getQueryBuilder();
