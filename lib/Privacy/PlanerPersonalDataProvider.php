@@ -6,57 +6,48 @@ namespace OCA\AdPlaner\Privacy;
 
 use DateTimeImmutable;
 use DateTimeInterface;
+use InvalidArgumentException;
 use OCA\AdPlaner\AppInfo\Application;
 use OCA\AdPlaner\Repository\ShiftPlanRepository;
-use OCA\LocalBase\Privacy\PersonalDataItem;
-use OCA\LocalBase\Privacy\PersonalDataProcessingInfo;
-use OCA\LocalBase\Privacy\PersonalDataProvider;
-use OCA\LocalBase\Privacy\PersonalDataReport;
-use OCA\LocalBase\Privacy\PersonalDataRequest;
-use OCA\LocalBase\Privacy\PersonalDataSubject;
+use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataEntry;
+use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataPage;
+use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataProvider;
+use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
+use OCA\FilzmannDataProtection\PublicApi\V1\ProviderDescriptor;
 
 final class PlanerPersonalDataProvider implements PersonalDataProvider {
     private const RETENTION = 'Keine feste Löschfrist festgelegt; gespeichert bis zur fachlich oder gesetzlich veranlassten Löschung.';
 
     public function __construct(private ShiftPlanRepository $repository) {}
 
-    public function appId(): string { return Application::APP_ID; }
-    public function supportedSubjectTypes(): array { return [PersonalDataSubject::NEXTCLOUD_USER]; }
+    public function descriptor(): ProviderDescriptor {
+        return new ProviderDescriptor(Application::APP_ID, 'AD Planer', '1.0', ['nextcloud-user'], ['personal-data'], 500);
+    }
 
-    public function collect(PersonalDataRequest $request): PersonalDataReport {
-        $limit = $request->limit();
-        $data = $this->repository->personalDataForUid($request->subject()->id(), $limit);
+    public function collect(PersonalDataRequest $request): PersonalDataPage {
+        if ($request->subject()->subjectType() !== 'nextcloud-user') return new PersonalDataPage('not_applicable');
+        if ($request->cursor() !== null) throw new InvalidArgumentException('AD Planer does not support cursor paging.');
+        $limit = $request->pageLimit();
+        $subjectUid = $request->subject()->subjectId();
+        $data = $this->repository->personalDataForUid($subjectUid, $limit + 1);
         $items = [];
         foreach ($data['candidates'] ?? [] as $row) {
-            $subjectIsCandidate = (string)$row['assistant_uid'] === $request->subject()->id();
-            $items[] = $subjectIsCandidate ? $this->candidateItem($row, $request->subject()->id()) : $this->activityItem($row);
+            $subjectIsCandidate = (string)$row['assistant_uid'] === $subjectUid;
+            $items[] = $subjectIsCandidate ? $this->candidateItem($row, $subjectUid) : $this->activityItem($row);
         }
         foreach ($data['dayNotes'] ?? [] as $row) $items[] = $this->dayNoteItem($row);
         foreach ($data['monthPlans'] ?? [] as $row) $items[] = $this->monthPlanItem($row);
-        $complete = count($items) < $limit;
+        $complete = count($items) <= $limit;
         $items = array_slice($items, 0, $limit);
-
-        return new PersonalDataReport(
-            $items,
-            new PersonalDataProcessingInfo(
-                purposes: ['Erfassung von Schichtwünschen und Dienstzuweisungen', 'Bearbeitung und Freigabe monatlicher Dienstpläne', 'Dokumentation planungsbezogener Änderungen'],
-                categories: ['Nextcloud-Kennung in Schichtwünschen und Zuweisungen', 'Bearbeitungsreferenzen an Tagesnotizen und Monatsplänen', 'Zeit-, Team- und Schichtangaben'],
-                recipients: ['Mitglieder des jeweiligen Assistenzteams im zulässigen Planungsscope', 'Berechtigte Einsatzbegleitungen', 'Nextcloud-Administrator*innen mit Verwaltungsrechten'],
-                source: 'Eigene Eingaben sowie Eingaben berechtigter Einsatzbegleitungen im Dienstplan',
-                retentionCriteria: self::RETENTION,
-                thirdCountryTransfers: 'Durch AD Planer sind keine Drittlandübermittlungen vorgesehen.',
-                automatedDecisionMaking: 'Planungshinweise und Konfliktprüfungen unterstützen die Bearbeitung; sie treffen keine Entscheidung mit rechtlicher oder vergleichbar erheblicher Wirkung.',
-            ),
-            complete: $complete,
-            limitations: $complete ? [] : ['Ausgabelimit erreicht; weitere Planungsdaten können vorhanden sein.'],
-            appName: 'AD Planer',
-        );
+        if ($items === []) return new PersonalDataPage('not_applicable');
+        return new PersonalDataPage($complete ? 'complete' : 'partial', $items, $complete ? [] : ['Ausgabelimit erreicht; weitere Planungsdaten können vorhanden sein.']);
     }
 
-    private function candidateItem(array $row, string $subjectUid): PersonalDataItem {
+    private function candidateItem(array $row, string $subjectUid): PersonalDataEntry {
         $selfCreated = (string)$row['created_by_uid'] === $subjectUid;
-        return new PersonalDataItem(
+        return $this->entry(
             'shift_assignment',
+            'Schichtwunsch oder Schichtzuweisung',
             self::shortDate((string)$row['work_date']) . ' – ' . (string)$row['label'],
             'shift-candidate:' . (string)$row['id'],
             [
@@ -69,16 +60,14 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
                 'Eingetragen am' => self::shortDateTime($row['created_at'] ?? ''),
             ],
             'Erfassung deines Schichtwunsches oder deiner Dienstzuweisung',
-            self::RETENTION,
-            'Folgende Schichtwünsche oder Schichtzuweisungen sind mit deinen Daten gespeichert:',
             $selfCreated ? null : 'Die eintragende Person wird zum Schutz ihrer Datenschutzrechte nicht genannt.',
-            'Schichtwunsch oder Schichtzuweisung',
         );
     }
 
-    private function activityItem(array $row): PersonalDataItem {
-        return new PersonalDataItem(
+    private function activityItem(array $row): PersonalDataEntry {
+        return $this->entry(
             'planning_activity',
+            'Planungsaktivität',
             self::shortDate((string)$row['work_date']) . ' – ' . (string)$row['label'],
             'shift-candidate-activity:' . (string)$row['id'],
             [
@@ -90,16 +79,14 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
                 'Eingetragen am' => self::shortDateTime($row['created_at'] ?? ''),
             ],
             'Nachvollziehbarkeit einer von dir vorgenommenen Planungsänderung',
-            self::RETENTION,
-            'Folgende Planungsaktivitäten sind mit deiner Kennung gespeichert:',
             'Die von der Aktivität betroffene andere Person wird nicht genannt.',
-            'Planungsaktivität',
         );
     }
 
-    private function dayNoteItem(array $row): PersonalDataItem {
-        return new PersonalDataItem(
+    private function dayNoteItem(array $row): PersonalDataEntry {
+        return $this->entry(
             'day_note_activity',
+            'Bearbeitete Tagesnotiz',
             self::shortDate((string)$row['work_date']),
             'day-note:' . (string)$row['id'],
             [
@@ -109,17 +96,15 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
                 'Notizinhalt' => 'Inhalt wird wegen möglicher Angaben zu anderen Personen nicht automatisch ausgegeben.',
             ],
             'Planungsbezogene Tagesinformation und Nachvollziehbarkeit der letzten Bearbeitung',
-            self::RETENTION,
-            'Folgende Tagesnotizen tragen deine Kennung als letzte Bearbeitung:',
             'Freie Tagesnotizen können Angaben über andere Personen enthalten.',
-            'Bearbeitete Tagesnotiz',
         );
     }
 
-    private function monthPlanItem(array $row): PersonalDataItem {
+    private function monthPlanItem(array $row): PersonalDataEntry {
         $status = ['draft'=>'Entwurf','planned'=>'Geplant','approved'=>'Genehmigt'][(string)$row['status']] ?? (string)$row['status'];
-        return new PersonalDataItem(
+        return $this->entry(
             'month_plan_activity',
+            'Bearbeiteter Monatsplan',
             self::shortMonth((string)$row['plan_month']) . ' – ' . $status,
             'month-plan:' . (string)$row['id'],
             [
@@ -129,9 +114,24 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
                 'Bearbeitet am' => self::shortDateTime($row['updated_at'] ?? ''),
             ],
             'Nachvollziehbarkeit der von dir zuletzt bearbeiteten Monatsplanung',
+            null,
+        );
+    }
+
+    private function entry(string $categoryId, string $categoryLabel, string $summary, string $reference, array $attributes, string $purpose, ?string $thirdPartyNotice): PersonalDataEntry {
+        return new PersonalDataEntry(
+            $categoryId,
+            $categoryLabel,
+            $reference,
+            $summary,
+            $purpose,
+            'Eigene Eingaben sowie Eingaben berechtigter Einsatzbegleitungen im Dienstplan',
+            ['Mitglieder des jeweiligen Assistenzteams im zulässigen Planungsscope', 'Berechtigte Einsatzbegleitungen', 'Nextcloud-Administrator*innen mit Verwaltungsrechten'],
             self::RETENTION,
-            'Folgende Monatsplanstände tragen deine Kennung als letzte Bearbeitung:',
-            dataType: 'Bearbeiteter Monatsplan',
+            'Durch AD Planer sind keine Drittlandübermittlungen vorgesehen.',
+            'Planungshinweise und Konfliktprüfungen unterstützen die Bearbeitung; sie treffen keine Entscheidung mit rechtlicher oder vergleichbar erheblicher Wirkung.',
+            $thirdPartyNotice,
+            $attributes,
         );
     }
 

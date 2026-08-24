@@ -7,8 +7,8 @@ namespace OCA\AdPlaner\AppInfo;
 use OCA\AdPlaner\Listener\IntegrationCapabilityQueryListener;
 use OCA\AdPlaner\Listener\StandaloneNavigationListener;
 use OCA\AdPlaner\Privacy\PlanerPrivacyProviderListener;
+use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
 use OCA\LocalBase\Integration\IntegrationCapabilityQueryEvent;
-use OCA\LocalBase\Privacy\PersonalDataProviderRegistryEvent;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -26,7 +26,7 @@ class Application extends App implements IBootstrap {
     public function register(IRegistrationContext $context): void {
         $context->registerEventListener(IntegrationCapabilityQueryEvent::class, IntegrationCapabilityQueryListener::class);
         $context->registerEventListener(LoadAdditionalEntriesEvent::class, StandaloneNavigationListener::class);
-        $context->registerEventListener(PersonalDataProviderRegistryEvent::class, PlanerPrivacyProviderListener::class);
+        $context->registerEventListener(RegisterPersonalDataProvidersEvent::class, PlanerPrivacyProviderListener::class);
     }
 
     public function boot(IBootContext $context): void {

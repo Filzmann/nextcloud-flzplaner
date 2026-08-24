@@ -88,7 +88,9 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
 - Gemeinsame Bausteine werden erst nach LocalBase verschoben, wenn mindestens
   zwei Apps denselben semantischen und testbaren Vertrag benötigen.
 - WordPress-Kompatibilität und parallele Urlaubspersistenz sind unzulässig.
-- Der `PersonalDataProvider` weist eigene Schichtwünsche/-zuweisungen sowie
+- Der `PersonalDataProvider` registriert sich lazy über den öffentlichen
+  Standalone-V1-Vertrag von `filzmann_data_protection` und weist eigene
+  Schichtwünsche/-zuweisungen sowie
   interne Bearbeitungsreferenzen an Zuweisungen, Tagesnotizen und Monatsplänen
   aus. Fremde Personenkennungen und unkontrollierte freie Tagesnotiztexte
   werden nicht in die Self-Service-Auskunft übernommen.

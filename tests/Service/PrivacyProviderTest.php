@@ -35,14 +35,23 @@ namespace {
     use OCA\AdPlaner\Privacy\PlanerPersonalDataProvider;
     use OCA\AdPlaner\Privacy\PlanerPrivacyProviderListener;
     use OCA\AdPlaner\Repository\ShiftPlanRepository;
-    use OCA\LocalBase\Privacy\PersonalDataProviderRegistryEvent;
-    use OCA\LocalBase\Privacy\PersonalDataRequest;
-    use OCA\LocalBase\Privacy\PersonalDataSubject;
+    use OCA\FilzmannDataProtection\PublicApi\V1\DataSubjectRef;
+    use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
+    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
 
     $provider = new PlanerPersonalDataProvider(new ShiftPlanRepository());
-    $report = $provider->collect(new PersonalDataRequest(new PersonalDataSubject(PersonalDataSubject::NEXTCLOUD_USER, 'self'), 'de', PersonalDataRequest::PURPOSE_SELF_SERVICE, 50));
-    $items = array_map(static fn($item): array => $item->toArray(), $report->items());
-    if (array_column($items, 'dataType') !== ['Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
+    $descriptor = $provider->descriptor();
+    if ($descriptor->appId() !== 'adplaner' || $descriptor->contractVersion() !== '1.0' || !$descriptor->supportsSubjectType('nextcloud-user')) throw new RuntimeException('AD Planer beschreibt den Standalone-V1-Vertrag nicht korrekt.');
+    $subject = new DataSubjectRef('nextcloud-user', 'self');
+    $report = $provider->collect(new PersonalDataRequest($subject, 'de', 'access-report', 50, []));
+    $items = array_map(static fn($item): array => [
+        'categoryId'=>$item->categoryId(),'categoryLabel'=>$item->categoryLabel(),'reference'=>$item->reference(),
+        'summary'=>$item->summary(),'purpose'=>$item->purpose(),'source'=>$item->source(),
+        'recipientCategories'=>$item->recipientCategories(),'retention'=>$item->retention(),
+        'thirdCountryTransfer'=>$item->thirdCountryTransfer(),'automatedDecision'=>$item->automatedDecision(),
+        'thirdPartyContentNotice'=>$item->thirdPartyContentNotice(),'attributes'=>$item->attributes(),
+    ], $report->entries());
+    if (array_column($items, 'categoryLabel') !== ['Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
     $encoded = json_encode($items, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
     foreach (['12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr'] as $expected) {
         if (!str_contains($encoded, $expected)) throw new RuntimeException('Menschenlesbare Planerauskunft fehlt: ' . $expected);
@@ -51,14 +60,23 @@ namespace {
         if (str_contains($encoded, $forbidden)) throw new RuntimeException('Planerauskunft offenbart Drittpersonen oder technische Felder: ' . $forbidden);
     }
     if (!str_contains($encoded, 'Inhalt wird wegen möglicher Angaben zu anderen Personen nicht automatisch ausgegeben')) throw new RuntimeException('Drittpersonenschutz für freie Tagesnotizen fehlt.');
-    if (!$report->isComplete() || $report->processing()->toArray()['purposes'] === []) throw new RuntimeException('Vollständigkeits- oder Art.-15-Verarbeitungsangaben fehlen.');
+    if ($report->status() !== 'complete' || $items[0]['recipientCategories'] === []) throw new RuntimeException('Vollständigkeits- oder Art.-15-Verarbeitungsangaben fehlen.');
 
-    $foreign = $provider->collect(new PersonalDataRequest(new PersonalDataSubject(PersonalDataSubject::NEXTCLOUD_USER, 'unknown'), 'de', PersonalDataRequest::PURPOSE_SELF_SERVICE, 50));
-    if ($foreign->items() !== []) throw new RuntimeException('Eine unbekannte Zielperson erhält fremde Planungsdaten.');
+    $foreign = $provider->collect(new PersonalDataRequest(new DataSubjectRef('nextcloud-user', 'unknown'), 'de', 'access-report', 50, []));
+    if ($foreign->status() !== 'not_applicable' || $foreign->entries() !== []) throw new RuntimeException('Eine unbekannte Zielperson erhält fremde Planungsdaten.');
+    $unsupported = $provider->collect(new PersonalDataRequest(new DataSubjectRef('external-applicant', 'self'), 'de', 'access-report', 50, []));
+    if ($unsupported->status() !== 'not_applicable' || $unsupported->entries() !== []) throw new RuntimeException('Ein nicht unterstützter Subject-Typ erhält Planungsdaten.');
+    if ($provider->collect(new PersonalDataRequest($subject, 'de', 'access-report', 1, []))->status() !== 'partial') throw new RuntimeException('Ein begrenzter Planungsbericht behauptet Vollständigkeit.');
+    try {
+        $provider->collect((new PersonalDataRequest($subject, 'de', 'access-report', 50, ['adplaner'=>'opaque']))->forProvider('adplaner', 50));
+        throw new RuntimeException('Ein unbekannter Provider-Cursor wurde akzeptiert.');
+    } catch (InvalidArgumentException) {}
 
-    $registry = new PersonalDataProviderRegistryEvent();
+    $registry = new RegisterPersonalDataProvidersEvent();
     (new PlanerPrivacyProviderListener($provider))->handle($registry);
     if (array_keys($registry->providers()) !== ['adplaner']) throw new RuntimeException('AD Planer registriert seinen Datenschutzprovider nicht.');
+    $application = (string)file_get_contents(dirname(__DIR__, 2) . '/lib/AppInfo/Application.php');
+    if (!str_contains($application, 'registerEventListener(RegisterPersonalDataProvidersEvent::class, PlanerPrivacyProviderListener::class)') || str_contains($application, 'PersonalDataProviderRegistryEvent')) throw new RuntimeException('AD Planer registriert den Provider nicht ausschließlich am Standalone-V1-Event.');
 
     echo "AD Planer privacy provider test passed\n";
 }
