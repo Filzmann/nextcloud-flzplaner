@@ -10,6 +10,10 @@ use OCA\AdPlaner\Privacy\PlanerPrivacyProviderListener;
 use OCA\AdPlaner\Permission\PlanerPermissionProviderListener;
 use OCA\AdPlaner\Permission\PlanerPermissionSourceInterface;
 use OCA\AdPlaner\Permission\NextcloudPlanerPermissionSource;
+use OCA\AdPlaner\Repository\TemporaryAdminAccessRepository;
+use OCA\AdPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
+use OCA\AdPlaner\Service\TemporaryAdminAccessChecker;
+use OCA\AdPlaner\Service\TemporaryAdminAccessService;
 use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
 use OCA\FilzmannPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
 use OCA\LocalBase\Integration\IntegrationCapabilityQueryEvent;
@@ -33,6 +37,8 @@ class Application extends App implements IBootstrap {
         $context->registerEventListener(RegisterPersonalDataProvidersEvent::class, PlanerPrivacyProviderListener::class);
         $context->registerEventListener(RegisterPermissionProvidersEvent::class, PlanerPermissionProviderListener::class);
         $context->registerServiceAlias(PlanerPermissionSourceInterface::class, NextcloudPlanerPermissionSource::class);
+        $context->registerServiceAlias(TemporaryAdminAccessChecker::class, TemporaryAdminAccessService::class);
+        $context->registerServiceAlias(TemporaryAdminAccessRepositoryInterface::class, TemporaryAdminAccessRepository::class);
     }
 
     public function boot(IBootContext $context): void {

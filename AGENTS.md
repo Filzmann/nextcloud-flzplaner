@@ -68,6 +68,11 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
 - Bereichszuordnungen werden app-uebergreifend separat als `ad-Bereich-<Name>` gepflegt; kombinierte Rollen-/Bereichsgruppen werden dynamisch abgeleitet.
 - AdPlaner und AD Urlaub verwenden dieselben Assistenzteam-Gruppen; separate Suffix-Gruppen werden nicht unterstützt.
 - Der app-eigene Adminabschnitt installiert Demo-Inhalte nur nach ausdrücklicher Bestätigung. Das Pack legt Team A, Team B und Team C mit ausschließlich synthetischen lokalen Konten und Standardschichten an; WordPress-Bestandsdaten werden nicht importiert.
+- Native Nextcloud-Administration allein erteilt kein Recht auf den fachlichen
+  Demo-Datenpfad. Dafür ist je Admin eine app-lokale Freigabe von höchstens 24
+  Stunden erforderlich; Beginn, geplantes Ende und Widerruf werden
+  protokolliert. Der technische Adminbereich bleibt zum Erteilen und
+  Widerrufen dieser Freigabe erreichbar.
 - Fremde oder LDAP-verwaltete Konten werden nicht als Demokonten übernommen. Bestehende read-only LDAP-Team- oder Rollengruppen brechen die Demo-Installation im Preflight vor jeder Mutation ab.
 - Ausschließlich lokal erzeugte Test- und Demokonten erhalten initial ihr
   jeweiliges Benutzerkürzel als Passwort. Diese bewusst einfache Vorgabe darf
@@ -94,6 +99,9 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
   interne Bearbeitungsreferenzen an Zuweisungen, Tagesnotizen und Monatsplänen
   aus. Fremde Personenkennungen und unkontrollierte freie Tagesnotiztexte
   werden nicht in die Self-Service-Auskunft übernommen.
+- PersonalDataProvider und PermissionProvider umfassen die app-lokale
+  Adminfreigabe; fremde Admin-Kennungen werden in der Selbstauskunft nicht
+  offengelegt.
 
 ## Verbindliche Navigation und optionale Integration
 

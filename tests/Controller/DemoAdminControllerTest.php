@@ -70,6 +70,7 @@ namespace {
 
     use OCA\AdPlaner\Controller\DemoAdminController;
     use OCA\AdPlaner\Service\PlanerDemoPackService;
+    use OCA\AdPlaner\Service\TemporaryAdminAccessChecker;
     use OCP\IGroupManager;
     use OCP\IRequest;
     use OCP\IUserSession;
@@ -94,7 +95,17 @@ namespace {
         }
     };
     $demoPack = new PlanerDemoPackService();
-    $controller = new DemoAdminController($request, $session, $groups, $demoPack, $logger);
+    $grants = new class implements TemporaryAdminAccessChecker {
+        public bool $active = false;
+        public function hasActiveGrant(string $uid): bool { return $this->active && $uid === 'admin-test'; }
+    };
+    $controller = new DemoAdminController($request, $session, $groups, $demoPack, $logger, $grants);
+
+    $notGranted = $controller->install(true);
+    if ($notGranted->getStatus() !== 403 || $demoPack->installCalls !== 0) {
+        throw new RuntimeException('Native Administration darf das Demo-Pack ohne app-lokale Freigabe nicht installieren.');
+    }
+    $grants->active = true;
 
     $unconfirmed = $controller->install(false);
     if ($unconfirmed->getStatus() !== 400 || $demoPack->installCalls !== 0) {

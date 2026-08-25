@@ -14,7 +14,7 @@ final class PlanerPermissionProvider implements PermissionProvider {
             $rules[]=$this->rule('Monatsplan',$team,'Fremdzuweisungen und Teamkonfiguration','plan.team.coordinate','Koordinieren','team:'.$team,$condition);
             $rules[]=$this->rule('Monatsplan',$team,'Status planned/approved ändern','plan.status.transition','Status ändern','team:'.$team,$condition);
         }
-        $rules[]=$this->rule('Administration','Demo-Pack','Nur Nextcloud-Administration','plan.demo.manage','Demo verwalten','app',PermissionCondition::nextcloudAdmin());
+        $rules[]=$this->rule('Administration','Demo-Pack','Nextcloud-Administration mit aktiver app-lokaler Freigabe','plan.demo.manage','Demo verwalten','app',PermissionCondition::all([PermissionCondition::nextcloudAdmin(),PermissionCondition::temporaryAppAdminGrant()]));
         return new PermissionProviderResult($rules);
     }
     private function rule(string $type,string $name,string $detail,string $key,string $label,string $scope,PermissionCondition $condition):PermissionRule{return new PermissionRule($type,$name,$detail,$key,$label,'allow',$scope,$condition,'adplaner:TeamAccessService','high');}

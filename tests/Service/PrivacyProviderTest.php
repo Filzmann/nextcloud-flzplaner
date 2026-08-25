@@ -33,13 +33,21 @@ namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
     use OCA\AdPlaner\Privacy\PlanerPersonalDataProvider;
+    use OCA\AdPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
     use OCA\AdPlaner\Privacy\PlanerPrivacyProviderListener;
     use OCA\AdPlaner\Repository\ShiftPlanRepository;
     use OCA\FilzmannDataProtection\PublicApi\V1\DataSubjectRef;
     use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
     use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
 
-    $provider = new PlanerPersonalDataProvider(new ShiftPlanRepository());
+    $adminAccess = new class implements TemporaryAdminAccessRepositoryInterface {
+        public function replaceActive(string $targetUid,string $grantedBy,\DateTimeImmutable $startsAt,\DateTimeImmutable $endsAt):array{return [];}
+        public function revokeActive(string $targetUid,string $revokedBy,\DateTimeImmutable $revokedAt):bool{return false;}
+        public function activeFor(string $targetUid,\DateTimeImmutable $at):?array{return null;}
+        public function history():array{return [];}
+        public function historyForUid(string $uid,int $limit):array{return $uid==='self'?[['id'=>99,'targetUid'=>$uid,'grantedBy'=>'other-admin','startsAt'=>new \DateTimeImmutable('2026-08-25T10:00:00Z'),'endsAt'=>new \DateTimeImmutable('2026-08-25T14:00:00Z'),'revokedAt'=>null,'revokedBy'=>null]]:[];}
+    };
+    $provider = new PlanerPersonalDataProvider(new ShiftPlanRepository(),$adminAccess);
     $descriptor = $provider->descriptor();
     if ($descriptor->appId() !== 'adplaner' || $descriptor->contractVersion() !== '1.0' || !$descriptor->supportsSubjectType('nextcloud-user')) throw new RuntimeException('AD Planer beschreibt den Standalone-V1-Vertrag nicht korrekt.');
     $subject = new DataSubjectRef('nextcloud-user', 'self');
@@ -51,12 +59,12 @@ namespace {
         'thirdCountryTransfer'=>$item->thirdCountryTransfer(),'automatedDecision'=>$item->automatedDecision(),
         'thirdPartyContentNotice'=>$item->thirdPartyContentNotice(),'attributes'=>$item->attributes(),
     ], $report->entries());
-    if (array_column($items, 'categoryLabel') !== ['Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
+    if (array_column($items, 'categoryLabel') !== ['Zeitlich begrenzter Admin-Vollzugriff', 'Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
     $encoded = json_encode($items, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    foreach (['12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr'] as $expected) {
+    foreach (['Admin-Vollzugriff','Ziel der Vollzugriffsfreigabe','12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr'] as $expected) {
         if (!str_contains($encoded, $expected)) throw new RuntimeException('Menschenlesbare Planerauskunft fehlt: ' . $expected);
     }
-    foreach (['foreign-user','planner','Enthält den Namen einer anderen Person','assistant_uid','created_by_uid','Art'] as $forbidden) {
+    foreach (['foreign-user','planner','other-admin','Enthält den Namen einer anderen Person','assistant_uid','created_by_uid','Art'] as $forbidden) {
         if (str_contains($encoded, $forbidden)) throw new RuntimeException('Planerauskunft offenbart Drittpersonen oder technische Felder: ' . $forbidden);
     }
     if (!str_contains($encoded, 'Inhalt wird wegen möglicher Angaben zu anderen Personen nicht automatisch ausgegeben')) throw new RuntimeException('Drittpersonenschutz für freie Tagesnotizen fehlt.');

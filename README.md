@@ -21,6 +21,13 @@ Die zuständige Einsatzbegleitung führt Monatspläne kontrolliert von `draft` �
 
 Genehmigte Pläne frieren die damaligen Schichtdefinitionen ein, speichern aber keine zusätzlichen historischen Personenstammdaten. Zuweisungen werden weiterhin nur für aktuell schichtfähige Mitglieder des jeweiligen Assistenzteams angezeigt.
 
+Native Nextcloud-Administration erteilt keinen automatischen Zugriff auf den
+fachlichen Demo-Datenpfad. Dieser wird je Admin app-lokal für höchstens 24
+Stunden freigegeben; Beginn, geplantes Ende und Widerruf bleiben auditierbar.
+PermissionProvider und PersonalDataProvider bilden die kombinierte
+Adminbedingung beziehungsweise den eigenen Freigabebezug ab, ohne andere
+Admin-Kennungen in der Selbstauskunft offenzulegen.
+
 ## Roadmap
 
 Geplante Erweiterungen und offene Produktentscheidungen stehen in der [Roadmap](ROADMAP.md).

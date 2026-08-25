@@ -9,6 +9,7 @@ use DateTimeInterface;
 use InvalidArgumentException;
 use OCA\AdPlaner\AppInfo\Application;
 use OCA\AdPlaner\Repository\ShiftPlanRepository;
+use OCA\AdPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
 use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataEntry;
 use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataPage;
 use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataProvider;
@@ -18,7 +19,7 @@ use OCA\FilzmannDataProtection\PublicApi\V1\ProviderDescriptor;
 final class PlanerPersonalDataProvider implements PersonalDataProvider {
     private const RETENTION = 'Keine feste Löschfrist festgelegt; gespeichert bis zur fachlich oder gesetzlich veranlassten Löschung.';
 
-    public function __construct(private ShiftPlanRepository $repository) {}
+    public function __construct(private ShiftPlanRepository $repository, private ?TemporaryAdminAccessRepositoryInterface $adminAccess = null) {}
 
     public function descriptor(): ProviderDescriptor {
         return new ProviderDescriptor(Application::APP_ID, 'AD Planer', '1.0', ['nextcloud-user'], ['personal-data'], 500);
@@ -31,6 +32,7 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
         $subjectUid = $request->subject()->subjectId();
         $data = $this->repository->personalDataForUid($subjectUid, $limit + 1);
         $items = [];
+        foreach ($this->adminAccess?->historyForUid($subjectUid,$limit+1)??[] as $row) $items[]=$this->adminAccessItem($row,$subjectUid);
         foreach ($data['candidates'] ?? [] as $row) {
             $subjectIsCandidate = (string)$row['assistant_uid'] === $subjectUid;
             $items[] = $subjectIsCandidate ? $this->candidateItem($row, $subjectUid) : $this->activityItem($row);
@@ -41,6 +43,11 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
         $items = array_slice($items, 0, $limit);
         if ($items === []) return new PersonalDataPage('not_applicable');
         return new PersonalDataPage($complete ? 'complete' : 'partial', $items, $complete ? [] : ['Ausgabelimit erreicht; weitere Planungsdaten können vorhanden sein.']);
+    }
+
+    private function adminAccessItem(array $row,string $subjectUid):PersonalDataEntry {
+        $roles=[];if($row['targetUid']===$subjectUid)$roles[]='Ziel der Vollzugriffsfreigabe';if($row['grantedBy']===$subjectUid)$roles[]='Freigebende Administration';if($row['revokedBy']===$subjectUid)$roles[]='Widerrufende Administration';$actualEnd=$row['revokedAt']??$row['endsAt'];
+        return $this->entry('admin-access','Zeitlich begrenzter Admin-Vollzugriff',self::shortDateTime($row['startsAt']),'admin-access:'.(string)$row['id'],['Eigene Rolle im Vorgang'=>implode(', ',$roles),'Beginn'=>$row['startsAt']->format(DATE_ATOM),'Geplantes Ende'=>$row['endsAt']->format(DATE_ATOM),'Tatsächliches Ende'=>$actualEnd->format(DATE_ATOM),'Status'=>$row['revokedAt']===null?'planmäßig beendet oder noch aktiv':'widerrufen'],'Nachweis einer zeitlich begrenzten administrativen Planer-Freigabe','Kennungen anderer beteiligter Administrator*innen werden nicht ausgegeben.');
     }
 
     private function candidateItem(array $row, string $subjectUid): PersonalDataEntry {
