@@ -111,6 +111,35 @@ class ShiftPlanStore {
         $this->repository->removeCandidate($slotId, $assistantUid);
     }
 
+    public function candidateForSlot(int $slotId, string $assistantUid): ?ShiftCandidate {
+        return ShiftCandidate::get($this->repository->findCandidate($slotId, $assistantUid));
+    }
+
+    public function updateCandidateMetadata(int $slotId, string $assistantUid, string $preference, string $note): bool {
+        return $this->repository->updateCandidateMetadata($slotId, $assistantUid, $preference, $note);
+    }
+
+    public function workloadLimitsForTeam(string $teamCode): array {
+        $result = [];
+        foreach ($this->repository->workloadLimitsForTeam($teamCode) as $uid => $row) {
+            $result[(string)$uid] = [
+                'weeklyMin' => isset($row['weekly_min']) ? (int)$row['weekly_min'] : null,
+                'weeklyMax' => isset($row['weekly_max']) ? (int)$row['weekly_max'] : null,
+                'monthlyMin' => isset($row['monthly_min']) ? (int)$row['monthly_min'] : null,
+                'monthlyMax' => isset($row['monthly_max']) ? (int)$row['monthly_max'] : null,
+            ];
+        }
+        return $result;
+    }
+
+    public function saveWorkloadLimits(string $teamCode, string $uid, array $limits): void {
+        $this->repository->saveWorkloadLimits($teamCode, $uid, $limits);
+    }
+
+    public function candidateDates(string $teamCode, string $from, string $to): array {
+        return $this->repository->candidateDates($teamCode, $from, $to);
+    }
+
     public function saveDayNote(string $teamCode, string $workDate, string $note, string $updatedByUid): void {
         $this->repository->saveDayNote($teamCode, $workDate, $note, $updatedByUid);
     }

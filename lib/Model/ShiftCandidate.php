@@ -16,7 +16,9 @@ class ShiftCandidate {
         public string $createdByUid,
         public string $createdAt = '',
         public string $displayName = '',
-        public bool $isSelf = false
+        public bool $isSelf = false,
+        public string $preference = 'neutral',
+        public string $note = ''
     ) {
     }
 
@@ -28,7 +30,9 @@ class ShiftCandidate {
             (string)($data['createdByUid'] ?? $data['created_by_uid'] ?? ''),
             (string)($data['createdAt'] ?? $data['created_at'] ?? ''),
             (string)($data['displayName'] ?? $data['display_name'] ?? ''),
-            (bool)($data['isSelf'] ?? $data['is_self'] ?? false)
+            (bool)($data['isSelf'] ?? $data['is_self'] ?? false),
+            (string)($data['preference'] ?? 'neutral'),
+            (string)($data['note'] ?? $data['candidate_note'] ?? '')
         );
     }
 
@@ -38,6 +42,8 @@ class ShiftCandidate {
             'uid' => $this->assistantUid,
             'displayName' => $assistantLabels[$this->assistantUid] ?? ($this->displayName !== '' ? $this->displayName : $this->assistantUid),
             'isSelf' => $this->isSelf || $this->assistantUid === $currentUid,
+            'preference' => $this->preference,
+            'note' => $this->note,
         ];
     }
 }

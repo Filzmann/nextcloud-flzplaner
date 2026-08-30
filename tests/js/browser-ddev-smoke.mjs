@@ -186,9 +186,22 @@ try {
     assert.equal(await evaluate(`Boolean(document.querySelector('[data-action="add-self"]'))`), true, 'Ein normales Teammitglied muss einen eigenen Wunsch eintragen können.');
     await click('[data-action="add-self"]', 'Eigener Wunsch');
     await waitFor(`Array.from(document.querySelectorAll('.adp-chip')).some(chip => chip.textContent.includes(${JSON.stringify(memberUid)}))`, 'Persistierter eigener Wunsch');
+    await click('[data-action="set-candidate-preference"][aria-label="Lieblingsschicht"]', 'Lieblingsschicht-Markierung');
+    await waitFor(`Array.from(document.querySelectorAll('[data-candidate-chip]')).some(chip => chip.textContent.includes(${JSON.stringify(memberUid)}) && chip.textContent.includes('⭐'))`, 'Persistierte Lieblingsschicht');
+    await evaluate(`(() => { const chip = Array.from(document.querySelectorAll('[data-candidate-chip]')).find(item => item.textContent.includes(${JSON.stringify(memberUid)})); const details = chip.querySelector('.adp-candidate-note'); details.open = true; const note = details.querySelector('[data-candidate-note]'); window.__adpCandidateNoteBeforeSave = note; note.value = 'Synthetischer Schichthinweis'; details.querySelector('[data-action="save-candidate-note"]').click(); return true; })()`);
+    await waitFor(`Array.from(document.querySelectorAll('[data-candidate-note]')).some(note => note !== window.__adpCandidateNoteBeforeSave && note.value === 'Synthetischer Schichthinweis')`, 'Persistierte Schichtanmerkung');
     await click('#adp-tab-settings', 'Einstellungstab des normalen Mitglieds');
     await waitFor(`document.querySelector('.adp-settings-readonly')`, 'Schreibgeschützte Einstellungen');
     assert.equal(await evaluate(`Boolean(document.querySelector('#settings-form'))`), false, 'Ein normales Mitglied darf kein Einstellungsformular erhalten.');
+    assert.equal(await evaluate(`Boolean(document.querySelector('#personal-workload-form'))`), true, 'Ein schichtfähiges Mitglied benötigt persönliche Schichtgrenzen.');
+    await evaluate(`(() => { const form = document.querySelector('#personal-workload-form'); window.__adpWorkloadFormBeforeSave = form; form.querySelector('[name="weeklyMin"]').value = '3'; form.querySelector('[name="weeklyMax"]').value = '5'; form.querySelector('[name="monthlyMin"]').value = '10'; form.querySelector('[name="monthlyMax"]').value = '15'; form.requestSubmit(); return true; })()`);
+    await waitFor(`document.querySelector('#personal-workload-form') !== window.__adpWorkloadFormBeforeSave && document.querySelector('#personal-workload-form [name="monthlyMin"]')?.value === '10'`, 'Persistierte persönliche Schichtgrenzen');
+
+    await navigateAs(ebUid);
+    await selectMonth();
+    assert.equal(await evaluate(`Boolean(document.querySelector('.adp-workload-overview[open]'))`), true, 'Die EB benötigt die geöffnete Team-Auslastungsübersicht.');
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('.adp-workload--under')).some(row => row.textContent.includes(${JSON.stringify(memberUid)}))`), true, 'Ein Teammitglied unter Minimum muss für die EB kräftig und textlich markiert sein.');
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('[data-candidate-chip].adp-chip--under')).some(chip => chip.textContent.includes(${JSON.stringify(memberUid)}))`), true, 'Schichten eines Teammitglieds unter Minimum müssen kräftig markiert sein.');
 
     const browserErrors = await evaluate(`window.__adpBrowserErrors || []`);
     assert.deepEqual(browserErrors, [], `Die Oberfläche erzeugte Browserfehler: ${browserErrors.join('; ')}`);

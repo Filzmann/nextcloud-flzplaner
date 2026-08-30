@@ -9,7 +9,7 @@ foreach ($routes as $route) {
     $byName[$route['name'] ?? ''] = $route;
 }
 
-foreach (['api#addShiftCandidate', 'api#removeShiftCandidate'] as $name) {
+foreach (['api#addShiftCandidate', 'api#removeShiftCandidate', 'api#updateCandidateMetadata'] as $name) {
     $slotRequirement = $byName[$name]['requirements']['slotId'] ?? null;
     if ($slotRequirement !== '\\d+') {
         throw new RuntimeException($name . ' muss nichtnumerische Schicht-IDs bereits an der Route abweisen.');

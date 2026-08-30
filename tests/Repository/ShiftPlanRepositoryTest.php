@@ -134,6 +134,17 @@ namespace {
     assertSameValue('planned', $lockRepository->lockMonthStatus('A1', '2026-08', ['draft', 'planned']), 'A matching month status should be locked.');
     assertSameValue(['revision'], $lockConnection->updatedColumns, 'A technical month lock must not persist viewer identity or overwrite the last functional update time.');
 
+    $metadataConnection = new CandidateConnectionFake();
+    $metadataRepository = new ShiftPlanRepository($metadataConnection);
+    assertSameValue(true, $metadataRepository->updateCandidateMetadata(7, 'assistant-a', 'favorite', 'Hinweis'), 'Candidate metadata update should report the scoped write.');
+    assertSameValue(['preference', 'candidate_note', 'metadata_updated_at'], $metadataConnection->updatedColumns, 'Candidate metadata must update only the approved fields.');
+
+    $limitsConnection = new CandidateConnectionFake();
+    $limitsRepository = new ShiftPlanRepository($limitsConnection);
+    $limitsRepository->saveWorkloadLimits('A1', 'assistant-a', ['weeklyMin'=>1,'weeklyMax'=>3,'monthlyMin'=>5,'monthlyMax'=>12]);
+    assertSameValue(1, $limitsConnection->insertAttempts, 'A first workload save should attempt an insert.');
+    assertSameValue(1, $limitsConnection->updateAttempts, 'A concurrent first workload insert must recover with a scoped update.');
+
     $failingConnection = new CandidateConnectionFake();
     $failingConnection->insertFailureReason = Exception::REASON_DRIVER;
     $failingRepository = new ShiftPlanRepository($failingConnection);

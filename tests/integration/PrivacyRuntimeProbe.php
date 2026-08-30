@@ -111,6 +111,7 @@ switch ($mode) {
 
         foreach ([
             ['adp_day_notes', ['team_code' => $teamCode]],
+            ['adp_workload_limits', ['team_code' => $teamCode]],
             ['adp_shift_slots', ['team_code' => $teamCode]],
             ['adp_month_plans', ['team_code' => $teamCode]],
             ['adp_team_settings', ['team_code' => $teamCode]],
@@ -129,6 +130,7 @@ switch ($mode) {
         $remaining = [];
         foreach ([
             'adp_day_notes' => ['team_code' => $teamCode],
+            'adp_workload_limits' => ['team_code' => $teamCode],
             'adp_shift_slots' => ['team_code' => $teamCode],
             'adp_month_plans' => ['team_code' => $teamCode],
             'adp_team_settings' => ['team_code' => $teamCode],

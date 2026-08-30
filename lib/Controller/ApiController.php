@@ -9,6 +9,7 @@ use OCA\AdPlaner\Service\AdPlanerLogger;
 use OCA\AdPlaner\Service\ScheduleService;
 use OCA\AdPlaner\Service\TeamAccessService;
 use OCA\AdPlaner\Service\TeamSettingsService;
+use OCA\AdPlaner\Service\WorkloadPreferenceService;
 use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -22,7 +23,8 @@ class ApiController extends Controller {
         private TeamSettingsService $teamSettings,
         private ScheduleService $scheduleService,
         private AdPlanerLogger $logger,
-        private ApiResponder $responder
+        private ApiResponder $responder,
+        private WorkloadPreferenceService $workloadPreferences
     ) {
         parent::__construct(Application::APP_ID, $request);
     }
@@ -35,7 +37,11 @@ class ApiController extends Controller {
             return [
                 'currentUser' => ['uid' => $uid],
                 'teams' => array_map(
-                    static fn($team): array => $team->toArray(),
+                    fn($team): array => [
+                        ...$team->toArray(),
+                        'personalWorkload' => $this->workloadPreferences->personal($team, $uid),
+                        'canSetPersonalWorkload' => $team->assistantByUid($uid)?->canReceiveShifts ?? false,
+                    ],
                     $this->teamAccess->teamsForCurrentUser()
                 ),
                 'organization' => $this->teamAccess->organizationContract(),
@@ -136,6 +142,30 @@ class ApiController extends Controller {
             'month' => $month,
             'slot_id' => $slotId,
         ]);
+    }
+
+    #[NoAdminRequired]
+    public function updateCandidateMetadata(string $teamCode, string $month, int $slotId, string $preference = 'neutral', string $note = ''): DataResponse {
+        return $this->responder->respond(function () use ($teamCode, $month, $slotId, $preference, $note): array {
+            $team = $this->teamAccess->assertTeamAccess($teamCode);
+            $this->scheduleService->updateCandidateMetadata($team, $month, $slotId, $preference, $note, $this->teamAccess->currentUserId());
+
+            return ['ok' => true];
+        }, [$this->logger, 'error'], 'update_candidate_metadata', [
+            'team_code' => $teamCode,
+            'month' => $month,
+            'slot_id' => $slotId,
+        ]);
+    }
+
+    #[NoAdminRequired]
+    public function savePersonalWorkload(string $teamCode, string $weeklyMin = '', string $weeklyMax = '', string $monthlyMin = '', string $monthlyMax = ''): DataResponse {
+        return $this->responder->respond(function () use ($teamCode, $weeklyMin, $weeklyMax, $monthlyMin, $monthlyMax): array {
+            $team = $this->teamAccess->assertTeamAccess($teamCode);
+            $limits = $this->workloadPreferences->savePersonal($team, $this->teamAccess->currentUserId(), $weeklyMin, $weeklyMax, $monthlyMin, $monthlyMax);
+
+            return ['ok' => true, 'limits' => $limits];
+        }, [$this->logger, 'error'], 'save_personal_workload', ['team_code' => $teamCode]);
     }
 
     private function decodeShiftsJson(string $shiftsJson): array {

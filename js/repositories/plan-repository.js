@@ -32,6 +32,14 @@
             });
         }
 
+        updateCandidateMetadata(teamCode, month, slotId, preference, note) {
+            return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/slots/' + this.encode(slotId) + '/candidate-metadata', { preference, note });
+        }
+
+        savePersonalWorkload(teamCode, limits) {
+            return this.post(this.teamPath(teamCode) + '/personal-workload', limits);
+        }
+
         saveDayNote(teamCode, month, date, note) {
             return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/days/' + this.encode(date) + '/note', {
                 note

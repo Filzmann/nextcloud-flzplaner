@@ -8,6 +8,7 @@ use OCA\AdPlaner\Model\ShiftCandidate;
 use OCA\AdPlaner\Model\ShiftSlot;
 use OCA\AdPlaner\Model\Team;
 use OCA\AdPlaner\Service\ScheduleService;
+use OCA\AdPlaner\Service\WorkloadPreferenceService;
 use OCA\AdPlaner\Service\ShiftConfigService;
 use OCA\AdPlaner\Service\TeamAccessService;
 use OCA\AdPlaner\Service\PlanningHintService;
@@ -23,6 +24,8 @@ class FakeShiftPlanStoreForSchedule extends ShiftPlanStore {
     public array $insertedSlots = [];
     public array $savedNotes = [];
     public array $deletedNotes = [];
+    public array $updatedCandidateMetadata = [];
+    public bool $candidateExists = true;
     public bool $slotEnabled = true;
     public string $status = 'draft';
     public ?string $statusOnNextLock = null;
@@ -65,6 +68,15 @@ class FakeShiftPlanStoreForSchedule extends ShiftPlanStore {
         $this->removed[] = compact('slotId', 'assistantUid');
     }
 
+    public function candidateForSlot(int $slotId, string $assistantUid): ?ShiftCandidate {
+        return $this->candidateExists ? new ShiftCandidate(1, $slotId, $assistantUid, $assistantUid) : null;
+    }
+
+    public function updateCandidateMetadata(int $slotId, string $assistantUid, string $preference, string $note): bool {
+        $this->updatedCandidateMetadata[] = compact('slotId', 'assistantUid', 'preference', 'note');
+        return true;
+    }
+
     public function saveDayNote(string $teamCode, string $workDate, string $note, string $updatedByUid): void {
         $this->savedNotes[] = compact('teamCode', 'workDate', 'note', 'updatedByUid');
     }
@@ -95,6 +107,9 @@ class FakeShiftPlanStoreForSchedule extends ShiftPlanStore {
     public function dayNotesForMonth(string $teamCode, string $month): array {
         return [];
     }
+
+    public function workloadLimitsForTeam(string $teamCode): array { return []; }
+    public function candidateDates(string $teamCode, string $from, string $to): array { return []; }
 
     public function updateSlotDefinition(int $slotId, string $label, string $startsAt, string $endsAt, bool $enabled): void {
         $this->updatedSlots[] = compact('slotId', 'label', 'startsAt', 'endsAt', 'enabled');
@@ -182,11 +197,11 @@ $mappedTeam = Team::get($ebTeam->toArray());
 assertSameValue('Team A1', $mappedTeam->toArray()['displayName'], 'Team::get should keep the API payload shape.');
 
 $store = new FakeShiftPlanStoreForSchedule();
-$service = new ScheduleService($store, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule());
+$service = new ScheduleService($store, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($store));
 
 $approvalRaceStore = new FakeShiftPlanStoreForSchedule();
 $approvalRaceStore->statusOnNextLock = 'approved';
-$approvalRaceService = new ScheduleService($approvalRaceStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule());
+$approvalRaceService = new ScheduleService($approvalRaceStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($approvalRaceStore));
 $approvalRacePlan = $approvalRaceService->monthPlan($ebTeam, '2026-07', 'test-eb');
 assertSameValue('approved', $approvalRacePlan['status'] ?? null, 'A concurrent approval must win over mutable month materialization.');
 assertSameValue([], $approvalRaceStore->updatedSlots, 'A concurrent approval must prevent slot-definition rewrites.');
@@ -211,6 +226,37 @@ assertSameValue(
     $store->removed[1] ?? null,
     'The responsible EB should be able to remove another assistant assignment.'
 );
+
+$service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'favorite', '  Nur vormittags  ', 'assistant-a');
+assertSameValue(
+    [['slotId'=>9, 'assistantUid'=>'assistant-a', 'preference'=>'favorite', 'note'=>'Nur vormittags']],
+    $store->updatedCandidateMetadata,
+    'Eine Assistenzkraft muss den eigenen vorhandenen Wunsch kennzeichnen und kommentieren können.'
+);
+$store->candidateExists = false;
+assertDomainException(
+    static fn() => $service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'emergency', '', 'assistant-a'),
+    'Eine fremde oder entfernte Kandidatenreferenz muss ohne Änderung abgewiesen werden.'
+);
+assertSameValue(1, count($store->updatedCandidateMetadata), 'Eine abgewiesene Kandidatenreferenz darf keine Metadaten verändern.');
+$store->candidateExists = true;
+try {
+    $service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'like', '', 'assistant-a');
+    throw new RuntimeException('Eine unbekannte Präferenz wurde akzeptiert.');
+} catch (InvalidArgumentException) {}
+assertSameValue(1, count($store->updatedCandidateMetadata), 'Eine ungültige Präferenz darf nichts speichern.');
+try {
+    $service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'favorite', str_repeat('Ä', 501), 'assistant-a');
+    throw new RuntimeException('Eine zu lange Schichtanmerkung wurde akzeptiert.');
+} catch (InvalidArgumentException) {}
+assertSameValue(1, count($store->updatedCandidateMetadata), 'Eine zu lange Schichtanmerkung darf nichts speichern.');
+$store->status = 'approved';
+assertDomainException(
+    static fn() => $service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'emergency', '', 'assistant-a'),
+    'Ein genehmigter Monat muss auch Schichtpräferenzen und -anmerkungen sperren.'
+);
+assertSameValue(1, count($store->updatedCandidateMetadata), 'Eine abgewiesene Änderung im genehmigten Monat darf nichts speichern.');
+$store->status = 'draft';
 
 assertDomainException(
     static fn() => $service->addCandidate($ebTeam, '2026-07', 9, '', 'test-eb'),
@@ -327,7 +373,7 @@ $configuredTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, [
         ['key' => 'night', 'label' => 'Nacht', 'startsAt' => '20:00', 'endsAt' => '08:00', 'enabled' => false],
     ],
 ]);
-$configuredService = new ScheduleService($configuredStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule());
+$configuredService = new ScheduleService($configuredStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($configuredStore));
 $configuredPlan = $configuredService->monthPlan($configuredTeam, '2026-07', 'test-eb');
 $updatesById = [];
 foreach ($configuredStore->updatedSlots as $updatedSlot) {

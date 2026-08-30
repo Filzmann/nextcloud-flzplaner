@@ -21,6 +21,7 @@
             if (state.activeView === 'settings') {
                 this.panel.innerHTML = this.renderSettings(team);
                 this.bindSettingsForm();
+                this.bindPersonalWorkloadForm();
                 return;
             }
             this.panel.innerHTML = this.renderMonth(state.monthPlan, state.currentUser);
@@ -43,6 +44,21 @@
                 const data = new FormData(form);
                 const shifts = this.collectShifts(form);
                 await this.onSaveSettings({ displayName: data.get('displayName') || '', meetingDay: data.get('meetingDay') || '', shifts });
+            });
+        }
+
+        bindPersonalWorkloadForm() {
+            const form = this.byId('personal-workload-form');
+            if (!form) return;
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+                const data = new FormData(form);
+                await this.onSavePersonalWorkload({
+                    weeklyMin: data.get('weeklyMin') || '',
+                    weeklyMax: data.get('weeklyMax') || '',
+                    monthlyMin: data.get('monthlyMin') || '',
+                    monthlyMax: data.get('monthlyMax') || '',
+                });
             });
         }
     }

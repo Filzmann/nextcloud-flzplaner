@@ -12,10 +12,10 @@ namespace OCA\AdPlaner\AppInfo { final class Application { public const APP_ID =
 namespace OCA\AdPlaner\Repository {
     class ShiftPlanRepository {
         public function personalDataForUid(string $uid, int $limit): array {
-            if ($uid !== 'self') return ['candidates' => [], 'dayNotes' => [], 'monthPlans' => []];
+            if ($uid !== 'self') return ['candidates' => [], 'dayNotes' => [], 'monthPlans' => [], 'workloadLimits' => []];
             return [
                 'candidates' => [
-                    ['id'=>1,'assistant_uid'=>'self','created_by_uid'=>'planner','created_at'=>'2026-08-01 08:30:00','team_code'=>'A1','work_date'=>'2026-08-12','label'=>'Frühdienst','starts_at'=>'08:00','ends_at'=>'14:00'],
+                    ['id'=>1,'assistant_uid'=>'self','created_by_uid'=>'planner','created_at'=>'2026-08-01 08:30:00','team_code'=>'A1','work_date'=>'2026-08-12','label'=>'Frühdienst','starts_at'=>'08:00','ends_at'=>'14:00','preference'=>'favorite','candidate_note'=>'Enthält eine andere Person'],
                     ['id'=>2,'assistant_uid'=>'foreign-user','created_by_uid'=>'self','created_at'=>'2026-08-02 09:45:00','team_code'=>'A1','work_date'=>'2026-08-13','label'=>'Spätdienst','starts_at'=>'14:00','ends_at'=>'20:00'],
                 ],
                 'dayNotes' => [
@@ -23,6 +23,9 @@ namespace OCA\AdPlaner\Repository {
                 ],
                 'monthPlans' => [
                     ['id'=>4,'team_code'=>'A1','plan_month'=>'2026-08','status'=>'approved','updated_at'=>'2026-08-04 11:20:00'],
+                ],
+                'workloadLimits' => [
+                    ['id'=>5,'team_code'=>'A1','weekly_min'=>1,'weekly_max'=>3,'monthly_min'=>5,'monthly_max'=>12,'updated_at'=>'2026-08-05 12:30:00'],
                 ],
             ];
         }
@@ -59,12 +62,12 @@ namespace {
         'thirdCountryTransfer'=>$item->thirdCountryTransfer(),'automatedDecision'=>$item->automatedDecision(),
         'thirdPartyContentNotice'=>$item->thirdPartyContentNotice(),'attributes'=>$item->attributes(),
     ], $report->entries());
-    if (array_column($items, 'categoryLabel') !== ['Zeitlich begrenzter Admin-Vollzugriff', 'Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
+    if (array_column($items, 'categoryLabel') !== ['Zeitlich begrenzter Admin-Vollzugriff', 'Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan', 'Persönliche Schichtgrenzen']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
     $encoded = json_encode($items, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    foreach (['Admin-Vollzugriff','Ziel der Vollzugriffsfreigabe','12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr'] as $expected) {
+    foreach (['Admin-Vollzugriff','Ziel der Vollzugriffsfreigabe','12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','Lieblingsschicht','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr','Persönliche Schichtgrenzen','Minimum pro Woche','05.08.26, 12:30 Uhr'] as $expected) {
         if (!str_contains($encoded, $expected)) throw new RuntimeException('Menschenlesbare Planerauskunft fehlt: ' . $expected);
     }
-    foreach (['foreign-user','planner','other-admin','Enthält den Namen einer anderen Person','assistant_uid','created_by_uid','Art'] as $forbidden) {
+    foreach (['foreign-user','planner','other-admin','Enthält den Namen einer anderen Person','Enthält eine andere Person','assistant_uid','created_by_uid','Art'] as $forbidden) {
         if (str_contains($encoded, $forbidden)) throw new RuntimeException('Planerauskunft offenbart Drittpersonen oder technische Felder: ' . $forbidden);
     }
     if (!str_contains($encoded, 'Inhalt wird wegen möglicher Angaben zu anderen Personen nicht automatisch ausgegeben')) throw new RuntimeException('Drittpersonenschutz für freie Tagesnotizen fehlt.');

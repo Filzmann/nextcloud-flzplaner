@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-rc.1
+
+- Eigene Schichtwünsche können als Lieblingsschicht oder „nur im Notfall“ gekennzeichnet und mit einer teamweit sichtbaren Anmerkung versehen werden.
+- Persönliche Wochen- und Monatsgrenzen für gewünschte Schichten sowie eigene und EB-weite Auslastungsübersichten ergänzt.
+- Schichten unter Minimum werden kräftig und textlich, Schichten über Maximum blasser und textlich markiert; Kalenderwochen werden auch über Monatsgrenzen korrekt gezählt.
+- Berechtigungs- und Datenschutzprovider, additive Migration sowie selbstbereinigende Integrationsverträge um die neuen Datenklassen erweitert.
+
 ## 0.5.0-rc.1
 
 - Subjectgebundene persönliche Datenauskunft für Schichtwünsche, Schichtzuweisungen und eigene Bearbeitungsreferenzen ergänzt.

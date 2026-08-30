@@ -38,8 +38,23 @@
                         </tbody>
                     </table>
                 </div>
+                ${renderWorkload(plan.workload || [], canCoordinate)}
             </section>
         `;
+    }
+
+    function renderWorkload(rows, canCoordinate) {
+        if (!rows.length) return '';
+        const content = `<div class="adp-table-wrap"><table class="adp-table adp-workload-table"><thead><tr><th scope="col">Person</th><th scope="col">Monat</th><th scope="col">Kalenderwochen</th></tr></thead><tbody>${rows.map(row => `<tr class="adp-workload--${esc(row.status || row.monthStatus || 'normal')}"><th scope="row">${esc(row.displayName || row.uid)}</th><td>${esc(row.monthCount)} (${limitRange(row.monthlyMin, row.monthlyMax)}) <span>${esc(statusLabel(row.monthStatus))}</span></td><td>${(row.weeks || []).map(week => `${esc(week.label)}: ${esc(week.count)} <span>${esc(statusLabel(week.status))}</span>`).join('<br>')}</td></tr>`).join('')}</tbody></table></div>`;
+        return `<details class="adp-workload-overview" ${canCoordinate ? 'open' : ''}><summary>${canCoordinate ? 'Auslastungsübersicht des Teams' : 'Meine Auslastung einblenden'}</summary>${content}</details>`;
+    }
+
+    function statusLabel(status) {
+        return status === 'under' ? 'Unter persönlichem Minimum' : (status === 'over' ? 'Über persönlichem Maximum' : 'Innerhalb persönlicher Grenzen');
+    }
+
+    function limitRange(minimum, maximum) {
+        return `${minimum ?? '–'} bis ${maximum ?? '–'}`;
     }
 
     function renderStatus(status, canCoordinate) {

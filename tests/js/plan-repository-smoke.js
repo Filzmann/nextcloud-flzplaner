@@ -49,6 +49,8 @@ require('../../js/repositories/plan-repository.js');
     await repository.saveDayNote('TeamA', '2026-07', '2026-07-01', 'Hinweis');
     await repository.transitionStatus('TeamA', '2026-07', 'planned');
     await repository.saveSettings('TeamA', 'Team A', '2', [{ key: 'day' }]);
+    await repository.updateCandidateMetadata('TeamA', '2026-07', 1, 'favorite', 'Hinweis');
+    await repository.savePersonalWorkload('TeamA', { weeklyMin: 1, weeklyMax: 3, monthlyMin: 5, monthlyMax: 12 });
 
     assert.strictEqual(state.teams[0] instanceof window.ADPlaner.models.Team, true);
     assert.strictEqual(monthPlan.team instanceof window.ADPlaner.models.Team, true);
@@ -60,11 +62,14 @@ require('../../js/repositories/plan-repository.js');
         '/api/teams/TeamA/months/2026-07/slots/1/candidates',
         '/api/teams/TeamA/months/2026-07/days/2026-07-01/note',
         '/api/teams/TeamA/months/2026-07/status',
-        '/api/teams/TeamA/settings'
+        '/api/teams/TeamA/settings',
+        '/api/teams/TeamA/months/2026-07/slots/1/candidate-metadata',
+        '/api/teams/TeamA/personal-workload'
     ]);
     assert.strictEqual(calls[2].options.body, '{"targetUid":"anna"}');
     assert.strictEqual(calls[4].options.body, '{"targetStatus":"planned"}');
     assert.strictEqual(calls[5].options.body, '{"displayName":"Team A","meetingDay":"2","shiftsJson":"[{\\"key\\":\\"day\\"}]"}');
+    assert.strictEqual(calls[6].options.body, '{"preference":"favorite","note":"Hinweis"}');
 
     console.log('AdPlaner plan repository smoke test passed.');
 })();

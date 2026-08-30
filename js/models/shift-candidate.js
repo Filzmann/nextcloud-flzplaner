@@ -12,6 +12,9 @@
             this.uid = this.assistantUid;
             this.displayName = data.displayName || data.display_name || this.uid;
             this.isSelf = !!(data.isSelf ?? data.is_self ?? false);
+            this.preference = data.preference || 'neutral';
+            this.note = data.note || data.candidate_note || '';
+            this.workloadStatus = data.workloadStatus || data.workload_status || 'normal';
         }
 
         toArray() {
@@ -21,7 +24,10 @@
                 assistantUid: this.assistantUid,
                 uid: this.uid,
                 displayName: this.displayName,
-                isSelf: this.isSelf
+                isSelf: this.isSelf,
+                preference: this.preference,
+                note: this.note,
+                workloadStatus: this.workloadStatus
             };
         }
     }

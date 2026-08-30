@@ -7,6 +7,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 use OCA\AdPlaner\Model\ShiftSlot;
 use OCA\AdPlaner\Model\Team;
 use OCA\AdPlaner\Service\ScheduleService;
+use OCA\AdPlaner\Service\WorkloadPreferenceService;
 use OCA\AdPlaner\Service\ShiftConfigService;
 use OCA\AdPlaner\Service\TeamAccessService;
 use OCA\AdPlaner\Service\PlanningHintService;
@@ -78,6 +79,8 @@ final class MonthPlanStatusStoreFake extends ShiftPlanStore {
 
     public function candidatesForSlotIds(array $slotIds): array { return $this->candidatesBySlot; }
     public function dayNotesForMonth(string $teamCode, string $month): array { return []; }
+    public function workloadLimitsForTeam(string $teamCode): array { return []; }
+    public function candidateDates(string $teamCode, string $from, string $to): array { return []; }
 
     public function addCandidate(int $slotId, string $assistantUid, string $createdByUid): void {
         $this->added[] = compact('slotId', 'assistantUid', 'createdByUid');
@@ -136,7 +139,7 @@ $settings = ['shifts' => [[
 $assistantTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, false, $settings);
 $ebTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, $settings);
 $store = new MonthPlanStatusStoreFake();
-$service = new ScheduleService($store, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake());
+$service = new ScheduleService($store, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake(), new WorkloadPreferenceService($store));
 
 assertSameValue('draft', $service->monthPlan($ebTeam, '2026-08', 'test-eb')['status'] ?? null, 'A new month plan starts as draft.');
 assertDomainException(
@@ -149,7 +152,7 @@ assertDomainException(
 );
 
 $directStore = new MonthPlanStatusStoreFake();
-$directService = new ScheduleService($directStore, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake());
+$directService = new ScheduleService($directStore, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake(), new WorkloadPreferenceService($directStore));
 assertSameValue('planned', $directService->transitionMonthStatus($ebTeam, '2026-08', 'planned', 'test-eb'), 'A month can be planned without loading it first.');
 assertSameValue('approved', $directService->transitionMonthStatus($ebTeam, '2026-08', 'approved', 'test-eb'), 'A month can be approved without loading it first.');
 assertSameValue(2, $directStore->transactionCalls, 'Status transitions run through the store transaction boundary.');

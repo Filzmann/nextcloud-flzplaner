@@ -21,6 +21,13 @@ Die zuständige Einsatzbegleitung führt Monatspläne kontrolliert von `draft` �
 
 Genehmigte Pläne frieren die damaligen Schichtdefinitionen ein, speichern aber keine zusätzlichen historischen Personenstammdaten. Zuweisungen werden weiterhin nur für aktuell schichtfähige Mitglieder des jeweiligen Assistenzteams angezeigt.
 
+Schichtfähige Teammitglieder können eigene Wünsche als Lieblingsschicht oder
+„nur im Notfall“ kennzeichnen und eine für das Team sichtbare kurze Anmerkung
+hinterlegen. Persönliche Mindest- und Höchstwerte pro Kalenderwoche und Monat
+werden im Einstellungstab gepflegt. Die eigene Auslastung ist einblendbar;
+die zuständige EB sieht die Teamübersicht und erkennt Unter- beziehungsweise
+Überschreitungen zusätzlich zu ihrer visuellen Markierung immer auch als Text.
+
 Native Nextcloud-Administration erteilt keinen automatischen Zugriff auf den
 fachlichen Demo-Datenpfad. Dieser wird je Admin app-lokal für höchstens 24
 Stunden freigegeben; Beginn, geplantes Ende und Widerruf bleiben auditierbar.

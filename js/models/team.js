@@ -14,6 +14,8 @@
             this.isEb = !!(data.isEb ?? data.is_eb ?? data.canCoordinate ?? false);
             this.canCoordinate = !!(data.canCoordinate ?? this.isEb);
             this.settings = data.settings || {};
+            this.personalWorkload = data.personalWorkload || data.personal_workload || {};
+            this.canSetPersonalWorkload = !!(data.canSetPersonalWorkload ?? data.can_set_personal_workload ?? false);
         }
 
         toArray() {
@@ -24,7 +26,9 @@
                 assistants: this.assistants.map(assistant => assistant.toArray()),
                 isEb: this.isEb,
                 canCoordinate: this.canCoordinate,
-                settings: this.settings
+                settings: this.settings,
+                personalWorkload: this.personalWorkload,
+                canSetPersonalWorkload: this.canSetPersonalWorkload
             };
         }
     }

@@ -14,7 +14,7 @@ foreach (['trap \'cleanup || report_failed_cleanup\' EXIT', 'run_probe assert-cl
         throw new RuntimeException('Dem Browser-Smoke fehlt ein Cleanup-Vertrag: ' . $contract);
     }
 }
-foreach (['transition-status', 'add-self', 'save-note', 'settings-form', 'Page.captureScreenshot', '__adpBrowserErrors'] as $contract) {
+foreach (['transition-status', 'add-self', 'save-note', 'settings-form', 'set-candidate-preference', 'save-candidate-note', 'personal-workload-form', 'adp-workload--under', 'Page.captureScreenshot', '__adpBrowserErrors'] as $contract) {
     if (!str_contains($browser, $contract)) {
         throw new RuntimeException('Dem Browser-Smoke fehlt ein Oberflächenvertrag: ' . $contract);
     }

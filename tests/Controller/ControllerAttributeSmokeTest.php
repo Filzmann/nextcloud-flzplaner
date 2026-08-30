@@ -57,6 +57,8 @@ namespace {
         'saveDayNote',
         'addShiftCandidate',
         'removeShiftCandidate',
+        'updateCandidateMetadata',
+        'savePersonalWorkload',
         'transitionMonthStatus',
     ];
 

@@ -34,7 +34,7 @@ const basePlan = {
                     id: 11,
                     segmentKey: 'late',
                     candidates: [
-                        { uid: 'assistant-a', displayName: 'Assistant A', isSelf: true }
+                        { uid: 'assistant-a', displayName: 'Assistant A', isSelf: true, preference: 'favorite', note: '<Nur vormittags>', workloadStatus: 'under' }
                     ]
                 }
             ]
@@ -44,6 +44,7 @@ const basePlan = {
 
 const assistantHtml = monthPlan.render({
     ...basePlan,
+    workload: [{ uid: 'assistant-a', displayName: 'Assistant A', monthCount: 1, monthStatus: 'under', status: 'under', weeklyMin: 2, weeklyMax: 4, monthlyMin: 8, monthlyMax: 12, weeks: [{ label: 'KW 27', count: 1, status: 'under' }] }],
     team: {
         code: 'A1',
         displayName: 'Team <A1>',
@@ -69,9 +70,18 @@ assert(!assistantHtml.includes('<Hinweis>'));
 assert(assistantHtml.includes('U? Assistant &lt;A&gt;'));
 assert(assistantHtml.includes('K Assistant B'));
 assert(!assistantHtml.includes('Assistant <A>'));
+assert(assistantHtml.includes('adp-workload-overview'));
+assert(assistantHtml.includes('Unter persönlichem Minimum'));
+assert(assistantHtml.includes('adp-chip--under'));
+assert(assistantHtml.includes('data-action="set-candidate-preference"'));
+assert(assistantHtml.includes('aria-label="Lieblingsschicht"'));
+assert(assistantHtml.includes('maxlength="500"'));
+assert(assistantHtml.includes('&lt;Nur vormittags&gt;'));
 
 const ebHtml = monthPlan.render({
     ...basePlan,
+    days: basePlan.days.map(day => ({ ...day, slots: day.slots.map(slot => ({ ...slot, candidates: (slot.candidates || []).map(candidate => ({ ...candidate, isSelf: false })) })) })),
+    workload: [{ uid: 'assistant-a', displayName: 'Assistant A', monthCount: 1, monthStatus: 'over', status: 'over', weeklyMin: null, weeklyMax: 0, monthlyMin: null, monthlyMax: 0, weeks: [] }],
     team: {
         code: 'A1',
         displayName: 'Team A1',
@@ -94,6 +104,8 @@ assert(ebHtml.includes('aria-label="Bemerkung für 01.07. speichern"'));
 assert(ebHtml.includes('data-action="add-selected" data-slot-id="10" data-target-uid="assistant-b"'));
 assert(ebHtml.includes('Entwurf'));
 assert(ebHtml.includes('data-action="transition-status" data-target-status="planned"'));
+assert(ebHtml.includes('Über persönlichem Maximum'));
+assert(!ebHtml.includes('data-action="set-candidate-preference"'), 'EB darf fremde Präferenzen nicht verändern.');
 
 const approvedHtml = monthPlan.render({
     ...basePlan,

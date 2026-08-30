@@ -187,3 +187,14 @@ waren grün und bestätigten zugleich den lokalen Testkontenvertrag
 Benutzername = Passwort. Die anschließenden Cleanup-Prüfungen fanden keine
 synthetischen Konten, Gruppen oder Plandaten. Die historische manuelle
 Gesamtentscheidung vom 02.08.2026 bleibt als damaliger Befund unverändert.
+
+Am 30.08.2026 wurde die additive Migration für `0.6.0-rc.1` erfolgreich auf
+der lokalen Nextcloud-34-DDEV-Datenbank ausgeführt. Eine erneute
+selbstbereinigende Headless-Chrome-Abnahme belegte zusätzlich die eigene
+Lieblings-/Notfallkennzeichnung, eine persistierte teamweit sichtbare
+Schichtanmerkung, persönliche Wochen- und Monatsgrenzen sowie die für die EB
+geöffnete Teamübersicht und die kräftige, auch textlich erklärte
+Unterminimum-Markierung. Statuspersistenz, Datenschutz-Runtime und
+Rechtematrix blieben grün; die Cleanup-Nachprüfung fand keine synthetischen
+Konten, Gruppen oder AdPlaner-Daten. Dieser automatisierte Lauf ersetzt keine
+neue fachliche und visuelle Freigabeentscheidung.

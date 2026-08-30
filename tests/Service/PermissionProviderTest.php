@@ -10,9 +10,7 @@ namespace OCA\FilzmannPermissionMatrix\PublicApi\V1 {
     final class RegisterPermissionProvidersEvent { public array $providers=[]; public function register(PermissionProvider $p):void{$this->providers[]=$p;} }
 }
 namespace {
-    require_once dirname(__DIR__, 2) . '/lib/Permission/PlanerPermissionSourceInterface.php';
-    require_once dirname(__DIR__, 2) . '/lib/Permission/PlanerPermissionProvider.php';
-    require_once dirname(__DIR__, 2) . '/lib/Permission/PlanerPermissionProviderListener.php';
+    require_once dirname(__DIR__) . '/bootstrap.php';
 
     use OCA\AdPlaner\Permission\PlanerPermissionProvider;
     use OCA\AdPlaner\Permission\PlanerPermissionProviderListener;
@@ -24,6 +22,9 @@ namespace {
     $coordinate=$by['plan.team.coordinate'][0]??null;
     if($coordinate?->condition->operator!=='all'||array_map(fn($c)=>$c->groupId,$coordinate->condition->children)!==['ad-ASN-A','ad-EB'])throw new RuntimeException('Koordination muss Team UND EB verlangen.');
     if(($by['plan.assignment.manage-own'][0]->condition->operator??null)!=='all')throw new RuntimeException('Eigene Zuweisungen müssen zusätzlich an das Team gebunden bleiben.');
+    if(count($by['plan.assignment.preference.manage-own']??[])!==2)throw new RuntimeException('Eigene Schichtreaktionen und -anmerkungen brauchen je Team eine eigene Regel.');
+    if(count($by['plan.workload.manage-own']??[])!==2)throw new RuntimeException('Persönliche Schichtgrenzen brauchen je Team eine eigene Regel.');
+    if(count($by['plan.workload.read-team']??[])!==2)throw new RuntimeException('Die EB-Auslastungsübersicht braucht je Team eine explizite Leseregel.');
     $demo=$by['plan.demo.manage'][0]??null;if($demo?->condition->operator!=='all'||array_map(fn($c)=>$c->operator,$demo->condition->children)!==['nextcloud-admin','app-admin-grant'])throw new RuntimeException('Demo-Verwaltung muss native Administration und aktive App-Freigabe verlangen.');
     $event=new RegisterPermissionProvidersEvent();(new PlanerPermissionProviderListener($provider))->handle($event);if(($event->providers[0]??null)!==$provider)throw new RuntimeException('Lazy-Registrierung fehlt.');
     echo "Planer permission provider tests passed\n";

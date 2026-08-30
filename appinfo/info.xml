@@ -5,7 +5,7 @@
     <name>Assistenz Dienstplanung</name>
     <summary>Wunschdienstplanung für Assistenzteams.</summary>
     <description>Verwaltet monatliche Wunschdienstpläne für Assistenzteams auf Basis dynamischer Nextcloud-Gruppen.</description>
-    <version>0.5.0-rc.2</version>
+    <version>0.6.0-rc.1</version>
     <licence>agpl</licence>
     <author>Simon</author>
     <namespace>AdPlaner</namespace>

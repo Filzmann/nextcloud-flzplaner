@@ -38,4 +38,21 @@ if ($info === false || version_compare((string)$info->version, '0.4.0-rc.2', '<'
     throw new RuntimeException('Die additive Revisionsmigration besitzt keinen neuen App-Versionsauslöser.');
 }
 
+$preferenceMigration = __DIR__ . '/../lib/Migration/Version000006Date202608300001.php';
+if (!is_file($preferenceMigration)) {
+    throw new RuntimeException('Die additive Migration für Schichtpräferenzen und persönliche Grenzen fehlt.');
+}
+$preferenceSource = (string)file_get_contents($preferenceMigration);
+foreach (['preference', 'candidate_note', 'metadata_updated_at', 'adp_workload_limits', 'weekly_min', 'weekly_max', 'monthly_min', 'monthly_max', 'adp_workload_user_unique'] as $contract) {
+    if (!str_contains($preferenceSource, $contract)) {
+        throw new RuntimeException("Der Präferenz-/Auslastungs-Migrationsvertrag fehlt: {$contract}");
+    }
+}
+if (!str_contains($preferenceSource, "'default' => 'neutral'")) {
+    throw new RuntimeException('Bestehende Schichtwünsche müssen neutral bleiben.');
+}
+if ($info === false || version_compare((string)$info->version, '0.6.0-rc.1', '<')) {
+    throw new RuntimeException('Die neue Migration besitzt keinen App-Versionsauslöser.');
+}
+
 echo "AdPlaner month plan migration contract test passed\n";

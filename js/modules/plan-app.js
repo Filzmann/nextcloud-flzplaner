@@ -29,6 +29,7 @@
                 openAssignmentPicker: options.openAssignmentPicker,
                 onAction: button => this.handleAction(button),
                 onSaveSettings: values => this.saveSettings(values),
+                onSavePersonalWorkload: values => this.savePersonalWorkload(values),
             });
         }
 
@@ -85,6 +86,9 @@
             }
             this.state.monthPlan = monthPlan;
             const updatedTeam = monthPlan.team;
+            const existingTeam = this.selectedTeam();
+            updatedTeam.personalWorkload = existingTeam?.personalWorkload || {};
+            updatedTeam.canSetPersonalWorkload = !!existingTeam?.canSetPersonalWorkload;
             this.state.teams = this.state.teams.map(team => team.code === updatedTeam.code ? updatedTeam : team);
             return true;
         }
@@ -111,6 +115,12 @@
                     await this.repository.addSelected(team, month, slot, targetUid);
                 } else if (action === 'remove-candidate') await this.repository.removeCandidate(team, month, slot, button.dataset.targetUid || '');
                 else if (action === 'transition-status') await this.repository.transitionStatus(team, month, button.dataset.targetStatus || '');
+                else if (action === 'set-candidate-preference' || action === 'save-candidate-note') {
+                    const chip = button.closest('[data-candidate-chip]');
+                    const note = chip ? chip.querySelector('[data-candidate-note]')?.value || '' : '';
+                    const preference = action === 'set-candidate-preference' ? button.dataset.preference || 'neutral' : chip?.dataset.currentPreference || 'neutral';
+                    await this.repository.updateCandidateMetadata(team, month, slot, preference, note);
+                }
                 else if (action === 'save-note') {
                     const textarea = this.panel.panel.querySelector(`textarea[data-note-date="${CSS.escape(button.dataset.date)}"]`);
                     await this.repository.saveDayNote(team, month, button.dataset.date, textarea ? textarea.value : '');
@@ -154,6 +164,22 @@
             } finally {
                 this.settingsSaving = false;
                 if (mutationCompleted) this.render();
+            }
+        }
+
+        async savePersonalWorkload(values) {
+            if (this.settingsSaving) return;
+            this.settingsSaving = true;
+            let mutationCompleted = false;
+            try {
+                await this.repository.savePersonalWorkload(this.state.selectedTeamCode, values);
+                mutationCompleted = true;
+                this.applyState(await this.repository.state());
+            } catch (error) {
+                this.showError(error, mutationCompleted ? 'Grenzen wurden gespeichert, aber die Ansicht konnte nicht neu geladen werden.' : 'Persönliche Grenzen konnten nicht gespeichert werden.');
+            } finally {
+                this.settingsSaving = false;
+                this.render();
             }
         }
     }

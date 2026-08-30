@@ -14,12 +14,14 @@ class ScheduleService {
     private const STATUS_PLANNED = 'planned';
     private const STATUS_APPROVED = 'approved';
     private const MAX_DAY_NOTE_LENGTH = 2000;
+    private const MAX_CANDIDATE_NOTE_LENGTH = 500;
 
     public function __construct(
         private ShiftPlanStore $store,
         private ShiftConfigService $shiftConfig,
         private TeamAccessService $teamAccess,
-        private PlanningHintService $planningHints
+        private PlanningHintService $planningHints,
+        private WorkloadPreferenceService $workloadPreferences
     ) {
     }
 
@@ -54,6 +56,8 @@ class ScheduleService {
         $assignableUids = $team->assignableAssistantUidMap();
         $notes = $this->store->dayNotesForMonth($team->code, $month);
         $hints = $this->planningHints->forMonth($month, array_keys($assignableUids));
+        $workload = $this->workloadPreferences->overview($team, $month, $currentUid);
+        $workloadByUid = array_column($workload, null, 'uid');
         $slotsByDate = [];
 
         foreach ($enabledSlots as $slot) {
@@ -61,7 +65,7 @@ class ScheduleService {
                 $candidatesBySlot[$slot->id] ?? [],
                 static fn(ShiftCandidate $candidate): bool => isset($assignableUids[$candidate->assistantUid])
             ));
-            $slot->candidates = $this->candidatePayload($slotCandidates, $assistantLabels, $currentUid);
+            $slot->candidates = $this->candidatePayload($slotCandidates, $assistantLabels, $currentUid, $slot->workDate, $workloadByUid);
             $slotsByDate[$slot->workDate][] = $slot->toArray();
         }
 
@@ -89,6 +93,7 @@ class ScheduleService {
             'status' => $status,
             'segments' => $segments,
             'days' => $days,
+            'workload' => $workload,
         ];
     }
 
@@ -121,6 +126,33 @@ class ScheduleService {
         $this->withMutableMonth($team->code, $month, $currentUid, function () use ($slotId, $team, $month, $targetUid): void {
             $slot = $this->requireSlot($slotId, $team->code, $month);
             $this->store->removeCandidate($slot->id, $targetUid);
+        });
+    }
+
+    public function updateCandidateMetadata(Team $team, string $month, int $slotId, string $preference, string $note, string $currentUid): void {
+        $month = $this->shiftConfig->normalizeMonth($month);
+        $this->assertAssignableAssistantInTeam($team, $currentUid);
+        $preference = strtolower(trim($preference));
+        if (!in_array($preference, ['neutral', 'favorite', 'emergency'], true)) {
+            throw new \InvalidArgumentException('Unbekannte Schichtpräferenz.');
+        }
+        $note = trim($note);
+        $length = preg_match_all('/./us', $note);
+        if ($length === false) {
+            throw new \InvalidArgumentException('Schichtanmerkungen müssen gültiges UTF-8 enthalten.');
+        }
+        if ($length > self::MAX_CANDIDATE_NOTE_LENGTH) {
+            throw new \InvalidArgumentException('Schichtanmerkungen dürfen höchstens 500 Zeichen lang sein.');
+        }
+
+        $this->withMutableMonth($team->code, $month, $currentUid, function () use ($slotId, $team, $month, $currentUid, $preference, $note): void {
+            $slot = $this->requireSlot($slotId, $team->code, $month);
+            if ($this->store->candidateForSlot($slot->id, $currentUid) === null) {
+                throw new \DomainException('Nur der eigene vorhandene Schichtwunsch darf gekennzeichnet werden.');
+            }
+            if (!$this->store->updateCandidateMetadata($slot->id, $currentUid, $preference, $note)) {
+                throw new \DomainException('Der Schichtwunsch wurde zwischenzeitlich geändert. Bitte neu laden.');
+            }
         });
     }
 
@@ -262,11 +294,21 @@ class ScheduleService {
         return $slot;
     }
 
-    private function candidatePayload(array $candidates, array $assistantLabels, string $currentUid): array {
-        return array_map(
-            static fn(ShiftCandidate $candidate): array => $candidate->toArray($assistantLabels, $currentUid),
-            $candidates
-        );
+    private function candidatePayload(array $candidates, array $assistantLabels, string $currentUid, string $workDate, array $workloadByUid): array {
+        return array_map(function (ShiftCandidate $candidate) use ($assistantLabels, $currentUid, $workDate, $workloadByUid): array {
+            $payload = $candidate->toArray($assistantLabels, $currentUid);
+            $entry = $workloadByUid[$candidate->assistantUid] ?? [];
+            $weekKey = (new \DateTimeImmutable($workDate))->format('o-W');
+            $week = null;
+            foreach ($entry['weeks'] ?? [] as $item) {
+                if (($item['key'] ?? '') === $weekKey) {
+                    $week = $item;
+                }
+            }
+            $statuses = [$entry['monthStatus'] ?? 'normal', $week['status'] ?? 'normal'];
+            $payload['workloadStatus'] = in_array('under', $statuses, true) ? 'under' : (in_array('over', $statuses, true) ? 'over' : 'normal');
+            return $payload;
+        }, $candidates);
     }
 
     private function assertCandidateMutationAllowed(Team $team, string $targetUid, string $currentUid): void {

@@ -39,6 +39,7 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
         }
         foreach ($data['dayNotes'] ?? [] as $row) $items[] = $this->dayNoteItem($row);
         foreach ($data['monthPlans'] ?? [] as $row) $items[] = $this->monthPlanItem($row);
+        foreach ($data['workloadLimits'] ?? [] as $row) $items[] = $this->workloadLimitItem($row);
         $complete = count($items) <= $limit;
         $items = array_slice($items, 0, $limit);
         if ($items === []) return new PersonalDataPage('not_applicable');
@@ -65,6 +66,8 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
                 'Ende' => (string)$row['ends_at'] . ' Uhr',
                 'Eintragung' => $selfCreated ? 'Von dir selbst eingetragen' : 'Von einer berechtigten Person eingetragen',
                 'Eingetragen am' => self::shortDateTime($row['created_at'] ?? ''),
+                'Präferenz' => ['favorite'=>'Lieblingsschicht','emergency'=>'Nur im Notfall','neutral'=>'Neutral'][(string)($row['preference'] ?? 'neutral')] ?? 'Neutral',
+                'Eigene Anmerkung' => trim((string)($row['candidate_note'] ?? '')) === '' ? 'Keine Anmerkung gespeichert' : 'Inhalt wird wegen möglicher Angaben zu anderen Personen nicht automatisch ausgegeben.',
             ],
             'Erfassung deines Schichtwunsches oder deiner Dienstzuweisung',
             $selfCreated ? null : 'Die eintragende Person wird zum Schutz ihrer Datenschutzrechte nicht genannt.',
@@ -121,6 +124,26 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
                 'Bearbeitet am' => self::shortDateTime($row['updated_at'] ?? ''),
             ],
             'Nachvollziehbarkeit der von dir zuletzt bearbeiteten Monatsplanung',
+            null,
+        );
+    }
+
+    private function workloadLimitItem(array $row): PersonalDataEntry {
+        $value = static fn(mixed $item): string => $item === null ? 'Keine Grenze' : (string)$item;
+        return $this->entry(
+            'workload_limits',
+            'Persönliche Schichtgrenzen',
+            'Team ' . (string)$row['team_code'],
+            'workload-limits:' . (string)$row['id'],
+            [
+                'Team'=>(string)$row['team_code'],
+                'Minimum pro Woche'=>$value($row['weekly_min'] ?? null),
+                'Maximum pro Woche'=>$value($row['weekly_max'] ?? null),
+                'Minimum pro Monat'=>$value($row['monthly_min'] ?? null),
+                'Maximum pro Monat'=>$value($row['monthly_max'] ?? null),
+                'Bearbeitet am'=>self::shortDateTime($row['updated_at'] ?? ''),
+            ],
+            'Persönliche Orientierung und Auslastungsdarstellung in der Wunschdienstplanung',
             null,
         );
     }
