@@ -34,10 +34,10 @@ class ShiftPlanRepository {
         }
     }
 
-    /** @return array{candidates:list<array<string,mixed>>,dayNotes:list<array<string,mixed>>,monthPlans:list<array<string,mixed>>,workloadLimits:list<array<string,mixed>>} */
+    /** @return array<string,list<array<string,mixed>>> */
     public function personalDataForUid(string $uid, int $limit): array {
         $candidateQuery = $this->db->getQueryBuilder();
-        $candidateQuery->select('c.id', 'c.assistant_uid', 'c.created_by_uid', 'c.created_at', 'c.preference', 'c.candidate_note', 'c.metadata_updated_at', 's.team_code', 's.work_date', 's.label', 's.starts_at', 's.ends_at')
+        $candidateQuery->select('c.id', 'c.assistant_uid', 'c.created_by_uid', 'c.created_at', 'c.preference', 'c.candidate_note', 'c.metadata_updated_at', 'c.assignment_source', 'c.fixed_deleted', 'c.fixed_modified', 's.team_code', 's.work_date', 's.label', 's.starts_at', 's.ends_at')
             ->from('adp_shift_candidates', 'c')
             ->innerJoin('c', 'adp_shift_slots', 's', $candidateQuery->expr()->eq('s.id', 'c.slot_id'))
             ->where($candidateQuery->expr()->orX(
@@ -68,11 +68,26 @@ class ShiftPlanRepository {
             ->orderBy('updated_at', 'ASC')
             ->setMaxResults($limit);
 
+        $rulesQuery = $this->db->getQueryBuilder();
+        $rulesQuery->select('id','team_code','weekday','segment_key','updated_at')->from('adp_regular_shifts')
+            ->where($rulesQuery->expr()->eq('user_uid',$rulesQuery->createNamedParameter($uid)))
+            ->orderBy('updated_at','ASC')->setMaxResults($limit);
+
+        $conflictsQuery = $this->db->getQueryBuilder();
+        $conflictsQuery->select('id','slot_id','status','reported_at','resolved_at')->from('adp_fixed_conflicts')
+            ->where($conflictsQuery->expr()->orX(
+                $conflictsQuery->expr()->eq('reported_by_uid',$conflictsQuery->createNamedParameter($uid)),
+                $conflictsQuery->expr()->eq('resolved_by_uid',$conflictsQuery->createNamedParameter($uid)),
+                $conflictsQuery->expr()->eq('kept_uid',$conflictsQuery->createNamedParameter($uid)),
+            ))->orderBy('reported_at','ASC')->setMaxResults($limit);
+
         return [
             'candidates' => $candidateQuery->executeQuery()->fetchAllAssociative(),
             'dayNotes' => $noteQuery->executeQuery()->fetchAllAssociative(),
             'monthPlans' => $monthQuery->executeQuery()->fetchAllAssociative(),
             'workloadLimits' => $limitsQuery->executeQuery()->fetchAllAssociative(),
+            'regularShifts' => $rulesQuery->executeQuery()->fetchAllAssociative(),
+            'fixedConflicts' => $conflictsQuery->executeQuery()->fetchAllAssociative(),
         ];
     }
 
@@ -153,6 +168,7 @@ class ShiftPlanRepository {
         $qb->select('*')
             ->from('adp_shift_candidates')
             ->where($qb->expr()->in('slot_id', $qb->createNamedParameter($slotIds, IQueryBuilder::PARAM_INT_ARRAY)))
+            ->andWhere($qb->expr()->eq('fixed_deleted', $qb->createNamedParameter(false, IQueryBuilder::PARAM_BOOL)))
             ->orderBy('created_at', 'ASC')
             ->addOrderBy('assistant_uid', 'ASC');
 
@@ -196,6 +212,123 @@ class ShiftPlanRepository {
         $qb->executeStatement();
     }
 
+    public function markFixedCandidateDeleted(int $slotId, string $assistantUid): bool {
+        $qb = $this->db->getQueryBuilder();
+        return $qb->update('adp_shift_candidates')
+            ->set('fixed_deleted', $qb->createNamedParameter(true, IQueryBuilder::PARAM_BOOL))
+            ->where($qb->expr()->eq('slot_id', $qb->createNamedParameter($slotId, IQueryBuilder::PARAM_INT)))
+            ->andWhere($qb->expr()->eq('assistant_uid', $qb->createNamedParameter($assistantUid)))
+            ->andWhere($qb->expr()->eq('assignment_source', $qb->createNamedParameter('regular')))
+            ->andWhere($qb->expr()->eq('fixed_deleted', $qb->createNamedParameter(false, IQueryBuilder::PARAM_BOOL)))
+            ->executeStatement() === 1;
+    }
+
+    public function materializeFixedCandidate(int $slotId, string $assistantUid): void {
+        $existing = $this->findCandidate($slotId, $assistantUid);
+        if ($existing !== null) {
+            if ((bool)($existing['fixed_deleted'] ?? false) || (bool)($existing['fixed_modified'] ?? false)) return;
+            $qb = $this->db->getQueryBuilder();
+            $qb->update('adp_shift_candidates')
+                ->set('assignment_source', $qb->createNamedParameter('regular'))
+                ->where($qb->expr()->eq('slot_id', $qb->createNamedParameter($slotId, IQueryBuilder::PARAM_INT)))
+                ->andWhere($qb->expr()->eq('assistant_uid', $qb->createNamedParameter($assistantUid)))
+                ->executeStatement();
+            return;
+        }
+
+        $qb = $this->db->getQueryBuilder();
+        $qb->insert('adp_shift_candidates')->values([
+            'slot_id'=>$qb->createNamedParameter($slotId, IQueryBuilder::PARAM_INT),
+            'assistant_uid'=>$qb->createNamedParameter($assistantUid),
+            'created_by_uid'=>$qb->createNamedParameter($assistantUid),
+            'assignment_source'=>$qb->createNamedParameter('regular'),
+            'fixed_deleted'=>$qb->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
+            'created_at'=>$qb->createNamedParameter(new DateTimeImmutable(), IQueryBuilder::PARAM_DATETIME_IMMUTABLE),
+        ]);
+        try { $qb->executeStatement(); }
+        catch (Exception $exception) {
+            if ($exception->getReason() !== Exception::REASON_UNIQUE_CONSTRAINT_VIOLATION) throw $exception;
+            $this->materializeFixedCandidate($slotId,$assistantUid);
+        }
+    }
+
+    public function regularShiftRulesForTeam(string $teamCode): array {
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from('adp_regular_shifts')
+            ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)))
+            ->orderBy('weekday', 'ASC')->addOrderBy('segment_key', 'ASC')->addOrderBy('user_uid', 'ASC');
+        return $qb->executeQuery()->fetchAllAssociative();
+    }
+
+    public function replaceRegularShiftRules(string $teamCode, string $uid, array $rules): void {
+        $this->transactional(function () use ($teamCode, $uid, $rules): void {
+            $delete = $this->db->getQueryBuilder();
+            $delete->delete('adp_regular_shifts')
+                ->where($delete->expr()->eq('team_code', $delete->createNamedParameter($teamCode)))
+                ->andWhere($delete->expr()->eq('user_uid', $delete->createNamedParameter($uid)))
+                ->executeStatement();
+            foreach ($rules as $rule) {
+                $qb = $this->db->getQueryBuilder();
+                $qb->insert('adp_regular_shifts')->values([
+                    'team_code'=>$qb->createNamedParameter($teamCode),
+                    'user_uid'=>$qb->createNamedParameter($uid),
+                    'weekday'=>$qb->createNamedParameter((int)$rule['weekday'], IQueryBuilder::PARAM_INT),
+                    'segment_key'=>$qb->createNamedParameter((string)$rule['segmentKey']),
+                    'updated_at'=>$qb->createNamedParameter(new DateTimeImmutable(), IQueryBuilder::PARAM_DATETIME_IMMUTABLE),
+                ])->executeStatement();
+            }
+        });
+    }
+
+    public function fixedConflictReports(array $slotIds): array {
+        $slotIds = array_values(array_filter(array_map('intval', $slotIds), static fn(int $id): bool => $id > 0));
+        if ($slotIds === []) return [];
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from('adp_fixed_conflicts')
+            ->where($qb->expr()->in('slot_id', $qb->createNamedParameter($slotIds, IQueryBuilder::PARAM_INT_ARRAY)));
+        $result = [];
+        foreach ($qb->executeQuery()->fetchAllAssociative() as $row) $result[(int)$row['slot_id']] = $row;
+        return $result;
+    }
+
+    public function reportFixedConflict(int $slotId, string $uid): void {
+        $existing = $this->fixedConflictReports([$slotId])[$slotId] ?? null;
+        if ($existing === null) {
+            $qb = $this->db->getQueryBuilder();
+            $qb->insert('adp_fixed_conflicts')->values([
+                'slot_id'=>$qb->createNamedParameter($slotId, IQueryBuilder::PARAM_INT),
+                'status'=>$qb->createNamedParameter('escalated'),
+                'reported_by_uid'=>$qb->createNamedParameter($uid),
+                'reported_at'=>$qb->createNamedParameter(new DateTimeImmutable(), IQueryBuilder::PARAM_DATETIME_IMMUTABLE),
+            ])->executeStatement();
+            return;
+        }
+        $qb = $this->db->getQueryBuilder();
+        $qb->update('adp_fixed_conflicts')->set('status',$qb->createNamedParameter('escalated'))
+            ->set('reported_by_uid',$qb->createNamedParameter($uid))
+            ->set('reported_at',$qb->createNamedParameter(new DateTimeImmutable(), IQueryBuilder::PARAM_DATETIME_IMMUTABLE))
+            ->set('kept_uid',$qb->createNamedParameter(null))->set('resolved_by_uid',$qb->createNamedParameter(null))->set('resolved_at',$qb->createNamedParameter(null))
+            ->where($qb->expr()->eq('slot_id',$qb->createNamedParameter($slotId,IQueryBuilder::PARAM_INT)))->executeStatement();
+    }
+
+    public function resolveFixedConflict(int $slotId, string $keptUid, string $resolvedByUid): void {
+        $qb = $this->db->getQueryBuilder();
+        $qb->update('adp_shift_candidates')
+            ->set('assignment_source',$qb->createNamedParameter('manual'))
+            ->set('fixed_modified',$qb->createNamedParameter(true,IQueryBuilder::PARAM_BOOL))
+            ->where($qb->expr()->eq('slot_id',$qb->createNamedParameter($slotId,IQueryBuilder::PARAM_INT)))
+            ->andWhere($qb->expr()->eq('assignment_source',$qb->createNamedParameter('regular')))
+            ->andWhere($qb->expr()->neq('assistant_uid',$qb->createNamedParameter($keptUid)))
+            ->executeStatement();
+        $report = $this->fixedConflictReports([$slotId])[$slotId] ?? null;
+        if ($report === null) return;
+        $update = $this->db->getQueryBuilder();
+        $update->update('adp_fixed_conflicts')->set('status',$update->createNamedParameter('resolved'))
+            ->set('kept_uid',$update->createNamedParameter($keptUid))->set('resolved_by_uid',$update->createNamedParameter($resolvedByUid))
+            ->set('resolved_at',$update->createNamedParameter(new DateTimeImmutable(), IQueryBuilder::PARAM_DATETIME_IMMUTABLE))
+            ->where($update->expr()->eq('slot_id',$update->createNamedParameter($slotId,IQueryBuilder::PARAM_INT)))->executeStatement();
+    }
+
     public function findCandidate(int $slotId, string $assistantUid): ?array {
         $qb = $this->db->getQueryBuilder();
         $qb->select('*')->from('adp_shift_candidates')
@@ -204,6 +337,18 @@ class ShiftPlanRepository {
         $row = $qb->executeQuery()->fetchAssociative();
 
         return $row === false ? null : $row;
+    }
+
+    public function deletedFixedSlotIds(array $slotIds,string $uid): array {
+        $slotIds=array_values(array_filter(array_map('intval',$slotIds),static fn(int $id):bool=>$id>0));
+        if($slotIds===[]||$uid==='')return [];
+        $qb=$this->db->getQueryBuilder();
+        $qb->select('slot_id')->from('adp_shift_candidates')
+            ->where($qb->expr()->in('slot_id',$qb->createNamedParameter($slotIds,IQueryBuilder::PARAM_INT_ARRAY)))
+            ->andWhere($qb->expr()->eq('assistant_uid',$qb->createNamedParameter($uid)))
+            ->andWhere($qb->expr()->eq('assignment_source',$qb->createNamedParameter('regular')))
+            ->andWhere($qb->expr()->eq('fixed_deleted',$qb->createNamedParameter(true,IQueryBuilder::PARAM_BOOL)));
+        return array_map('intval',$qb->executeQuery()->fetchFirstColumn());
     }
 
     public function updateCandidateMetadata(int $slotId, string $assistantUid, string $preference, string $note): bool {
@@ -268,7 +413,7 @@ class ShiftPlanRepository {
 
     public function candidateDates(string $teamCode, string $from, string $to): array {
         $qb = $this->db->getQueryBuilder();
-        $qb->select('c.assistant_uid', 's.work_date')->from('adp_shift_candidates', 'c')
+        $qb->select('c.assistant_uid', 'c.assignment_source', 'c.fixed_deleted', 's.work_date', 's.segment_key')->from('adp_shift_candidates', 'c')
             ->innerJoin('c', 'adp_shift_slots', 's', $qb->expr()->eq('s.id', 'c.slot_id'))
             ->where($qb->expr()->eq('s.team_code', $qb->createNamedParameter($teamCode)))
             ->andWhere($qb->expr()->eq('s.enabled', $qb->createNamedParameter(1, IQueryBuilder::PARAM_INT)))

@@ -40,6 +40,18 @@
             return this.post(this.teamPath(teamCode) + '/personal-workload', limits);
         }
 
+        savePersonalRegularShifts(teamCode, rules) {
+            return this.post(this.teamPath(teamCode) + '/personal-regular-shifts', { regularShiftsJson: JSON.stringify(rules) });
+        }
+
+        reportFixedConflict(teamCode, month, slotId) {
+            return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/slots/' + this.encode(slotId) + '/fixed-conflict/report');
+        }
+
+        resolveFixedConflict(teamCode, month, slotId, keptUid) {
+            return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/slots/' + this.encode(slotId) + '/fixed-conflict/resolve', { keptUid });
+        }
+
         saveDayNote(teamCode, month, date, note) {
             return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/days/' + this.encode(date) + '/note', {
                 note

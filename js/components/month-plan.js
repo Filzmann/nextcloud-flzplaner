@@ -38,23 +38,8 @@
                         </tbody>
                     </table>
                 </div>
-                ${renderWorkload(plan.workload || [], canCoordinate)}
             </section>
         `;
-    }
-
-    function renderWorkload(rows, canCoordinate) {
-        if (!rows.length) return '';
-        const content = `<div class="adp-table-wrap"><table class="adp-table adp-workload-table"><thead><tr><th scope="col">Person</th><th scope="col">Monat</th><th scope="col">Kalenderwochen</th></tr></thead><tbody>${rows.map(row => `<tr class="adp-workload--${esc(row.status || row.monthStatus || 'normal')}"><th scope="row">${esc(row.displayName || row.uid)}</th><td>${esc(row.monthCount)} (${limitRange(row.monthlyMin, row.monthlyMax)}) <span>${esc(statusLabel(row.monthStatus))}</span></td><td>${(row.weeks || []).map(week => `${esc(week.label)}: ${esc(week.count)} <span>${esc(statusLabel(week.status))}</span>`).join('<br>')}</td></tr>`).join('')}</tbody></table></div>`;
-        return `<details class="adp-workload-overview" ${canCoordinate ? 'open' : ''}><summary>${canCoordinate ? 'Auslastungsübersicht des Teams' : 'Meine Auslastung einblenden'}</summary>${content}</details>`;
-    }
-
-    function statusLabel(status) {
-        return status === 'under' ? 'Unter persönlichem Minimum' : (status === 'over' ? 'Über persönlichem Maximum' : 'Innerhalb persönlicher Grenzen');
-    }
-
-    function limitRange(minimum, maximum) {
-        return `${minimum ?? '–'} bis ${maximum ?? '–'}`;
     }
 
     function renderStatus(status, canCoordinate) {
@@ -78,11 +63,38 @@
 
         return `
             <tr>
-                <th scope="row" class="adp-day">${dayHeader(day)}<small>${esc(dateShort(day.date))}</small>${renderHints(day.hints || [])}</th>
+                <th scope="row" class="adp-day">${dayHeader(day)}<small>${esc(dateShort(day.date))}</small><span class="adp-week-label">${esc(day.weekLabel || '')}</span>${renderHints(day.hints || [])}</th>
                 ${segments.map(segment => slotCell(slotsByKey[segment.key], team, currentUser, canCoordinate, mutable)).join('')}
-                <td class="adp-note-cell">${renderDayNoteControl(day, canCoordinate && mutable)}</td>
+                <td class="adp-note-cell">
+                    <div class="adp-eb-note">${renderDayNoteControl(day, canCoordinate && mutable)}</div>
+                    ${renderCandidateNotes(day, segments, mutable)}
+                </td>
             </tr>
         `;
+    }
+
+    function renderCandidateNotes(day, segments, mutable) {
+        const labels = Object.fromEntries(segments.map(segment => [segment.key, segment.label]));
+        const entries = [];
+        for (const slot of day.slots || []) {
+            const shiftLabel = labels[slot.segmentKey] || slot.segmentKey || 'Schicht';
+            for (const candidate of slot.candidates || []) {
+                const editable = mutable && candidate.isSelf;
+                if (!candidate.note && !editable) continue;
+                entries.push(renderCandidateNote(candidate, slot.id, shiftLabel, editable));
+            }
+        }
+        return entries.length ? `<div class="adp-shift-notes">${entries.join('')}</div>` : '';
+    }
+
+    function renderCandidateNote(candidate, slotId, shiftLabel, editable) {
+        const displayName = candidate.displayName || candidate.uid;
+        const preference = ['favorite', 'emergency'].includes(candidate.preference) ? candidate.preference : 'neutral';
+        const note = candidate.note || '';
+        return `<div class="adp-shift-note${note ? '' : ' adp-shift-note--empty'}" data-candidate-note-entry data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}" data-current-preference="${esc(preference)}">
+            ${note ? `<div class="adp-shift-note-display"><p><strong>${esc(displayName)}, ${esc(shiftLabel)}:</strong> ${esc(note)}</p>${editable ? `<div class="adp-shift-note-actions"><button type="button" class="adp-icon-button" aria-label="Anmerkung bearbeiten" title="Anmerkung bearbeiten" data-action="open-candidate-note-editor" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">✎</button><button type="button" class="adp-icon-button" aria-label="Anmerkung löschen" title="Anmerkung löschen" data-action="delete-candidate-note" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">&times;</button></div>` : ''}</div>` : ''}
+            ${editable ? `<div class="adp-shift-note-editor" hidden><label>Anmerkung <textarea maxlength="500" rows="2" data-candidate-note>${esc(note)}</textarea></label><div><button type="button" class="adp-small" data-action="save-candidate-note" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">Speichern</button><button type="button" class="adp-small" data-action="close-candidate-note-editor" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">Abbrechen</button></div></div>` : ''}
+        </div>`;
     }
 
     function renderHints(hints) {
@@ -100,7 +112,7 @@
         const candidates = slot.candidates || [];
         const selfUid = currentUser && currentUser.uid ? currentUser.uid : '';
         const hasSelf = candidates.some(candidate => candidate.uid === selfUid);
-        const selfAction = mutable && !canCoordinate && !hasSelf
+        const selfAction = mutable && !canCoordinate && !hasSelf && !slot.selfUnavailable
             ? `<button type="button" class="adp-small" data-action="add-self" data-slot-id="${esc(slot.id)}">+ ich</button>`
             : '';
 
@@ -109,12 +121,21 @@
                 <div class="adp-candidates">
                     ${candidates.map(candidate => renderCandidateChip(candidate, canCoordinate, slot.id, mutable)).join('')}
                 </div>
+                ${renderFixedConflict(slot, candidates, canCoordinate, mutable)}
                 <div class="adp-cell-actions">
                     ${selfAction}
+                    ${slot.selfUnavailable && !canCoordinate ? '<span class="adp-badge">Nicht verfügbar</span>' : ''}
                     ${canCoordinate && mutable ? renderAssignmentControl(slot, team, candidates) : ''}
                 </div>
             </td>
         `;
+    }
+
+    function renderFixedConflict(slot,candidates,canCoordinate,mutable) {
+        const conflict=slot.fixedConflict;
+        if (!conflict) return '';
+        const labels=(conflict.candidateUids||[]).map(uid=>candidates.find(candidate=>candidate.uid===uid)?.displayName||uid);
+        return `<div class="adp-fixed-conflict" role="alert"><strong>Konflikt bei festen Schichten</strong><span>${labels.map(esc).join(', ')}</span>${conflict.status==='escalated'?'<span class="adp-badge">An EB weitergegeben</span>':''}${mutable&&conflict.canReport?`<button type="button" class="adp-small" data-action="report-fixed-conflict" data-slot-id="${esc(slot.id)}">An EB weitergeben</button>`:''}${mutable&&canCoordinate&&conflict.canResolve?(conflict.candidateUids||[]).map(uid=>`<button type="button" class="adp-small" data-action="resolve-fixed-conflict" data-slot-id="${esc(slot.id)}" data-kept-uid="${esc(uid)}">${esc(candidates.find(candidate=>candidate.uid===uid)?.displayName||uid)} fest behalten</button>`).join(''):''}</div>`;
     }
 
     window.ADPlaner = window.ADPlaner || {};

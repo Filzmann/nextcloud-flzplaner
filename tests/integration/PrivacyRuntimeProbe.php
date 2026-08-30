@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 4) . '/lib/base.php';
 
-use OCPDBQueryBuilder\IQueryBuilder;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 $mode = (string)($argv[1] ?? '');
@@ -104,6 +104,10 @@ switch ($mode) {
         $slotIds = array_map('intval', $qb->executeQuery()->fetchFirstColumn());
         if ($slotIds !== []) {
             $qb = $db->getQueryBuilder();
+            $qb->delete('adp_fixed_conflicts')
+                ->where($qb->expr()->in('slot_id', $qb->createNamedParameter($slotIds, IQueryBuilder::PARAM_INT_ARRAY)));
+            $qb->executeStatement();
+            $qb = $db->getQueryBuilder();
             $qb->delete('adp_shift_candidates')
                 ->where($qb->expr()->in('slot_id', $qb->createNamedParameter($slotIds, IQueryBuilder::PARAM_INT_ARRAY)));
             $qb->executeStatement();
@@ -112,6 +116,7 @@ switch ($mode) {
         foreach ([
             ['adp_day_notes', ['team_code' => $teamCode]],
             ['adp_workload_limits', ['team_code' => $teamCode]],
+            ['adp_regular_shifts', ['team_code' => $teamCode]],
             ['adp_shift_slots', ['team_code' => $teamCode]],
             ['adp_month_plans', ['team_code' => $teamCode]],
             ['adp_team_settings', ['team_code' => $teamCode]],
@@ -131,6 +136,7 @@ switch ($mode) {
         foreach ([
             'adp_day_notes' => ['team_code' => $teamCode],
             'adp_workload_limits' => ['team_code' => $teamCode],
+            'adp_regular_shifts' => ['team_code' => $teamCode],
             'adp_shift_slots' => ['team_code' => $teamCode],
             'adp_month_plans' => ['team_code' => $teamCode],
             'adp_team_settings' => ['team_code' => $teamCode],

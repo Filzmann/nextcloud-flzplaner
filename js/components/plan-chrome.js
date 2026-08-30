@@ -85,9 +85,10 @@
                 button.classList.toggle('is-active', active);
                 button.setAttribute('aria-selected', active ? 'true' : 'false');
                 button.setAttribute('tabindex', active ? '0' : '-1');
+                if (button.dataset.view === 'workload') button.setAttribute('aria-expanded', active ? 'true' : 'false');
                 if (active) activeTabId = button.id;
             });
-            this.panel.setAttribute('aria-labelledby', activeTabId);
+            this.panel.setAttribute('aria-labelledby', state.activeView === 'workload' ? (this.tabButtons.find(button => button.dataset.view === 'month')?.id || activeTabId) : activeTabId);
             this.panel.setAttribute('aria-busy', state.loading ? 'true' : 'false');
         }
     }

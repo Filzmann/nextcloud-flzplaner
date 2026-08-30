@@ -1,9 +1,17 @@
 # Changelog
 
+## 0.7.0-rc.2
+
+- Persönliche regelmäßige Festschichten werden wöchentlich materialisiert; bestätigte Einzel-Löschungen bleiben als Ausnahme bestehen.
+- Mehrfache feste Belegungen desselben Slots können an die EB eskaliert und vor der Genehmigung aufgelöst werden.
+- Die Auslastung öffnet aus dem Tab-Menü als Overlay; Kalenderwochen sind im Plan sichtbar und zählen vollständig über Monatsgrenzen hinweg.
+
 ## 0.6.0-rc.1
 
 - Eigene Schichtwünsche können als Lieblingsschicht oder „nur im Notfall“ gekennzeichnet und mit einer teamweit sichtbaren Anmerkung versehen werden.
+- Neutrale Schichtchips zeigen nur Name und Löschaktion; Favorit, „nur wenn sonst niemand kann“ und Anmerkungsaktion liegen in einem per Hover oder Tastaturfokus erreichbaren Overlay mit Tooltips. Schichtanmerkungen erscheinen mit Nutzer- und Schichtbezug unter den EB-Bemerkungen und sind dort für den Ersteller bearbeitbar und löschbar.
 - Persönliche Wochen- und Monatsgrenzen für gewünschte Schichten sowie eigene und EB-weite Auslastungsübersichten ergänzt.
+- Die Auslastung besitzt einen eigenen Tab mit kompakten Mindest-/Maximalwerten; für die EB wird daraus ein unverbindlicher Planvorschlag mit festen Zuteilungen, Lieblings-, neutralen und Notfallwünschen abgeleitet.
 - Schichten unter Minimum werden kräftig und textlich, Schichten über Maximum blasser und textlich markiert; Kalenderwochen werden auch über Monatsgrenzen korrekt gezählt.
 - Berechtigungs- und Datenschutzprovider, additive Migration sowie selbstbereinigende Integrationsverträge um die neuen Datenklassen erweitert.
 

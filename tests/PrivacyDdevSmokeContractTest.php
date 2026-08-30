@@ -13,7 +13,7 @@ foreach (['trap \'cleanup || report_failed_cleanup\' EXIT', 'user:disable', 'ass
         throw new RuntimeException('Dem Datenschutz-DDEV-Smoke fehlt ein Sicherheitsvertrag: ' . $contract);
     }
 }
-foreach (['PARAM_INT_ARRAY', "'adp_shift_candidates'", "'adp_day_notes'", "'adp_workload_limits'", "'adp_shift_slots'", "'adp_month_plans'", "'adp_team_settings'"] as $contract) {
+foreach (['PARAM_INT_ARRAY', "'adp_shift_candidates'", "'adp_fixed_conflicts'", "'adp_day_notes'", "'adp_workload_limits'", "'adp_regular_shifts'", "'adp_shift_slots'", "'adp_month_plans'", "'adp_team_settings'"] as $contract) {
     if (!str_contains($probe, $contract)) {
         throw new RuntimeException('Der Datenbank-Probe fehlt ein Cleanup-Vertrag: ' . $contract);
     }

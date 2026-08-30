@@ -23,6 +23,8 @@ namespace {
     if($coordinate?->condition->operator!=='all'||array_map(fn($c)=>$c->groupId,$coordinate->condition->children)!==['ad-ASN-A','ad-EB'])throw new RuntimeException('Koordination muss Team UND EB verlangen.');
     if(($by['plan.assignment.manage-own'][0]->condition->operator??null)!=='all')throw new RuntimeException('Eigene Zuweisungen müssen zusätzlich an das Team gebunden bleiben.');
     if(count($by['plan.assignment.preference.manage-own']??[])!==2)throw new RuntimeException('Eigene Schichtreaktionen und -anmerkungen brauchen je Team eine eigene Regel.');
+    if(count($by['plan.fixed-shift.manage-own']??[])!==2)throw new RuntimeException('Eigene regelmäßige Schichten brauchen je Team eine eigene Regel.');
+    if(count($by['plan.fixed-conflict.resolve']??[])!==2)throw new RuntimeException('Die EB-Konfliktlösung braucht je Team eine eigene Regel.');
     if(count($by['plan.workload.manage-own']??[])!==2)throw new RuntimeException('Persönliche Schichtgrenzen brauchen je Team eine eigene Regel.');
     if(count($by['plan.workload.read-team']??[])!==2)throw new RuntimeException('Die EB-Auslastungsübersicht braucht je Team eine explizite Leseregel.');
     $demo=$by['plan.demo.manage'][0]??null;if($demo?->condition->operator!=='all'||array_map(fn($c)=>$c->operator,$demo->condition->children)!==['nextcloud-admin','app-admin-grant'])throw new RuntimeException('Demo-Verwaltung muss native Administration und aktive App-Freigabe verlangen.');

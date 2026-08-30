@@ -12,6 +12,7 @@
             this.uid = this.assistantUid;
             this.displayName = data.displayName || data.display_name || this.uid;
             this.isSelf = !!(data.isSelf ?? data.is_self ?? false);
+            this.fixed = !!data.fixed;
             this.preference = data.preference || 'neutral';
             this.note = data.note || data.candidate_note || '';
             this.workloadStatus = data.workloadStatus || data.workload_status || 'normal';
@@ -25,6 +26,7 @@
                 uid: this.uid,
                 displayName: this.displayName,
                 isSelf: this.isSelf,
+                fixed: this.fixed,
                 preference: this.preference,
                 note: this.note,
                 workloadStatus: this.workloadStatus

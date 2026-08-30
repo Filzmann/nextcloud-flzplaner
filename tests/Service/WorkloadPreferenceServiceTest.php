@@ -14,10 +14,12 @@ final class WorkloadStoreFake extends ShiftPlanStore {
     public array $saved = [];
     public array $limits = [];
     public array $assignments = [];
+    public array $rules = [];
     public function __construct() {}
     public function saveWorkloadLimits(string $teamCode, string $uid, array $limits): void { $this->saved[] = compact('teamCode', 'uid', 'limits'); $this->limits[$uid] = $limits; }
     public function workloadLimitsForTeam(string $teamCode): array { return $this->limits; }
     public function candidateDates(string $teamCode, string $from, string $to): array { return $this->assignments; }
+    public function regularShiftRulesForTeam(string $teamCode): array { return $this->rules; }
 }
 
 $assistants = [
@@ -42,18 +44,18 @@ try {
 } catch (InvalidArgumentException) {}
 
 $store->limits = [
-    'self' => ['weeklyMin'=>2,'weeklyMax'=>4,'monthlyMin'=>3,'monthlyMax'=>6],
+    'self' => ['weeklyMin'=>2,'weeklyMax'=>4,'monthlyMin'=>8,'monthlyMax'=>10],
     'other' => ['weeklyMin'=>null,'weeklyMax'=>1,'monthlyMin'=>null,'monthlyMax'=>1],
 ];
 $store->assignments = [
-    ['assistant_uid'=>'self','work_date'=>'2026-08-31'],
-    ['assistant_uid'=>'self','work_date'=>'2026-09-01'],
+    ['assistant_uid'=>'self','work_date'=>'2026-09-01','segment_key'=>'early','assignment_source'=>'manual','fixed_deleted'=>false],
     ['assistant_uid'=>'other','work_date'=>'2026-09-02'],
     ['assistant_uid'=>'other','work_date'=>'2026-09-03'],
 ];
+$store->rules = [['userUid'=>'self','weekday'=>1,'segmentKey'=>'early']];
 $overview = $service->overview($ebTeam, '2026-09', 'eb');
 assertSameValue('under', $overview[0]['monthStatus'] ?? null, 'Monatlich unter Minimum muss kräftig markiert werden.');
-assertSameValue(2, $overview[0]['weeks'][0]['count'] ?? null, 'Eine Kalenderwoche muss über die Monatsgrenze hinweg gezählt werden.');
+assertSameValue(2, $overview[0]['weeks'][0]['count'] ?? null, 'Eine Kalenderwoche muss einschließlich einer noch nicht materialisierten Festschicht aus dem Vormonat gezählt werden.');
 assertSameValue('over', $overview[1]['monthStatus'] ?? null, 'Monatlich über Maximum muss blasser markiert werden.');
 
 $ownOverview = $service->overview($selfTeam, '2026-09', 'self');

@@ -16,6 +16,8 @@
             this.settings = data.settings || {};
             this.personalWorkload = data.personalWorkload || data.personal_workload || {};
             this.canSetPersonalWorkload = !!(data.canSetPersonalWorkload ?? data.can_set_personal_workload ?? false);
+            this.personalRegularShifts = data.personalRegularShifts || data.personal_regular_shifts || [];
+            this.canSetRegularShifts = !!(data.canSetRegularShifts ?? data.can_set_regular_shifts ?? false);
         }
 
         toArray() {
@@ -28,7 +30,9 @@
                 canCoordinate: this.canCoordinate,
                 settings: this.settings,
                 personalWorkload: this.personalWorkload,
-                canSetPersonalWorkload: this.canSetPersonalWorkload
+                canSetPersonalWorkload: this.canSetPersonalWorkload,
+                personalRegularShifts: this.personalRegularShifts,
+                canSetRegularShifts: this.canSetRegularShifts
             };
         }
     }

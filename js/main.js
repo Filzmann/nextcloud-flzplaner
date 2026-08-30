@@ -9,6 +9,7 @@
         PlanPanel: window.ADPlaner.PlanPanel,
         byId: ui.byId, esc: ui.esc, showNotice: ui.showNotice, showError: ui.showError,
         renderMonth: window.ADPlaner.monthPlan.render,
+        renderWorkload: window.ADPlaner.workloadPanel.render,
         renderSettings: window.ADPlaner.settingsPanel.render,
         addShiftRow: shifts.addRow, removeShiftRow: shifts.removeRow, collectShifts: shifts.collect,
         openAssignmentPicker: window.ADPlaner.assignmentControl.open,

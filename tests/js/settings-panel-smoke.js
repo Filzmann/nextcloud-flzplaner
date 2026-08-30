@@ -27,6 +27,8 @@ const readonlyHtml = settingsPanel.render({
     ...team,
     canCoordinate: false,
     canSetPersonalWorkload: true,
+    canSetRegularShifts: true,
+    personalRegularShifts: [{weekday:1,segmentKey:'early'}],
     personalWorkload: { weeklyMin: 1, weeklyMax: 3, monthlyMin: 5, monthlyMax: 12 }
 });
 
@@ -40,11 +42,14 @@ assert(!readonlyHtml.includes('id="settings-form"'));
 assert(readonlyHtml.includes('id="personal-workload-form"'));
 assert(readonlyHtml.includes('name="weeklyMin"'));
 assert(readonlyHtml.includes('value="12"'));
+assert(readonlyHtml.includes('id="personal-regular-shifts-form"'));
+assert(readonlyHtml.includes('value="1|early" checked'));
 
 const editorHtml = settingsPanel.render({
     ...team,
     canCoordinate: true,
     canSetPersonalWorkload: false
+    ,canSetRegularShifts: false
 });
 
 assert(editorHtml.includes('id="settings-form"'));

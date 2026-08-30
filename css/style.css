@@ -64,6 +64,28 @@
     outline-offset: 2px;
 }
 
+.adp-tab-area { position: relative; }
+.adp-workload-overlay {
+    position: absolute;
+    z-index: 120;
+    top: calc(100% + 6px);
+    right: 12px;
+    width: min(920px, calc(100vw - 40px));
+    max-height: min(72vh, 720px);
+    overflow: auto;
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-large);
+    background: var(--color-main-background);
+    box-shadow: 0 8px 28px rgba(0,0,0,.24);
+}
+.adp-workload-overlay[hidden] { display: none !important; }
+.adp-overlay-close { float: right; font-size: 20px; }
+.adp-week-label { display: block; margin-top: 2px; font-size: .78em; font-weight: 600; color: var(--color-text-maxcontrast); }
+.adp-fixed-marker { font-size: .85em; }
+.adp-fixed-conflict { display: grid; gap: 4px; margin-top: 6px; padding: 8px; border: 2px solid var(--color-warning); border-radius: var(--border-radius); background: var(--color-warning-hover); }
+.adp-regular-shifts-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 8px; }
+
 .adp-notice {
     border: 1px solid var(--color-warning);
     border-radius: 8px;
@@ -200,6 +222,7 @@
 }
 
 .adp-chip {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -227,48 +250,133 @@
     display: none;
 }
 
-.adp-preference-actions {
-    display: inline-flex;
-    gap: 2px;
+.adp-preference-marker {
+    font-size: 20px;
+    line-height: 1;
 }
 
-.adp-preference-actions button[aria-pressed="true"] {
+.adp-preference-marker--favorite,
+.adp-preference-option--favorite > span {
+    color: #f5b301;
+}
+
+.adp-preference-panel {
+    position: absolute;
+    z-index: 40;
+    inset-block-start: 100%;
+    inset-inline-start: 0;
+    display: none;
+    align-items: center;
+    gap: 4px;
+    width: max-content;
+    padding: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-main-background);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .22);
+}
+
+.adp-chip--editable:hover > .adp-preference-panel,
+.adp-chip--editable:focus-within > .adp-preference-panel {
+    display: flex;
+}
+
+.adp-preference-option {
+    font-size: 19px;
+}
+
+.adp-preference-option[aria-pressed="true"] {
     outline: 2px solid var(--color-primary-element, #00679e);
     outline-offset: 1px;
 }
 
-.adp-candidate-note {
-    position: relative;
-    display: inline-block;
+.adp-shift-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
 }
 
-.adp-candidate-note[open] {
-    display: block;
-    width: min(18rem, 70vw);
-    margin-top: .35rem;
+.adp-shift-note--empty {
+    margin: 0;
 }
 
-.adp-candidate-note textarea {
+.adp-shift-note-display {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.adp-shift-note-display p {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.adp-shift-note-actions {
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 2px;
+}
+
+.adp-shift-note-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.adp-shift-note-editor[hidden] {
+    display: none;
+}
+
+.adp-shift-note-editor label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.adp-shift-note-editor textarea {
     width: 100%;
 }
 
-.adp-workload-overview {
-    margin-top: 1rem;
-}
-
-.adp-workload-overview > summary {
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.adp-workload--under {
+.adp-capacity {
+    display: inline-block;
+    min-width: 2.5rem;
+    padding: 2px 6px;
+    border-radius: 999px;
     font-weight: 700;
-    border-inline-start: 4px solid var(--color-warning, #b45309);
+    text-align: center;
 }
 
-.adp-workload--over {
-    color: var(--color-text-maxcontrast);
-    background: var(--color-background-hover);
+.adp-capacity--under {
+    color: var(--color-warning-text, #7c2d12);
+    background: var(--color-warning-light, #ffedd5);
+}
+
+.adp-capacity--within {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.adp-capacity--over {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.adp-plan-proposal {
+    margin-top: 1.5rem;
+}
+
+.adp-proposal-candidates {
+    margin: 0;
+    padding-inline-start: 1.5rem;
+}
+
+.adp-proposal-candidates li + li {
+    margin-top: 4px;
 }
 
 .adp-visually-hidden {

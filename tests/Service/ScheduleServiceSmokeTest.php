@@ -12,6 +12,7 @@ use OCA\AdPlaner\Service\WorkloadPreferenceService;
 use OCA\AdPlaner\Service\ShiftConfigService;
 use OCA\AdPlaner\Service\TeamAccessService;
 use OCA\AdPlaner\Service\PlanningHintService;
+use OCA\AdPlaner\Service\FixedShiftService;
 use OCA\AdPlaner\Store\ShiftPlanStore;
 use function OCA\AdPlaner\Tests\assertDomainException;
 use function OCA\AdPlaner\Tests\assertSameValue;
@@ -110,6 +111,9 @@ class FakeShiftPlanStoreForSchedule extends ShiftPlanStore {
 
     public function workloadLimitsForTeam(string $teamCode): array { return []; }
     public function candidateDates(string $teamCode, string $from, string $to): array { return []; }
+    public function regularShiftRulesForTeam(string $teamCode): array { return []; }
+    public function fixedConflictReports(array $slotIds): array { return []; }
+    public function deletedFixedSlotIds(array $slotIds,string $uid): array { return []; }
 
     public function updateSlotDefinition(int $slotId, string $label, string $startsAt, string $endsAt, bool $enabled): void {
         $this->updatedSlots[] = compact('slotId', 'label', 'startsAt', 'endsAt', 'enabled');
@@ -197,11 +201,11 @@ $mappedTeam = Team::get($ebTeam->toArray());
 assertSameValue('Team A1', $mappedTeam->toArray()['displayName'], 'Team::get should keep the API payload shape.');
 
 $store = new FakeShiftPlanStoreForSchedule();
-$service = new ScheduleService($store, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($store));
+$service = new ScheduleService($store, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($store), new FixedShiftService($store, new ShiftConfigService()));
 
 $approvalRaceStore = new FakeShiftPlanStoreForSchedule();
 $approvalRaceStore->statusOnNextLock = 'approved';
-$approvalRaceService = new ScheduleService($approvalRaceStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($approvalRaceStore));
+$approvalRaceService = new ScheduleService($approvalRaceStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($approvalRaceStore), new FixedShiftService($approvalRaceStore, new ShiftConfigService()));
 $approvalRacePlan = $approvalRaceService->monthPlan($ebTeam, '2026-07', 'test-eb');
 assertSameValue('approved', $approvalRacePlan['status'] ?? null, 'A concurrent approval must win over mutable month materialization.');
 assertSameValue([], $approvalRaceStore->updatedSlots, 'A concurrent approval must prevent slot-definition rewrites.');
@@ -358,6 +362,9 @@ $plan = $service->monthPlan($ebTeam, '2026-07', 'test-eb');
 $slotCandidates = $plan['days'][0]['slots'][0]['candidates'] ?? [];
 assertSameValue(['assistant-a'], array_column($slotCandidates, 'uid'), 'Month plan should hide non-assignable EB candidates.');
 assertSameValue(false, array_key_exists('createdByUid', $slotCandidates[0] ?? []), 'Month plans must not expose the internal candidate creator uid.');
+assertSameValue(false, $slotCandidates[0]['fixed'] ?? null, 'An assignment created by the EB must remain manual and must not impersonate a regular fixed shift.');
+assertSameValue(false, (new ShiftCandidate(3, 1, 'assistant-a', 'assistant-a'))->toArray([], 'assistant-a')['fixed'] ?? null, 'A self-entered shift wish must not be marked as fixed.');
+assertSameValue(true, (new ShiftCandidate(4, 1, 'assistant-a', 'assistant-a', source: 'regular'))->toArray([], 'assistant-a')['fixed'] ?? null, 'Only a materialized regular shift may be marked as fixed.');
 assertSameValue('Assistant A', $plan['days'][0]['hints'][0]['displayName'] ?? null, 'Planning hints use the visible team label without exposing foreign details.');
 assertSameValue(false, array_key_exists('employeeUid', $plan['days'][0]['hints'][0] ?? []), 'Public planning hints must not expose an internal Nextcloud uid once the visible label is resolved.');
 
@@ -373,7 +380,7 @@ $configuredTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, [
         ['key' => 'night', 'label' => 'Nacht', 'startsAt' => '20:00', 'endsAt' => '08:00', 'enabled' => false],
     ],
 ]);
-$configuredService = new ScheduleService($configuredStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($configuredStore));
+$configuredService = new ScheduleService($configuredStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($configuredStore), new FixedShiftService($configuredStore, new ShiftConfigService()));
 $configuredPlan = $configuredService->monthPlan($configuredTeam, '2026-07', 'test-eb');
 $updatesById = [];
 foreach ($configuredStore->updatedSlots as $updatedSlot) {

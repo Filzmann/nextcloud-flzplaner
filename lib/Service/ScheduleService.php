@@ -21,7 +21,8 @@ class ScheduleService {
         private ShiftConfigService $shiftConfig,
         private TeamAccessService $teamAccess,
         private PlanningHintService $planningHints,
-        private WorkloadPreferenceService $workloadPreferences
+        private WorkloadPreferenceService $workloadPreferences,
+        private FixedShiftService $fixedShifts
     ) {
     }
 
@@ -41,6 +42,7 @@ class ScheduleService {
                 }
 
                 $this->ensureMonthSlots($team, $month);
+                $this->fixedShifts->materializeMonth($team, $this->store->slotsForMonth($team->code, $month));
 
                 return $lockedStatus;
             });
@@ -52,6 +54,8 @@ class ScheduleService {
             ? $this->segmentsFromFrozenSlots($enabledSlots)
             : array_values(array_filter($this->shiftConfig->segments($team->settings), static fn(array $segment): bool => $segment['enabled']));
         $candidatesBySlot = $this->store->candidatesForSlotIds(array_map(static fn(ShiftSlot $slot): int => $slot->id, $enabledSlots));
+        $fixedConflicts = $this->fixedShifts->conflictsForSlots($team, array_map(static fn(ShiftSlot $slot): int => $slot->id, $enabledSlots), $currentUid);
+        $deletedFixedSlots=array_flip($this->store->deletedFixedSlotIds(array_map(static fn(ShiftSlot $slot):int=>$slot->id,$enabledSlots),$currentUid));
         $assistantLabels = $team->assistantLabelMap();
         $assignableUids = $team->assignableAssistantUidMap();
         $notes = $this->store->dayNotesForMonth($team->code, $month);
@@ -66,7 +70,10 @@ class ScheduleService {
                 static fn(ShiftCandidate $candidate): bool => isset($assignableUids[$candidate->assistantUid])
             ));
             $slot->candidates = $this->candidatePayload($slotCandidates, $assistantLabels, $currentUid, $slot->workDate, $workloadByUid);
-            $slotsByDate[$slot->workDate][] = $slot->toArray();
+            $slotPayload = $slot->toArray();
+            $slotPayload['fixedConflict'] = $fixedConflicts[$slot->id] ?? null;
+            $slotPayload['selfUnavailable'] = isset($deletedFixedSlots[$slot->id]);
+            $slotsByDate[$slot->workDate][] = $slotPayload;
         }
 
         $days = [];
@@ -76,6 +83,7 @@ class ScheduleService {
                 'date' => $date,
                 'dayOfMonth' => $day['dayOfMonth'],
                 'weekday' => $day['weekday'],
+                'weekLabel' => 'KW ' . (new \DateTimeImmutable($date))->format('W'),
                 'slots' => $slotsByDate[$date] ?? [],
                 'note' => isset($notes[$date]) ? $notes[$date]->note : '',
                 'hints' => array_map(static function (array $hint) use ($assistantLabels): array {
@@ -123,9 +131,29 @@ class ScheduleService {
         $this->assertCandidateMutationAllowed($team, $targetUid, $currentUid);
         $this->assertAssignableAssistantInTeam($team, $targetUid);
 
-        $this->withMutableMonth($team->code, $month, $currentUid, function () use ($slotId, $team, $month, $targetUid): void {
+        $this->withMutableMonth($team->code, $month, $currentUid, function () use ($slotId, $team, $month, $targetUid, $currentUid): void {
             $slot = $this->requireSlot($slotId, $team->code, $month);
+            $candidate = $this->store->candidateForSlot($slot->id, $targetUid);
+            if ($candidate?->source === 'regular') {
+                if ($targetUid !== $currentUid) throw new \DomainException('Feste Schichten werden durch die betroffene Assistenz oder über die Konfliktlösung geändert.');
+                if (!$this->fixedShifts->deleteOwnOccurrence($team, $slot, $targetUid)) throw new \DomainException('Die feste Schicht wurde zwischenzeitlich geändert. Bitte neu laden.');
+                return;
+            }
             $this->store->removeCandidate($slot->id, $targetUid);
+        });
+    }
+
+    public function reportFixedConflict(Team $team, string $month, int $slotId, string $currentUid): void {
+        $month = $this->shiftConfig->normalizeMonth($month);
+        $this->withMutableMonth($team->code,$month,$currentUid,function() use($team,$month,$slotId,$currentUid): void {
+            $this->fixedShifts->reportConflict($team,$month,$this->requireSlot($slotId,$team->code,$month),$currentUid);
+        });
+    }
+
+    public function resolveFixedConflict(Team $team, string $month, int $slotId, string $keptUid, string $currentUid): void {
+        $month = $this->shiftConfig->normalizeMonth($month);
+        $this->withMutableMonth($team->code,$month,$currentUid,function() use($team,$month,$slotId,$keptUid,$currentUid): void {
+            $this->fixedShifts->resolveConflict($team,$month,$this->requireSlot($slotId,$team->code,$month),$keptUid,$currentUid);
         });
     }
 
@@ -202,6 +230,11 @@ class ScheduleService {
             }
             if ($targetStatus === self::STATUS_APPROVED) {
                 $this->ensureMonthSlots($team, $month);
+                $slots = array_values(array_filter($this->store->slotsForMonth($team->code,$month), static fn(ShiftSlot $slot): bool => $slot->enabled));
+                $this->fixedShifts->materializeMonth($team,$slots);
+                if ($this->fixedShifts->conflictsForSlots($team,array_map(static fn(ShiftSlot $slot): int => $slot->id,$slots),$currentUid) !== []) {
+                    throw new \DomainException('Offene Festschichtkonflikte müssen vor der Genehmigung gelöst werden.');
+                }
             }
             if (!$this->store->transitionMonthStatus($team->code, $month, $currentStatus, $targetStatus, $currentUid)) {
                 throw new \DomainException('Der Planstatus wurde zwischenzeitlich geändert. Bitte neu laden.');

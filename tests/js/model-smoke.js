@@ -36,6 +36,7 @@ const candidate = ShiftCandidate.get({
     assistant_uid: 'anna',
     display_name: 'Anna Assistenz',
     createdByUid: 'internal-coordinator',
+    fixed: true,
     created_at: '2026-08-09T10:00:00Z',
     preference: 'favorite',
     candidate_note: 'Hinweis',
@@ -47,10 +48,13 @@ assert.strictEqual(candidate.uid, 'anna');
 assert.strictEqual(Object.hasOwn(candidate, 'createdByUid'), false);
 assert.strictEqual(Object.hasOwn(candidate, 'createdAt'), false);
 assert.strictEqual(Object.hasOwn(candidate.toArray(), 'createdByUid'), false);
+assert.strictEqual(candidate.fixed, true);
+assert.strictEqual(candidate.toArray().fixed, true);
 assert.strictEqual(Object.hasOwn(candidate.toArray(), 'createdAt'), false);
 assert.strictEqual(candidate.preference, 'favorite');
 assert.strictEqual(candidate.note, 'Hinweis');
 assert.strictEqual(candidate.workloadStatus, 'under');
+assert.strictEqual(ShiftCandidate.get({assistant_uid:'anna',fixed:false}).fixed, false);
 
 const definition = ShiftDefinition.get({
     key: 'day',

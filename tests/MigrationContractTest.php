@@ -55,4 +55,16 @@ if ($info === false || version_compare((string)$info->version, '0.6.0-rc.1', '<'
     throw new RuntimeException('Die neue Migration besitzt keinen App-Versionsauslöser.');
 }
 
+$fixedMigration = __DIR__ . '/../lib/Migration/Version000007Date202608300002.php';
+if (!is_file($fixedMigration)) throw new RuntimeException('Die additive Festschichtmigration fehlt.');
+$fixedSource = (string)file_get_contents($fixedMigration);
+foreach (['assignment_source','fixed_deleted','adp_regular_shifts','weekday','segment_key','adp_regular_shift_unique','adp_fixed_conflicts','reported_by_uid','resolved_by_uid','adp_fixed_conflict_slot_unique'] as $contract) {
+    if (!str_contains($fixedSource,$contract)) throw new RuntimeException('Der Festschicht-Migrationsvertrag fehlt: '.$contract);
+}
+if (!str_contains($fixedSource,"'default'=>'manual'")) throw new RuntimeException('Bestehende Kandidaturen müssen manuell bleiben.');
+if ($info === false || version_compare((string)$info->version,'0.7.0-rc.1','<')) throw new RuntimeException('Die Festschichtmigration besitzt keinen neuen App-Versionsauslöser.');
+$overrideMigration=__DIR__.'/../lib/Migration/Version000008Date202608300003.php';
+if(!is_file($overrideMigration)||!str_contains((string)file_get_contents($overrideMigration),'fixed_modified')) throw new RuntimeException('Die additive Migration für individuell aufgelöste Festschichten fehlt.');
+if($info===false||version_compare((string)$info->version,'0.7.0-rc.2','<')) throw new RuntimeException('Die Auflösungsmigration besitzt keinen neuen App-Versionsauslöser.');
+
 echo "AdPlaner month plan migration contract test passed\n";

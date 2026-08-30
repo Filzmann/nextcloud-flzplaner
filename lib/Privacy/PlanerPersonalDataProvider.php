@@ -40,6 +40,8 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
         foreach ($data['dayNotes'] ?? [] as $row) $items[] = $this->dayNoteItem($row);
         foreach ($data['monthPlans'] ?? [] as $row) $items[] = $this->monthPlanItem($row);
         foreach ($data['workloadLimits'] ?? [] as $row) $items[] = $this->workloadLimitItem($row);
+        foreach ($data['regularShifts'] ?? [] as $row) $items[] = $this->regularShiftItem($row);
+        foreach ($data['fixedConflicts'] ?? [] as $row) $items[] = $this->fixedConflictItem($row);
         $complete = count($items) <= $limit;
         $items = array_slice($items, 0, $limit);
         if ($items === []) return new PersonalDataPage('not_applicable');
@@ -67,6 +69,9 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
                 'Eintragung' => $selfCreated ? 'Von dir selbst eingetragen' : 'Von einer berechtigten Person eingetragen',
                 'Eingetragen am' => self::shortDateTime($row['created_at'] ?? ''),
                 'Präferenz' => ['favorite'=>'Lieblingsschicht','emergency'=>'Nur im Notfall','neutral'=>'Neutral'][(string)($row['preference'] ?? 'neutral')] ?? 'Neutral',
+                'Schichtstatus' => ($row['assignment_source'] ?? 'manual') === 'regular' ? 'Regelmäßige feste Schicht' : 'Manueller Schichtwunsch',
+                'Ausnahme' => (bool)($row['fixed_deleted'] ?? false) ? 'Für dieses Datum ausdrücklich nicht möglich' : 'Keine Lösch-Ausnahme',
+                'Individuelle Konfliktauflösung' => (bool)($row['fixed_modified'] ?? false) ? 'Für dieses Datum in einen normalen Schichtwunsch umgewandelt' : 'Keine individuelle Umwandlung',
                 'Eigene Anmerkung' => trim((string)($row['candidate_note'] ?? '')) === '' ? 'Keine Anmerkung gespeichert' : 'Inhalt wird wegen möglicher Angaben zu anderen Personen nicht automatisch ausgegeben.',
             ],
             'Erfassung deines Schichtwunsches oder deiner Dienstzuweisung',
@@ -146,6 +151,19 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
             'Persönliche Orientierung und Auslastungsdarstellung in der Wunschdienstplanung',
             null,
         );
+    }
+
+    private function regularShiftItem(array $row): PersonalDataEntry {
+        $days=[1=>'Montag',2=>'Dienstag',3=>'Mittwoch',4=>'Donnerstag',5=>'Freitag',6=>'Samstag',7=>'Sonntag'];
+        return $this->entry('regular_shift','Regelmäßige feste Schicht',($days[(int)$row['weekday']]??'Wochentag').' – '.(string)$row['segment_key'],'regular-shift:'.(string)$row['id'],[
+            'Team'=>(string)$row['team_code'],'Wochentag'=>$days[(int)$row['weekday']]??(string)$row['weekday'],'Schichtkennung'=>(string)$row['segment_key'],'Bearbeitet am'=>self::shortDateTime($row['updated_at']??''),
+        ],'Automatische Vorbelegung persönlicher fester Schichten',null);
+    }
+
+    private function fixedConflictItem(array $row): PersonalDataEntry {
+        return $this->entry('fixed_shift_conflict','Festschichtkonflikt','Status '.(string)$row['status'],'fixed-conflict:'.(string)$row['id'],[
+            'Status'=>(string)$row['status'],'Weitergegeben am'=>self::shortDateTime($row['reported_at']??''),'Gelöst am'=>empty($row['resolved_at'])?'Noch nicht gelöst':self::shortDateTime($row['resolved_at']),
+        ],'Weitergabe und Auflösung einer mehrfach fest belegten Schicht','Kennungen anderer beteiligter Personen werden nicht ausgegeben.');
     }
 
     private function entry(string $categoryId, string $categoryLabel, string $summary, string $reference, array $attributes, string $purpose, ?string $thirdPartyNotice): PersonalDataEntry {

@@ -9,7 +9,49 @@ require('../../js/components/day-note-control.js');
 require('../../js/components/assignment-control.js');
 require('../../js/components/month-plan.js');
 
-const { monthPlan } = window.ADPlaner;
+const { monthPlan, candidateChip } = window.ADPlaner;
+
+const neutralPreferenceHtml = candidateChip.render({
+    uid: 'assistant-neutral',
+    displayName: 'Neutral',
+    isSelf: true,
+    preference: 'neutral',
+    note: ''
+}, false, 12, true);
+assert(neutralPreferenceHtml.includes('<span class="adp-candidate-name">Neutral</span>'));
+assert(!neutralPreferenceHtml.includes('adp-preference-marker--neutral'), 'Ein neutraler Chip darf keine Statusmarke anzeigen.');
+assert(!neutralPreferenceHtml.includes('☆'), 'Ein neutraler Chip darf keinen Platzhalterstern anzeigen.');
+assert(neutralPreferenceHtml.includes('adp-chip--editable'), 'Das Overlay muss am gesamten eigenen Chip hängen.');
+assert(neutralPreferenceHtml.includes('tabindex="0" aria-label="Schichtaktionen für Neutral"'), 'Der Chip muss das Hover-Overlay auch per Tastatur öffnen können.');
+assert(neutralPreferenceHtml.includes('class="adp-preference-panel"'), 'Hover und Tastaturfokus benötigen ein kompaktes Auswahlpanel.');
+assert(neutralPreferenceHtml.includes('aria-label="Als Lieblingsschicht markieren"'));
+assert(neutralPreferenceHtml.includes('title="Als Lieblingsschicht markieren"'), 'Der Stern braucht einen sichtbaren Hover-Tooltip.');
+assert(neutralPreferenceHtml.includes('aria-hidden="true">★</span>'));
+assert(neutralPreferenceHtml.includes('aria-label="Nur wenn sonst niemand kann"'));
+assert(neutralPreferenceHtml.includes('title="Nur wenn sonst niemand kann"'), 'Die Rettungsboje braucht einen sichtbaren Hover-Tooltip.');
+assert(neutralPreferenceHtml.includes('aria-hidden="true">🛟</span>'));
+assert(neutralPreferenceHtml.includes('data-action="open-candidate-note-editor"'));
+assert(neutralPreferenceHtml.includes('aria-label="Anmerkung hinzufügen"'));
+assert(neutralPreferenceHtml.includes('title="Anmerkung hinzufügen"'), 'Der Anmerkungsbutton braucht einen sichtbaren Hover-Tooltip.');
+assert(!neutralPreferenceHtml.includes('data-candidate-note'), 'Der Editor gehört nicht in den Schichtchip.');
+assert.strictEqual((neutralPreferenceHtml.match(/data-action="set-candidate-preference"/g) || []).length, 2, 'Nur Favorit und Notfall dürfen als Status angeboten werden.');
+
+const favoritePreferenceHtml = candidateChip.render({
+    uid: 'assistant-favorite', displayName: 'Favorit', isSelf: true,
+    preference: 'favorite', note: '<Hinweis>'
+}, false, 13, true);
+assert(favoritePreferenceHtml.includes('adp-preference-marker--favorite'));
+assert(favoritePreferenceHtml.includes('aria-hidden="true">★</span>'));
+assert(favoritePreferenceHtml.includes('aria-label="Anmerkung bearbeiten"'));
+assert(!favoritePreferenceHtml.includes('&lt;Hinweis&gt;'), 'Anmerkungstext darf nicht mehr im Chip oder Overlay erscheinen.');
+
+const emergencyPreferenceHtml = candidateChip.render({
+    uid: 'assistant-emergency', displayName: 'Reserve', isSelf: true,
+    preference: 'emergency', note: ''
+}, false, 14, true);
+assert(emergencyPreferenceHtml.includes('adp-preference-marker--emergency'));
+assert(emergencyPreferenceHtml.includes('aria-hidden="true">🛟</span>'));
+assert(!emergencyPreferenceHtml.includes('🆘'), 'Das missverständliche SOS-Symbol darf nicht mehr verwendet werden.');
 
 const basePlan = {
     month: '2026-07',
@@ -23,6 +65,7 @@ const basePlan = {
             date: '2026-07-01',
             dayOfMonth: 1,
             weekday: 3,
+            weekLabel: 'KW 27',
             note: '<Hinweis>',
             hints: [
                 { employeeUid: 'assistant-a', displayName: 'Assistant <A>', marker: 'U?', label: 'Urlaub', blocks: false },
@@ -70,13 +113,35 @@ assert(!assistantHtml.includes('<Hinweis>'));
 assert(assistantHtml.includes('U? Assistant &lt;A&gt;'));
 assert(assistantHtml.includes('K Assistant B'));
 assert(!assistantHtml.includes('Assistant <A>'));
-assert(assistantHtml.includes('adp-workload-overview'));
+assert(!assistantHtml.includes('adp-workload-overview'), 'Die Auslastung gehört nicht mehr unter den Wunschplan.');
 assert(assistantHtml.includes('Unter persönlichem Minimum'));
 assert(assistantHtml.includes('adp-chip--under'));
+assert(assistantHtml.includes('title="Unter persönlichem Minimum"'), 'Die verbleibende kräftige Markierung braucht eine textliche Erklärung als Tooltip.');
+assert(!assistantHtml.includes('aria-hidden="true">▲</span>'), 'Das missverständliche schwarze Dreieck darf nicht mehr erscheinen.');
+assert(!assistantHtml.includes('aria-hidden="true">▽</span>'), 'Auch die Über-Maximum-Markierung darf kein zusätzliches Dreieck verwenden.');
 assert(assistantHtml.includes('data-action="set-candidate-preference"'));
-assert(assistantHtml.includes('aria-label="Lieblingsschicht"'));
+assert(assistantHtml.includes('KW 27'), 'Die im Auslastungs-Overlay verwendete Kalenderwoche muss im Monatsplan erkennbar sein.');
+
+const conflictPlan = JSON.parse(JSON.stringify(basePlan));
+conflictPlan.team = {code:'A1',displayName:'Team A1',canCoordinate:true,settings:{},assistants:[]};
+conflictPlan.days[0].slots[0].candidates = [
+    {uid:'a',displayName:'A',fixed:true},
+    {uid:'b',displayName:'B',fixed:true},
+];
+conflictPlan.days[0].slots[0].fixedConflict = {status:'escalated',candidateUids:['a','b'],canReport:false,canResolve:true};
+const conflictHtml = monthPlan.render(conflictPlan,{uid:'eb'});
+assert(conflictHtml.includes('Konflikt bei festen Schichten'));
+assert(conflictHtml.includes('An EB weitergegeben'));
+assert(conflictHtml.includes('data-action="resolve-fixed-conflict"'));
+assert(!conflictHtml.includes('aria-label="A entfernen"'), 'Die EB darf feste Schichten nicht über das normale Lösch-X verändern.');
+assert(assistantHtml.includes('aria-label="Lieblingsschicht entfernen"'));
 assert(assistantHtml.includes('maxlength="500"'));
 assert(assistantHtml.includes('&lt;Nur vormittags&gt;'));
+const ebNotePosition = assistantHtml.indexOf('<span class="adp-note-text">&lt;Hinweis&gt;</span>');
+const candidateNotePosition = assistantHtml.indexOf('<strong>Assistant A, Spät:</strong> &lt;Nur vormittags&gt;');
+assert(ebNotePosition >= 0 && candidateNotePosition > ebNotePosition, 'Schichtanmerkungen müssen unter der EB-Bemerkung erscheinen.');
+assert(assistantHtml.includes('data-action="open-candidate-note-editor" data-slot-id="11" data-target-uid="assistant-a"'));
+assert(assistantHtml.includes('data-action="delete-candidate-note" data-slot-id="11" data-target-uid="assistant-a"'));
 
 const ebHtml = monthPlan.render({
     ...basePlan,
@@ -101,10 +166,13 @@ assert(ebHtml.includes('aria-label="Assistant A entfernen"'));
 assert(ebHtml.includes('<textarea rows="2" maxlength="2000" aria-label="Bemerkung für 01.07." data-note-date="2026-07-01">&lt;Hinweis&gt;</textarea>'));
 assert(ebHtml.includes('aria-label="Bemerkung für 01.07."'), 'The editable day note needs its own accessible name.');
 assert(ebHtml.includes('aria-label="Bemerkung für 01.07. speichern"'));
+assert(ebHtml.includes('<strong>Assistant A, Spät:</strong> &lt;Nur vormittags&gt;'), 'Die EB muss Schichtanmerkungen in der Bemerkungsspalte sehen.');
+assert(!ebHtml.includes('data-action="delete-candidate-note"'), 'Die EB darf fremde Schichtanmerkungen nicht löschen.');
+assert(!ebHtml.includes('data-action="open-candidate-note-editor"'), 'Die EB darf fremde Schichtanmerkungen nicht bearbeiten.');
 assert(ebHtml.includes('data-action="add-selected" data-slot-id="10" data-target-uid="assistant-b"'));
 assert(ebHtml.includes('Entwurf'));
 assert(ebHtml.includes('data-action="transition-status" data-target-status="planned"'));
-assert(ebHtml.includes('Über persönlichem Maximum'));
+assert(!ebHtml.includes('adp-workload-table'), 'Die Team-Auslastung darf nicht mehr im Wunschplan eingebettet sein.');
 assert(!ebHtml.includes('data-action="set-candidate-preference"'), 'EB darf fremde Präferenzen nicht verändern.');
 
 const approvedHtml = monthPlan.render({

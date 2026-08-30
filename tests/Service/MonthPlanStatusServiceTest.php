@@ -8,6 +8,7 @@ use OCA\AdPlaner\Model\ShiftSlot;
 use OCA\AdPlaner\Model\Team;
 use OCA\AdPlaner\Service\ScheduleService;
 use OCA\AdPlaner\Service\WorkloadPreferenceService;
+use OCA\AdPlaner\Service\FixedShiftService;
 use OCA\AdPlaner\Service\ShiftConfigService;
 use OCA\AdPlaner\Service\TeamAccessService;
 use OCA\AdPlaner\Service\PlanningHintService;
@@ -24,6 +25,7 @@ final class MonthPlanStatusStoreFake extends ShiftPlanStore {
     public int $transactionCalls = 0;
     public bool $rejectNextTransition = false;
     public array $candidatesBySlot = [];
+    public array $regularRules = [];
 
     public function __construct() {}
 
@@ -81,6 +83,11 @@ final class MonthPlanStatusStoreFake extends ShiftPlanStore {
     public function dayNotesForMonth(string $teamCode, string $month): array { return []; }
     public function workloadLimitsForTeam(string $teamCode): array { return []; }
     public function candidateDates(string $teamCode, string $from, string $to): array { return []; }
+    public function regularShiftRulesForTeam(string $teamCode): array { return $this->regularRules; }
+    public function materializeFixedCandidate(int $slotId,string $uid): void {}
+    public function removeCandidate(int $slotId,string $uid): void { $this->candidatesBySlot[$slotId]=array_values(array_filter($this->candidatesBySlot[$slotId]??[],static fn($candidate):bool=>$candidate->assistantUid!==$uid)); }
+    public function fixedConflictReports(array $slotIds): array { return []; }
+    public function deletedFixedSlotIds(array $slotIds,string $uid): array { return []; }
 
     public function addCandidate(int $slotId, string $assistantUid, string $createdByUid): void {
         $this->added[] = compact('slotId', 'assistantUid', 'createdByUid');
@@ -128,6 +135,11 @@ $assistants = [[
     'displayName' => 'Assistant A',
     'isEb' => false,
     'canReceiveShifts' => true,
+],[
+    'uid' => 'assistant-b',
+    'displayName' => 'Assistant B',
+    'isEb' => false,
+    'canReceiveShifts' => true,
 ]];
 $settings = ['shifts' => [[
     'key' => 'early',
@@ -139,7 +151,7 @@ $settings = ['shifts' => [[
 $assistantTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, false, $settings);
 $ebTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, $settings);
 $store = new MonthPlanStatusStoreFake();
-$service = new ScheduleService($store, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake(), new WorkloadPreferenceService($store));
+$service = new ScheduleService($store, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake(), new WorkloadPreferenceService($store), new FixedShiftService($store, new ShiftConfigService()));
 
 assertSameValue('draft', $service->monthPlan($ebTeam, '2026-08', 'test-eb')['status'] ?? null, 'A new month plan starts as draft.');
 assertDomainException(
@@ -152,7 +164,7 @@ assertDomainException(
 );
 
 $directStore = new MonthPlanStatusStoreFake();
-$directService = new ScheduleService($directStore, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake(), new WorkloadPreferenceService($directStore));
+$directService = new ScheduleService($directStore, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake(), new WorkloadPreferenceService($directStore), new FixedShiftService($directStore, new ShiftConfigService()));
 assertSameValue('planned', $directService->transitionMonthStatus($ebTeam, '2026-08', 'planned', 'test-eb'), 'A month can be planned without loading it first.');
 assertSameValue('approved', $directService->transitionMonthStatus($ebTeam, '2026-08', 'approved', 'test-eb'), 'A month can be approved without loading it first.');
 assertSameValue(2, $directStore->transactionCalls, 'Status transitions run through the store transaction boundary.');
@@ -200,6 +212,18 @@ assertSameValue(
 );
 
 assertSameValue('planned', $service->transitionMonthStatus($ebTeam, '2026-08', 'planned', 'test-eb'), 'EB has an explicit unlock path back to planned.');
+$store->candidatesBySlot = [1=>[
+    new \OCA\AdPlaner\Model\ShiftCandidate(10,1,'assistant-a','assistant-a',source:'regular'),
+    new \OCA\AdPlaner\Model\ShiftCandidate(11,1,'assistant-b','assistant-b',source:'regular'),
+]];
+$store->regularRules=[
+    ['userUid'=>'assistant-a','weekday'=>6,'segmentKey'=>'early'],
+    ['userUid'=>'assistant-b','weekday'=>6,'segmentKey'=>'early'],
+];
+assertDomainException(static fn()=>$service->transitionMonthStatus($ebTeam,'2026-08','approved','test-eb'),'An unresolved duplicate fixed assignment must block approval.');
+assertSameValue('planned',$store->monthStatus('A1','2026-08'),'Rejected conflict approval must keep the plan in planned state.');
+$store->candidatesBySlot=[];
+$store->regularRules=[];
 $insertedBeforeConflict = $store->insertedSlots;
 $updatedBeforeConflict = $store->updatedSlots;
 $store->rejectNextTransition = true;

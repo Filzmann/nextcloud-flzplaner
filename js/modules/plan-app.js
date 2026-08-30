@@ -22,6 +22,7 @@
             this.panel = new options.PlanPanel({
                 byId: options.byId,
                 renderMonth: options.renderMonth,
+                renderWorkload: options.renderWorkload,
                 renderSettings: options.renderSettings,
                 addShiftRow: options.addShiftRow,
                 removeShiftRow: options.removeShiftRow,
@@ -30,6 +31,7 @@
                 onAction: button => this.handleAction(button),
                 onSaveSettings: values => this.saveSettings(values),
                 onSavePersonalWorkload: values => this.savePersonalWorkload(values),
+                onSavePersonalRegularShifts: rules => this.savePersonalRegularShifts(rules),
             });
         }
 
@@ -81,7 +83,7 @@
             const teamCode = this.state.selectedTeamCode;
             const month = this.state.month;
             const monthPlan = await this.repository.monthPlan(teamCode, month);
-            if (loadVersion !== this.loadVersion || teamCode !== this.state.selectedTeamCode || month !== this.state.month || this.state.activeView !== 'month') {
+            if (loadVersion !== this.loadVersion || teamCode !== this.state.selectedTeamCode || month !== this.state.month || !['month', 'workload'].includes(this.state.activeView)) {
                 return false;
             }
             this.state.monthPlan = monthPlan;
@@ -89,6 +91,8 @@
             const existingTeam = this.selectedTeam();
             updatedTeam.personalWorkload = existingTeam?.personalWorkload || {};
             updatedTeam.canSetPersonalWorkload = !!existingTeam?.canSetPersonalWorkload;
+            updatedTeam.personalRegularShifts = existingTeam?.personalRegularShifts || [];
+            updatedTeam.canSetRegularShifts = !!existingTeam?.canSetRegularShifts;
             this.state.teams = this.state.teams.map(team => team.code === updatedTeam.code ? updatedTeam : team);
             return true;
         }
@@ -97,7 +101,7 @@
         async selectMonth(value) {
             this.state.month = value;
             this.state.monthPlan = null;
-            if (this.state.activeView === 'month') await this.reloadActive();
+            if (this.state.activeView !== 'settings') await this.reloadActive();
         }
         async selectView(value) { this.state.activeView = value; this.render(); await this.reloadActive(); }
 
@@ -108,17 +112,26 @@
             try {
                 const action = button.dataset.action;
                 const team = this.state.selectedTeamCode; const month = this.state.month; const slot = button.dataset.slotId;
+                if (action === 'close-workload') { await this.selectView('month'); return; }
                 if (action === 'add-self') await this.repository.addSelf(team, month, slot);
                 else if (action === 'add-selected') {
                     const targetUid = button.dataset.targetUid || '';
                     if (!targetUid) return;
                     await this.repository.addSelected(team, month, slot, targetUid);
-                } else if (action === 'remove-candidate') await this.repository.removeCandidate(team, month, slot, button.dataset.targetUid || '');
+                } else if (action === 'remove-candidate') {
+                    const fixed=button.closest('[data-candidate-chip]')?.dataset.fixed==='true';
+                    if (fixed && !window.confirm('Diese feste Schicht wirklich entfernen? Sie wird für dieses Datum dauerhaft als nicht möglich gespeichert.')) return;
+                    await this.repository.removeCandidate(team, month, slot, button.dataset.targetUid || '');
+                }
                 else if (action === 'transition-status') await this.repository.transitionStatus(team, month, button.dataset.targetStatus || '');
-                else if (action === 'set-candidate-preference' || action === 'save-candidate-note') {
+                else if (action === 'report-fixed-conflict') await this.repository.reportFixedConflict(team,month,slot);
+                else if (action === 'resolve-fixed-conflict') await this.repository.resolveFixedConflict(team,month,slot,button.dataset.keptUid || '');
+                else if (action === 'set-candidate-preference' || action === 'save-candidate-note' || action === 'delete-candidate-note') {
                     const chip = button.closest('[data-candidate-chip]');
-                    const note = chip ? chip.querySelector('[data-candidate-note]')?.value || '' : '';
-                    const preference = action === 'set-candidate-preference' ? button.dataset.preference || 'neutral' : chip?.dataset.currentPreference || 'neutral';
+                    const entrySelector = `[data-candidate-note-entry][data-slot-id="${CSS.escape(slot || '')}"][data-target-uid="${CSS.escape(button.dataset.targetUid || '')}"]`;
+                    const entry = button.closest('[data-candidate-note-entry]') || this.panel.panel.querySelector(entrySelector);
+                    const note = action === 'delete-candidate-note' ? '' : entry?.querySelector('[data-candidate-note]')?.value || '';
+                    const preference = action === 'set-candidate-preference' ? button.dataset.preference || 'neutral' : entry?.dataset.currentPreference || chip?.dataset.currentPreference || 'neutral';
                     await this.repository.updateCandidateMetadata(team, month, slot, preference, note);
                 }
                 else if (action === 'save-note') {
@@ -181,6 +194,16 @@
                 this.settingsSaving = false;
                 this.render();
             }
+        }
+
+        async savePersonalRegularShifts(rules) {
+            if (this.settingsSaving) return;
+            this.settingsSaving = true;
+            try {
+                await this.repository.savePersonalRegularShifts(this.state.selectedTeamCode,rules);
+                this.applyState(await this.repository.state());
+            } catch (error) { this.showError(error,'Regelmäßige Schichten konnten nicht gespeichert werden.'); }
+            finally { this.settingsSaving=false; this.render(); }
         }
     }
 

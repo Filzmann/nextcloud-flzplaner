@@ -59,6 +59,7 @@ function createApp(repository, errors) {
         showNotice() {},
         showError(error, fallback) { errors.push({ message: error.message, fallback }); },
         renderMonth() { return ''; },
+        renderWorkload() { return ''; },
         renderSettings() { return ''; },
         addShiftRow() {},
         removeShiftRow() {},

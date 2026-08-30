@@ -27,6 +27,12 @@ namespace OCA\AdPlaner\Repository {
                 'workloadLimits' => [
                     ['id'=>5,'team_code'=>'A1','weekly_min'=>1,'weekly_max'=>3,'monthly_min'=>5,'monthly_max'=>12,'updated_at'=>'2026-08-05 12:30:00'],
                 ],
+                'regularShifts' => [
+                    ['id'=>6,'team_code'=>'A1','weekday'=>1,'segment_key'=>'early','updated_at'=>'2026-08-06 13:30:00'],
+                ],
+                'fixedConflicts' => [
+                    ['id'=>7,'slot_id'=>9,'status'=>'resolved','reported_at'=>'2026-08-07 14:30:00','resolved_at'=>'2026-08-07 15:00:00'],
+                ],
             ];
         }
     }
@@ -62,9 +68,9 @@ namespace {
         'thirdCountryTransfer'=>$item->thirdCountryTransfer(),'automatedDecision'=>$item->automatedDecision(),
         'thirdPartyContentNotice'=>$item->thirdPartyContentNotice(),'attributes'=>$item->attributes(),
     ], $report->entries());
-    if (array_column($items, 'categoryLabel') !== ['Zeitlich begrenzter Admin-Vollzugriff', 'Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan', 'Persönliche Schichtgrenzen']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
+    if (array_column($items, 'categoryLabel') !== ['Zeitlich begrenzter Admin-Vollzugriff', 'Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan', 'Persönliche Schichtgrenzen', 'Regelmäßige feste Schicht', 'Festschichtkonflikt']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
     $encoded = json_encode($items, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    foreach (['Admin-Vollzugriff','Ziel der Vollzugriffsfreigabe','12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','Lieblingsschicht','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr','Persönliche Schichtgrenzen','Minimum pro Woche','05.08.26, 12:30 Uhr'] as $expected) {
+    foreach (['Admin-Vollzugriff','Ziel der Vollzugriffsfreigabe','12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','Lieblingsschicht','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr','Persönliche Schichtgrenzen','Minimum pro Woche','05.08.26, 12:30 Uhr','Regelmäßige feste Schicht','Montag','Festschichtkonflikt','resolved'] as $expected) {
         if (!str_contains($encoded, $expected)) throw new RuntimeException('Menschenlesbare Planerauskunft fehlt: ' . $expected);
     }
     foreach (['foreign-user','planner','other-admin','Enthält den Namen einer anderen Person','Enthält eine andere Person','assistant_uid','created_by_uid','Art'] as $forbidden) {

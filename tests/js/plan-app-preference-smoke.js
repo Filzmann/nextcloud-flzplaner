@@ -1,11 +1,15 @@
 const assert = require('assert');
 
 global.window = { ADPlaner: {} };
+global.CSS = { escape: String };
 require('../../js/modules/plan-app.js');
 
 class ChromeFake { render() {} }
 class PanelFake {
-    constructor() { this.panel = { querySelector() { return null; } }; }
+    constructor() {
+        this.noteEntry = { dataset:{currentPreference:'favorite'}, querySelector(selector){ assert.strictEqual(selector, '[data-candidate-note]'); return {value:'Synthetischer Hinweis'}; } };
+        this.panel = { querySelector: selector => selector.includes('data-candidate-note-entry') ? this.noteEntry : null };
+    }
     render() {}
 }
 
@@ -25,8 +29,8 @@ const app = new window.ADPlaner.PlanApp({
 app.state = { currentUser:{uid:'self'}, teams:[{code:'A1',personalWorkload:{weeklyMin:1},canSetPersonalWorkload:true}], selectedTeamCode:'A1', month:'2026-09', activeView:'month', monthPlan:{}, organization:{}, loading:false };
 
 function actionButton(action, preference = '') {
-    const chip = { dataset:{currentPreference:'favorite'}, querySelector(selector){ assert.strictEqual(selector, '[data-candidate-note]'); return {value:'Synthetischer Hinweis'}; } };
-    return { disabled:false, dataset:{action, slotId:'7', preference}, closest(selector){ return selector === '[data-candidate-chip]' ? chip : null; } };
+    const chip = { dataset:{currentPreference:'favorite'} };
+    return { disabled:false, dataset:{action, slotId:'7', targetUid:'self', preference}, closest(selector){ return selector === '[data-candidate-chip]' ? chip : null; } };
 }
 
 (async () => {
@@ -36,8 +40,11 @@ function actionButton(action, preference = '') {
     await app.handleAction(actionButton('save-candidate-note'));
     assert.deepStrictEqual(calls[1], ['metadata','A1','2026-09','7','favorite','Synthetischer Hinweis']);
 
+    await app.handleAction(actionButton('delete-candidate-note'));
+    assert.deepStrictEqual(calls[2], ['metadata','A1','2026-09','7','favorite','']);
+
     await app.savePersonalWorkload({weeklyMin:'2',weeklyMax:'4',monthlyMin:'8',monthlyMax:'12'});
-    assert.deepStrictEqual(calls[2], ['limits','A1',{weeklyMin:'2',weeklyMax:'4',monthlyMin:'8',monthlyMax:'12'}]);
+    assert.deepStrictEqual(calls[3], ['limits','A1',{weeklyMin:'2',weeklyMax:'4',monthlyMin:'8',monthlyMax:'12'}]);
     assert.strictEqual(app.selectedTeam().personalWorkload.weeklyMin, 2);
     assert.strictEqual(app.selectedTeam().canSetPersonalWorkload, true);
     assert.deepStrictEqual(errors, []);

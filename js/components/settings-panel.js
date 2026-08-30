@@ -10,6 +10,16 @@
         const settings = team.settings || {};
         const shifts = settings.shifts || [];
         const personal = team.personalWorkload || {};
+        const regular = team.personalRegularShifts || [];
+        const regularKeys = new Set(regular.map(rule => `${rule.weekday}|${rule.segmentKey}`));
+        const weekdays = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+        const regularForm = team.canSetRegularShifts ? `<section class="adp-personal-settings" aria-labelledby="adp-regular-shifts-heading">
+            <h3 id="adp-regular-shifts-heading">Meine regelmäßigen festen Schichten</h3>
+            <p>Diese Schichten werden in offenen Monatsplänen automatisch fest eingetragen.</p>
+            <form id="personal-regular-shifts-form" class="adp-settings-form"><div class="adp-regular-shifts-grid">
+                ${weekdays.map((label,index)=>`<fieldset><legend>${label}</legend>${shifts.filter(shift=>shift.enabled !== false).map(shift=>`<label><input type="checkbox" name="regularShift" value="${esc(`${index+1}|${shift.key}`)}"${regularKeys.has(`${index+1}|${shift.key}`)?' checked':''}> ${esc(shift.label)}</label>`).join('')}</fieldset>`).join('')}
+            </div><button type="submit">Regelmäßige Schichten speichern</button></form>
+        </section>` : '';
         const personalForm = team.canSetPersonalWorkload ? `
             <section class="adp-personal-settings" aria-labelledby="adp-personal-settings-heading">
                 <h3 id="adp-personal-settings-heading">Meine gewünschten Schichten</h3>
@@ -39,7 +49,7 @@
                         <dt>Schichten</dt>
                         <dd>${renderReadonly(shifts)}</dd>
                     </dl>
-                    ${personalForm}
+                    ${regularForm}${personalForm}
                 </section>
             `;
         }
@@ -58,7 +68,7 @@
                     </fieldset>
                     <button type="submit">Speichern</button>
                 </form>
-                ${personalForm}
+                ${regularForm}${personalForm}
             </section>
         `;
     }

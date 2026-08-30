@@ -111,8 +111,44 @@ class ShiftPlanStore {
         $this->repository->removeCandidate($slotId, $assistantUid);
     }
 
+    public function markFixedCandidateDeleted(int $slotId, string $assistantUid): bool {
+        return $this->repository->markFixedCandidateDeleted($slotId, $assistantUid);
+    }
+
+    public function materializeFixedCandidate(int $slotId, string $assistantUid): void {
+        $this->repository->materializeFixedCandidate($slotId, $assistantUid);
+    }
+
+    public function regularShiftRulesForTeam(string $teamCode): array {
+        return array_map(static fn(array $row): array => [
+            'userUid' => (string)$row['user_uid'],
+            'weekday' => (int)$row['weekday'],
+            'segmentKey' => (string)$row['segment_key'],
+        ], $this->repository->regularShiftRulesForTeam($teamCode));
+    }
+
+    public function replaceRegularShiftRules(string $teamCode, string $uid, array $rules): void {
+        $this->repository->replaceRegularShiftRules($teamCode, $uid, $rules);
+    }
+
+    public function fixedConflictReports(array $slotIds): array {
+        return $this->repository->fixedConflictReports($slotIds);
+    }
+
+    public function reportFixedConflict(int $slotId, string $uid): void {
+        $this->repository->reportFixedConflict($slotId, $uid);
+    }
+
+    public function resolveFixedConflict(int $slotId, string $keptUid, string $resolvedByUid): void {
+        $this->repository->resolveFixedConflict($slotId, $keptUid, $resolvedByUid);
+    }
+
     public function candidateForSlot(int $slotId, string $assistantUid): ?ShiftCandidate {
         return ShiftCandidate::get($this->repository->findCandidate($slotId, $assistantUid));
+    }
+
+    public function deletedFixedSlotIds(array $slotIds,string $uid): array {
+        return $this->repository->deletedFixedSlotIds($slotIds,$uid);
     }
 
     public function updateCandidateMetadata(int $slotId, string $assistantUid, string $preference, string $note): bool {

@@ -51,6 +51,9 @@ require('../../js/repositories/plan-repository.js');
     await repository.saveSettings('TeamA', 'Team A', '2', [{ key: 'day' }]);
     await repository.updateCandidateMetadata('TeamA', '2026-07', 1, 'favorite', 'Hinweis');
     await repository.savePersonalWorkload('TeamA', { weeklyMin: 1, weeklyMax: 3, monthlyMin: 5, monthlyMax: 12 });
+    await repository.savePersonalRegularShifts('TeamA',[{weekday:1,segmentKey:'day'}]);
+    await repository.reportFixedConflict('TeamA','2026-07',1);
+    await repository.resolveFixedConflict('TeamA','2026-07',1,'anna');
 
     assert.strictEqual(state.teams[0] instanceof window.ADPlaner.models.Team, true);
     assert.strictEqual(monthPlan.team instanceof window.ADPlaner.models.Team, true);
@@ -64,12 +67,17 @@ require('../../js/repositories/plan-repository.js');
         '/api/teams/TeamA/months/2026-07/status',
         '/api/teams/TeamA/settings',
         '/api/teams/TeamA/months/2026-07/slots/1/candidate-metadata',
-        '/api/teams/TeamA/personal-workload'
+        '/api/teams/TeamA/personal-workload',
+        '/api/teams/TeamA/personal-regular-shifts',
+        '/api/teams/TeamA/months/2026-07/slots/1/fixed-conflict/report',
+        '/api/teams/TeamA/months/2026-07/slots/1/fixed-conflict/resolve'
     ]);
     assert.strictEqual(calls[2].options.body, '{"targetUid":"anna"}');
     assert.strictEqual(calls[4].options.body, '{"targetStatus":"planned"}');
     assert.strictEqual(calls[5].options.body, '{"displayName":"Team A","meetingDay":"2","shiftsJson":"[{\\"key\\":\\"day\\"}]"}');
     assert.strictEqual(calls[6].options.body, '{"preference":"favorite","note":"Hinweis"}');
+    assert.strictEqual(calls[8].options.body, '{"regularShiftsJson":"[{\\"weekday\\":1,\\"segmentKey\\":\\"day\\"}]"}');
+    assert.strictEqual(calls[10].options.body, '{"keptUid":"anna"}');
 
     console.log('AdPlaner plan repository smoke test passed.');
 })();

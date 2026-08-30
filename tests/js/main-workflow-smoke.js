@@ -11,9 +11,11 @@ const elements = createElementMap([
     'month-prev',
     'month-next',
     'adp-panel',
+    'adp-workload-overlay',
 ]);
 const tabs = new FakeElement('tabs');
 const tabMonth = new FakeButton({ view: 'month' }, 'tab-month');
+const tabWorkload = new FakeButton({ view: 'workload' }, 'tab-workload');
 const tabSettings = new FakeButton({ view: 'settings' }, 'tab-settings');
 
 const notices = [];
@@ -53,6 +55,11 @@ global.window = {
                 return `<section data-view="month">${esc(plan && plan.team ? plan.team.code : '')}:${esc(plan ? plan.month : '')}</section>`;
             }
         },
+        workloadPanel: {
+            render(plan) {
+                return `<section data-view="workload">${esc(plan && plan.team ? plan.team.code : '')}:${esc(plan ? plan.month : '')}</section>`;
+            }
+        },
         settingsPanel: {
             render(team) {
                 return `<form id="settings-form">${esc(team ? team.code : '')}</form>`;
@@ -81,7 +88,7 @@ global.document = {
         return selector === '.adp-tabs' ? tabs : null;
     },
     querySelectorAll(selector) {
-        return selector === '.adp-tab' ? [tabMonth, tabSettings] : [];
+        return selector === '.adp-tab' ? [tabMonth, tabWorkload, tabSettings] : [];
     }
 };
 
@@ -206,6 +213,7 @@ async function flush() {
     assert.deepStrictEqual(repositoryCalls.at(-1), ['monthPlan', 'TeamA', '2026-12']);
     await elements.get('month-input').listeners.change({ target: { value: '2026-07' } });
     assert.strictEqual(tabMonth.classList.has('is-active'), true);
+    assert.strictEqual(tabWorkload.getAttribute('aria-selected'), 'false');
     assert.strictEqual(tabMonth.getAttribute('aria-selected'), 'true');
     assert.strictEqual(tabSettings.getAttribute('aria-selected'), 'false');
     assert.strictEqual(elements.get('adp-panel').getAttribute('aria-labelledby'), 'tab-month');
@@ -218,6 +226,19 @@ async function flush() {
         preventDefault() { prevented = true; }
     });
     assert.strictEqual(prevented, true);
+    assert.strictEqual(tabWorkload.focused, true);
+    assert.strictEqual(tabWorkload.getAttribute('aria-selected'), 'true');
+    assert.strictEqual(elements.get('adp-panel').getAttribute('aria-labelledby'), 'tab-month');
+    assert(elements.get('adp-panel').innerHTML.includes('data-view="month"'), 'Der Monatsplan muss unter dem Auslastungs-Overlay sichtbar bleiben.');
+    assert(elements.get('adp-workload-overlay').innerHTML.includes('data-view="workload"'));
+    assert.strictEqual(elements.get('adp-workload-overlay').hidden, false, 'Auslastung muss als am Tab verankertes Overlay öffnen.');
+    assert.deepStrictEqual(repositoryCalls.at(-1), ['monthPlan', 'TeamA', '2026-07']);
+
+    await tabs.listeners.keydown({
+        target: tabWorkload,
+        key: 'ArrowRight',
+        preventDefault() {}
+    });
     assert.strictEqual(tabSettings.focused, true);
     assert.strictEqual(tabSettings.getAttribute('aria-selected'), 'true');
     assert.strictEqual(elements.get('adp-panel').getAttribute('aria-labelledby'), 'tab-settings');

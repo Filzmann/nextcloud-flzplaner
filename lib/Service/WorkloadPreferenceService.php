@@ -47,16 +47,36 @@ final class WorkloadPreferenceService {
         $limitsByUid = $this->store->workloadLimitsForTeam($team->code);
         $monthCounts = [];
         $weekCounts = [];
-        foreach ($this->store->candidateDates($team->code, $rangeStart->format('Y-m-d'), $rangeEnd->format('Y-m-d')) as $row) {
+        $occurrences = [];
+        foreach ($this->store->candidateDates($team->code, $rangeStart->format('Y-m-d'), $rangeEnd->format('Y-m-d')) as $index => $row) {
             $uid = (string)($row['assistant_uid'] ?? '');
             $date = DateTimeImmutable::createFromFormat('!Y-m-d', (string)($row['work_date'] ?? ''));
             if ($uid === '' || $date === false) {
                 continue;
             }
+            $segmentKey = (string)($row['segment_key'] ?? ('manual-'.$index));
+            $occurrences[$uid.'|'.$date->format('Y-m-d').'|'.$segmentKey] = true;
+            if ((bool)($row['fixed_deleted'] ?? false)) continue;
             $weekKey = $date->format('o-W');
             $weekCounts[$uid][$weekKey] = ($weekCounts[$uid][$weekKey] ?? 0) + 1;
             if ($date->format('Y-m') === $month) {
                 $monthCounts[$uid] = ($monthCounts[$uid] ?? 0) + 1;
+            }
+        }
+        $rulesByDay = [];
+        foreach ($this->store->regularShiftRulesForTeam($team->code) as $rule) {
+            $rulesByDay[(int)($rule['weekday'] ?? 0)][] = $rule;
+        }
+        for ($date = $rangeStart; $date <= $rangeEnd; $date = $date->modify('+1 day')) {
+            foreach ($rulesByDay[(int)$date->format('N')] ?? [] as $rule) {
+                $uid = (string)($rule['userUid'] ?? '');
+                $segmentKey = (string)($rule['segmentKey'] ?? '');
+                $key = $uid.'|'.$date->format('Y-m-d').'|'.$segmentKey;
+                if ($uid === '' || $segmentKey === '' || isset($occurrences[$key])) continue;
+                $occurrences[$key] = true;
+                $weekKey = $date->format('o-W');
+                $weekCounts[$uid][$weekKey] = ($weekCounts[$uid][$weekKey] ?? 0) + 1;
+                if ($date->format('Y-m') === $month) $monthCounts[$uid] = ($monthCounts[$uid] ?? 0) + 1;
             }
         }
         $weekKeys = [];

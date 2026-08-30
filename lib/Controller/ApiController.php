@@ -10,6 +10,7 @@ use OCA\AdPlaner\Service\ScheduleService;
 use OCA\AdPlaner\Service\TeamAccessService;
 use OCA\AdPlaner\Service\TeamSettingsService;
 use OCA\AdPlaner\Service\WorkloadPreferenceService;
+use OCA\AdPlaner\Service\FixedShiftService;
 use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -24,7 +25,8 @@ class ApiController extends Controller {
         private ScheduleService $scheduleService,
         private AdPlanerLogger $logger,
         private ApiResponder $responder,
-        private WorkloadPreferenceService $workloadPreferences
+        private WorkloadPreferenceService $workloadPreferences,
+        private FixedShiftService $fixedShifts
     ) {
         parent::__construct(Application::APP_ID, $request);
     }
@@ -41,6 +43,8 @@ class ApiController extends Controller {
                         ...$team->toArray(),
                         'personalWorkload' => $this->workloadPreferences->personal($team, $uid),
                         'canSetPersonalWorkload' => $team->assistantByUid($uid)?->canReceiveShifts ?? false,
+                        'personalRegularShifts' => $this->fixedShifts->personal($team, $uid),
+                        'canSetRegularShifts' => $team->assistantByUid($uid)?->canReceiveShifts ?? false,
                     ],
                     $this->teamAccess->teamsForCurrentUser()
                 ),
@@ -166,6 +170,34 @@ class ApiController extends Controller {
 
             return ['ok' => true, 'limits' => $limits];
         }, [$this->logger, 'error'], 'save_personal_workload', ['team_code' => $teamCode]);
+    }
+
+    #[NoAdminRequired]
+    public function savePersonalRegularShifts(string $teamCode, string $regularShiftsJson = '[]'): DataResponse {
+        return $this->responder->respond(function () use ($teamCode,$regularShiftsJson): array {
+            $team = $this->teamAccess->assertTeamAccess($teamCode);
+            $rules = json_decode($regularShiftsJson,true);
+            if (!is_array($rules) || !array_is_list($rules)) throw new \InvalidArgumentException('Regelmäßige Schichten konnten nicht gelesen werden.');
+            return ['ok'=>true,'regularShifts'=>$this->fixedShifts->savePersonal($team,$this->teamAccess->currentUserId(),$rules)];
+        },[$this->logger,'error'],'save_personal_regular_shifts',['team_code'=>$teamCode]);
+    }
+
+    #[NoAdminRequired]
+    public function reportFixedConflict(string $teamCode,string $month,int $slotId): DataResponse {
+        return $this->responder->respond(function() use($teamCode,$month,$slotId): array {
+            $team=$this->teamAccess->assertTeamAccess($teamCode);
+            $this->scheduleService->reportFixedConflict($team,$month,$slotId,$this->teamAccess->currentUserId());
+            return ['ok'=>true];
+        },[$this->logger,'error'],'report_fixed_conflict',['team_code'=>$teamCode,'month'=>$month,'slot_id'=>$slotId]);
+    }
+
+    #[NoAdminRequired]
+    public function resolveFixedConflict(string $teamCode,string $month,int $slotId,string $keptUid=''): DataResponse {
+        return $this->responder->respond(function() use($teamCode,$month,$slotId,$keptUid): array {
+            $team=$this->teamAccess->assertCanCoordinate($teamCode);
+            $this->scheduleService->resolveFixedConflict($team,$month,$slotId,$keptUid,$this->teamAccess->currentUserId());
+            return ['ok'=>true];
+        },[$this->logger,'error'],'resolve_fixed_conflict',['team_code'=>$teamCode,'month'=>$month,'slot_id'=>$slotId]);
     }
 
     private function decodeShiftsJson(string $shiftsJson): array {

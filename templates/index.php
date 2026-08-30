@@ -18,6 +18,7 @@
 \OCP\Util::addScript('adplaner', 'components/assignment-control');
 \OCP\Util::addScript('adplaner', 'components/shift-settings-list');
 \OCP\Util::addScript('adplaner', 'components/month-plan');
+\OCP\Util::addScript('adplaner', 'components/workload-panel');
 \OCP\Util::addScript('adplaner', 'components/settings-panel');
 \OCP\Util::addScript('adplaner', 'components/plan-chrome');
 \OCP\Util::addScript('adplaner', 'components/plan-panel');
@@ -46,10 +47,14 @@
         </div>
     </header>
 
-    <nav class="adp-tabs" role="tablist" aria-label="Planbereiche">
-        <button type="button" id="adp-tab-month" class="adp-tab is-active" role="tab" aria-controls="adp-panel" aria-selected="true" tabindex="0" data-view="month">Wunschplan</button>
-        <button type="button" id="adp-tab-settings" class="adp-tab" role="tab" aria-controls="adp-panel" aria-selected="false" tabindex="-1" data-view="settings">Einstellungen</button>
-    </nav>
+    <div class="adp-tab-area">
+        <nav class="adp-tabs" role="tablist" aria-label="Planbereiche">
+            <button type="button" id="adp-tab-month" class="adp-tab is-active" role="tab" aria-controls="adp-panel" aria-selected="true" tabindex="0" data-view="month">Wunschplan</button>
+            <button type="button" id="adp-tab-workload" class="adp-tab" role="tab" aria-controls="adp-workload-overlay" aria-haspopup="dialog" aria-expanded="false" aria-selected="false" tabindex="-1" data-view="workload">Auslastung</button>
+            <button type="button" id="adp-tab-settings" class="adp-tab" role="tab" aria-controls="adp-panel" aria-selected="false" tabindex="-1" data-view="settings">Einstellungen</button>
+        </nav>
+        <section id="adp-workload-overlay" class="adp-workload-overlay" role="dialog" aria-modal="false" aria-labelledby="adp-tab-workload" hidden></section>
+    </div>
 
     <div id="adp-notice" class="adp-notice" hidden></div>
     <main id="adp-panel" class="adp-panel" role="tabpanel" aria-labelledby="adp-tab-month" tabindex="0"></main>

@@ -19,6 +19,7 @@ runJavaScriptSuite({
         'tests/js/plan-repository-smoke.js',
         'tests/js/settings-panel-smoke.js',
         'tests/js/ui-smoke.js',
+        'tests/js/workload-panel-smoke.js',
     ],
     successMessage: 'AdPlaner JavaScript tests passed',
 });
