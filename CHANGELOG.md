@@ -3,6 +3,9 @@
 ## Unreleased
 
 - Dokumentations- und Steuerungsstruktur vereinheitlicht.
+- Belegte Assistenzschichten als versionierte read-only Planungskonflikte
+  veröffentlicht; Kalenderdienste blockieren Planvorschlag, Festschichten und
+  manuelle Zuweisungen und erscheinen datensparsam als `Dienst/Büro`.
 
 ## 0.7.0-rc.2
 

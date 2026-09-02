@@ -19,6 +19,12 @@ Assistenzteams werden aus den zentral konfigurierten Nextcloud-Gruppen abgeleite
 
 Die zuständige Einsatzbegleitung führt Monatspläne kontrolliert von `draft` über `planned` nach `approved`. Genehmigte Pläne sind bis zu einer ausdrücklichen Rücknahme gegen Wünsche, Zuweisungen und Bemerkungsänderungen gesperrt. Optionale Urlaubs- und Kalenderprovider liefern ausschließlich datensparsame, schreibgeschützte Planungshinweise.
 
+Ist AD Kalender aktiv, blockieren dortige Dienste über den versionierten
+LocalBase-Konfliktvertrag überlappende Assistenzzuweisungen und erscheinen im
+Plan als `Dienst/Büro`. Umgekehrt veröffentlicht AdPlaner belegte
+Assistenzschichten als read-only `Assistenz`-Konflikte. Ohne die jeweils andere
+App bleiben beide Produkte eigenständig nutzbar.
+
 Genehmigte Pläne frieren die damaligen Schichtdefinitionen ein, speichern aber keine zusätzlichen historischen Personenstammdaten. Zuweisungen werden weiterhin nur für aktuell schichtfähige Mitglieder des jeweiligen Assistenzteams angezeigt.
 
 Schichtfähige Teammitglieder können eigene Wünsche als Lieblingsschicht oder
