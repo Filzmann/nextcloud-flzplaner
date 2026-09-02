@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Dokumentations- und Steuerungsstruktur vereinheitlicht.
+
 ## 0.7.0-rc.2
 
 - Persönliche regelmäßige Festschichten werden wöchentlich materialisiert; bestätigte Einzel-Löschungen bleiben als Ausnahme bestehen.
