@@ -128,6 +128,8 @@ final class MonthPlanStatusTeamAccessFake extends TeamAccessService {
 final class MonthPlanStatusHintServiceFake extends PlanningHintService {
     public function __construct() {}
     public function forMonth(string $month, array $employeeUids): array { return []; }
+    public function contextForMonth(string $month, array $employeeUids, array $segments): array { return ['hints'=>[],'unavailable'=>[]]; }
+    public function assertAvailableForSlot(ShiftSlot $slot, string $employeeUid): void {}
 }
 
 $assistants = [[

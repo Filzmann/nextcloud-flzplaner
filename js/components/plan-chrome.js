@@ -35,15 +35,16 @@
             this.tabs.addEventListener('keydown', event => {
                 const button = event.target instanceof Element ? event.target.closest('button[data-view]') : null;
                 if (!button || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-                const current = this.tabButtons.indexOf(button);
-                if (current < 0 || this.tabButtons.length === 0) return;
+                const visibleButtons = this.tabButtons.filter(item => !item.hidden);
+                const current = visibleButtons.indexOf(button);
+                if (current < 0 || visibleButtons.length === 0) return;
                 event.preventDefault();
-                const last = this.tabButtons.length - 1;
+                const last = visibleButtons.length - 1;
                 const nextIndex = event.key === 'Home' ? 0
                     : event.key === 'End' ? last
-                        : event.key === 'ArrowLeft' ? (current + last) % this.tabButtons.length
-                            : (current + 1) % this.tabButtons.length;
-                const next = this.tabButtons[nextIndex];
+                        : event.key === 'ArrowLeft' ? (current + last) % visibleButtons.length
+                            : (current + 1) % visibleButtons.length;
+                const next = visibleButtons[nextIndex];
                 next.focus();
                 return this.onViewChange(next.dataset.view || 'month');
             });
@@ -70,6 +71,8 @@
         }
 
         render(state) {
+            const selectedTeam = state.teams.find(team => team.code === state.selectedTeamCode) || null;
+            const canViewWorkload = !!selectedTeam?.canCoordinate;
             this.teamSelect.innerHTML = state.teams.map(team => {
                 const selected = team.code === state.selectedTeamCode ? ' selected' : '';
                 return `<option value="${this.esc(team.code)}"${selected}>${this.esc(team.displayName || team.code)}</option>`;
@@ -81,6 +84,7 @@
             this.monthNext.disabled = state.month === '2100-12';
             let activeTabId = '';
             this.tabButtons.forEach(button => {
+                if (button.dataset.view === 'workload') button.hidden = !canViewWorkload;
                 const active = button.dataset.view === state.activeView;
                 button.classList.toggle('is-active', active);
                 button.setAttribute('aria-selected', active ? 'true' : 'false');

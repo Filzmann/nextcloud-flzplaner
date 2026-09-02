@@ -39,7 +39,7 @@ final class FixedShiftService {
     }
 
     /** @param list<ShiftSlot> $slots */
-    public function materializeMonth(Team $team, array $slots): void {
+    public function materializeMonth(Team $team, array $slots, array $unavailable = []): void {
         $rules = [];
         $assignable = $team->assignableAssistantUidMap();
         foreach ($this->store->regularShiftRulesForTeam($team->code) as $rule) {
@@ -52,6 +52,7 @@ final class FixedShiftService {
             if (!$slot->enabled) continue;
             $weekday = (int)(new \DateTimeImmutable($slot->workDate))->format('N');
             foreach ($rules[$weekday.'|'.$slot->segmentKey] ?? [] as $uid) {
+                if (isset($unavailable[$slot->workDate.'|'.$slot->segmentKey][$uid])) continue;
                 $desired[$slot->id.'|'.$uid]=true;
                 $this->store->materializeFixedCandidate($slot->id, $uid);
             }

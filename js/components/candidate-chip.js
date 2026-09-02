@@ -14,6 +14,7 @@
                 <span class="adp-chip-status"><span class="adp-visually-hidden">${esc(statusLabel)}: </span></span>
                 ${preferenceDisplay(preference)}
                 ${candidate.fixed ? '<span class="adp-fixed-marker" aria-label="Feste Schicht" title="Regelmäßige feste Schicht">🔒</span>' : ''}
+                ${candidate.unavailable ? '<span class="adp-vacation-conflict" aria-label="Urlaub – nicht für den Planvorschlag verfügbar" title="Urlaub – nicht für den Planvorschlag verfügbar">U</span>' : ''}
                 <span class="adp-candidate-name">${esc(displayName)}</span>
                 ${removable ? `<button type="button" aria-label="${esc(displayName)} entfernen" data-action="remove-candidate" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">&times;</button>` : ''}
                 ${editable ? preferencePanel(candidate, preference, slotId) : ''}

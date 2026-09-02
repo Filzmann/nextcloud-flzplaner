@@ -97,13 +97,22 @@
             return true;
         }
 
-        async selectTeam(value) { this.state.selectedTeamCode = value; this.state.monthPlan = null; await this.reloadActive(); }
+        async selectTeam(value) {
+            this.state.selectedTeamCode = value;
+            if (this.state.activeView === 'workload' && !this.selectedTeam()?.canCoordinate) this.state.activeView = 'month';
+            this.state.monthPlan = null;
+            await this.reloadActive();
+        }
         async selectMonth(value) {
             this.state.month = value;
             this.state.monthPlan = null;
             if (this.state.activeView !== 'settings') await this.reloadActive();
         }
-        async selectView(value) { this.state.activeView = value; this.render(); await this.reloadActive(); }
+        async selectView(value) {
+            this.state.activeView = value === 'workload' && !this.selectedTeam()?.canCoordinate ? 'month' : value;
+            this.render();
+            await this.reloadActive();
+        }
 
         async handleAction(button) {
             if (button.disabled) return;

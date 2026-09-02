@@ -106,8 +106,8 @@ class FakePlanRepository {
         return {
             currentUser: { uid: 'anna' },
             teams: [
-                { code: 'TeamA', displayName: 'Team <A>' },
-                { code: 'TeamB', displayName: 'Team B' }
+                { code: 'TeamA', displayName: 'Team <A>', canCoordinate: true },
+                { code: 'TeamB', displayName: 'Team B', canCoordinate: false }
             ],
             defaultMonth: '2026-07'
         };
@@ -122,7 +122,7 @@ class FakePlanRepository {
             return this.deferredMonths.get(month).promise;
         }
 
-        return { month, team: { code: teamCode, displayName: teamCode === 'TeamA' ? 'Team <A>' : teamCode } };
+        return { month, team: { code: teamCode, displayName: teamCode === 'TeamA' ? 'Team <A>' : teamCode, canCoordinate: teamCode === 'TeamA' } };
     }
 
     deferMonth(month) {
@@ -250,6 +250,18 @@ async function flush() {
     await elements.get('team-select').listeners.change({ target: { value: 'TeamB' } });
     assert.deepStrictEqual(repositoryCalls.at(-1), ['monthPlan', 'TeamB', '2026-07']);
     assert(elements.get('adp-panel').innerHTML.includes('TeamB:2026-07'));
+    assert.strictEqual(tabWorkload.hidden, true, 'Assistenzkräfte benötigen keinen Auslastungstab.');
+    await tabs.listeners.click({ target: tabWorkload });
+    assert.strictEqual(tabMonth.getAttribute('aria-selected'), 'true', 'Ein programmgesteuerter Auslastungsaufruf muss für Assistenzkräfte beim Monatsplan bleiben.');
+    assert.strictEqual(elements.get('adp-workload-overlay').hidden, true, 'Für Assistenzkräfte darf kein Auslastungs-Overlay erscheinen.');
+
+    await tabs.listeners.keydown({
+        target: tabMonth,
+        key: 'ArrowRight',
+        preventDefault() {}
+    });
+    assert.strictEqual(tabSettings.focused, true, 'Die Tastaturnavigation muss den ausgeblendeten Auslastungstab überspringen.');
+    await tabs.listeners.click({ target: tabMonth });
 
     await elements.get('adp-panel').listeners.click({
         target: new FakeButton({

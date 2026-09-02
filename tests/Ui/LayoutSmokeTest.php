@@ -38,8 +38,20 @@ foreach (['id="adp-tab-workload"', 'data-view="workload"', '>Auslastung</button>
         throw new RuntimeException("Der Auslastungstab fehlt: {$contract}");
     }
 }
-foreach (['.adp-tab-area', '.adp-workload-overlay', 'top: calc(100% + 6px)', 'z-index: 120', '.adp-week-label'] as $contract) {
+foreach (['.adp-tab-area', '.adp-workload-overlay', 'top: calc(100% + 6px)', 'z-index: 120'] as $contract) {
     if (!str_contains($css,$contract)) throw new RuntimeException("Der verankerte Auslastungs-Overlayvertrag fehlt: {$contract}");
+}
+foreach (['.adp-month-table .adp-week-column', '.adp-month-table .adp-week-cell', 'width: 1%', 'min-width: 2.7rem', 'vertical-align: middle', '.adp-week-cell.adp-capacity--within'] as $contract) {
+    if (!str_contains($css,$contract)) throw new RuntimeException("Der kompakte, wochenübergreifende KW-Zellvertrag fehlt: {$contract}");
+}
+foreach (['.adp-month-table tbody tr.adp-week-start > *', 'border-top: 3px solid'] as $contract) {
+    if (!str_contains($css,$contract)) throw new RuntimeException("Die kräftige Trennlinie zwischen Kalenderwochen fehlt: {$contract}");
+}
+foreach (['.adp-month-table .adp-vacation-column', '.adp-month-table .adp-vacation-cell', '.adp-vacation-label', 'position: sticky', 'writing-mode: vertical-rl', 'transform: rotate(180deg)'] as $contract) {
+    if (!str_contains($css,$contract)) throw new RuntimeException("Die vertikale, im sichtbaren Bereich gehaltene Urlaubsspalte fehlt: {$contract}");
+}
+foreach (['width: min(640px, calc(100vw - 24px))', 'padding: 8px', '.adp-workload-view', '.adp-week-capacities', '.adp-proposal-candidates'] as $contract) {
+    if (!str_contains($css, $contract)) throw new RuntimeException("Der kompakte Auslastungs-Overlayvertrag fehlt: {$contract}");
 }
 foreach (['.adp-capacity--under', '.adp-capacity--within', '.adp-capacity--over', '#dcfce7', '#fee2e2', '.adp-plan-proposal'] as $contract) {
     if (!str_contains($css, $contract)) {

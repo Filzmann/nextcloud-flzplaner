@@ -1,53 +1,60 @@
 (function() {
-    const { esc, dateShort } = window.ADPlaner.ui;
+    const { esc, dateShort, renderCapacity } = window.ADPlaner.ui;
 
     function render(plan) {
         if (!plan || !plan.team) return '<p>Keine Auslastungsdaten verfügbar.</p>';
-        const rows = plan.workload || [];
         const canCoordinate = !!plan.team.canCoordinate;
+        if (!canCoordinate) return '';
+        const rows = plan.workload || [];
         return `<section class="adp-section adp-workload-view" aria-labelledby="adp-workload-heading">
-            <div class="adp-section-head"><h2 id="adp-workload-heading">${canCoordinate ? 'Auslastung des Teams' : 'Meine Auslastung'} – ${esc(plan.month)}</h2></div>
+            <div class="adp-section-head"><h2 id="adp-workload-heading">Teamauslastung · ${esc(plan.month)}</h2></div>
             ${renderOverview(rows)}
-            ${canCoordinate ? renderProposal(plan, rows) : ''}
+            ${renderProposal(plan, rows)}
         </section>`;
     }
 
     function renderOverview(rows) {
         if (!rows.length) return '<p>Noch keine Auslastungsdaten vorhanden.</p>';
-        return `<div class="adp-table-wrap"><table class="adp-table adp-workload-table"><thead><tr><th scope="col">Person</th><th scope="col">Monat</th><th scope="col">Kalenderwochen</th></tr></thead><tbody>${rows.map(row => `<tr><th scope="row">${esc(row.displayName || row.uid)}</th><td>${capacity(row.monthCount, row.monthlyMin, row.monthlyMax)}</td><td>${(row.weeks || []).map(week => `${esc(week.label)}: ${capacity(week.count, row.weeklyMin, row.weeklyMax)}`).join('<br>') || '–'}</td></tr>`).join('')}</tbody></table></div>`;
+        return `<div class="adp-table-wrap"><table class="adp-table adp-workload-table"><thead><tr><th scope="col">Person</th><th scope="col">Monat</th><th scope="col">Kalenderwochen</th></tr></thead><tbody>${rows.map(row => `<tr><th scope="row">${esc(row.displayName || row.uid)}</th><td>${renderCapacity(row.monthCount, row.monthlyMin, row.monthlyMax)}</td><td>${renderWeeks(row)}</td></tr>`).join('')}</tbody></table></div>`;
     }
 
-    function capacity(countValue, minimumValue, maximumValue) {
-        const count = Number(countValue) || 0;
-        const minimum = finiteOrNull(minimumValue);
-        const maximum = finiteOrNull(maximumValue);
-        if (minimum !== null && count < minimum) {
-            return `<span class="adp-capacity adp-capacity--under" title="${esc(count)} von mindestens ${esc(minimum)}">&lt;${esc(minimum)}</span>`;
-        }
-        if (maximum !== null) {
-            const status = count > maximum ? 'over' : 'within';
-            return `<span class="adp-capacity adp-capacity--${status}" title="${esc(count)} von maximal ${esc(maximum)}">${esc(count)}/${esc(maximum)}</span>`;
-        }
-        return `<span class="adp-capacity adp-capacity--within" title="${esc(count)} Schichten">${esc(count)}</span>`;
+    function renderWeeks(row) {
+        const weeks = row.weeks || [];
+        if (!weeks.length) return '–';
+        return `<span class="adp-week-capacities">${weeks.map(week => `<span class="adp-week-capacity"><span>${esc(week.label)}</span>${renderCapacity(week.count, row.weeklyMin, row.weeklyMax)}</span>`).join('')}</span>`;
     }
 
     function renderProposal(plan, workload) {
         const workloadByUid = new Map(workload.map(row => [row.uid, row]));
         const segmentLabels = Object.fromEntries((plan.segments || []).map(segment => [segment.key, segment.label]));
         const rows = [];
+        let emptyCount = 0;
+        let unavailableCount = 0;
         for (const day of plan.days || []) {
             for (const slot of day.slots || []) {
-                const candidates = [...(slot.candidates || [])].sort((left, right) => compareCandidates(left, right, workloadByUid));
-                rows.push(`<tr><th scope="row">${esc(dateShort(day.date))}</th><td>${esc(segmentLabels[slot.segmentKey] || slot.segmentKey || 'Schicht')}</td><td>${candidates.length ? `<ol class="adp-proposal-candidates">${candidates.map(candidate => proposalCandidate(candidate, workloadByUid.get(candidate.uid))).join('')}</ol>` : '<span class="adp-muted">Keine Wünsche</span>'}</td></tr>`);
+                const slotCandidates = slot.candidates || [];
+                const candidates = slotCandidates.filter(candidate => {
+                    if (!candidate.unavailable) return true;
+                    unavailableCount += 1;
+                    return false;
+                }).sort((left, right) => compareCandidates(left, right, workloadByUid));
+                if (!candidates.length) {
+                    if (!slotCandidates.length) emptyCount += 1;
+                    continue;
+                }
+                rows.push(`<tr><th scope="row">${esc(dateShort(day.date))}</th><td>${esc(segmentLabels[slot.segmentKey] || slot.segmentKey || 'Schicht')}</td><td><ol class="adp-proposal-candidates">${candidates.map(candidate => proposalCandidate(candidate, workloadByUid.get(candidate.uid))).join('')}</ol></td></tr>`);
             }
         }
-        return `<section class="adp-plan-proposal" aria-labelledby="adp-proposal-heading"><h3 id="adp-proposal-heading">Grober Planvorschlag</h3><p>Feste Schichten bleiben gesetzt. Danach folgen vorhandene Wünsche: Lieblingsschichten zuerst, Notfallschichten zuletzt; bei gleicher Präferenz wird die geringere Auslastung bevorzugt.</p><div class="adp-table-wrap"><table class="adp-table"><thead><tr><th scope="col">Tag</th><th scope="col">Schicht</th><th scope="col">Reihenfolge</th></tr></thead><tbody>${rows.join('')}</tbody></table></div></section>`;
+        const emptySummary = emptyCount ? `<span class="adp-muted adp-empty-summary">${esc(emptyCount)} ${emptyCount === 1 ? 'Schicht' : 'Schichten'} ohne Wünsche</span>` : '';
+        const unavailableSummary = unavailableCount ? `<span class="adp-vacation-summary">${esc(unavailableCount)} ${unavailableCount === 1 ? 'Urlaubskonflikt' : 'Urlaubskonflikte'} nicht vorgeschlagen</span>` : '';
+        const table = rows.length ? `<div class="adp-table-wrap"><table class="adp-table"><thead><tr><th scope="col">Tag</th><th scope="col">Schicht</th><th scope="col">Reihenfolge</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>` : '<p class="adp-muted">Noch keine Wünsche für einen Vorschlag vorhanden.</p>';
+        return `<section class="adp-plan-proposal" aria-labelledby="adp-proposal-heading"><div class="adp-proposal-head"><h3 id="adp-proposal-heading">Grober Planvorschlag</h3><span>${unavailableSummary}${emptySummary}</span></div><details class="adp-proposal-help"><summary>Sortierung</summary><p>Urlaub wird nicht vorgeschlagen. Feste Schichten bleiben gesetzt. Danach folgen Lieblingsschichten, normale Wünsche und zuletzt Notfallschichten; bei gleicher Präferenz wird die geringere Auslastung bevorzugt.</p></details>${table}</section>`;
     }
 
     function proposalCandidate(candidate, workload) {
         const preference = normalizedPreference(candidate.preference);
         const marker = candidate.fixed ? '<span title="Feste Schicht" aria-label="Feste Schicht">🔒</span> ' : (preference === 'favorite' ? '<span title="Lieblingsschicht" aria-label="Lieblingsschicht">★</span> ' : (preference === 'emergency' ? '<span title="Nur wenn sonst niemand kann" aria-label="Nur wenn sonst niemand kann">🛟</span> ' : ''));
-        const load = workload ? ` ${capacity(workload.monthCount, workload.monthlyMin, workload.monthlyMax)}` : '';
+        const load = workload ? ` ${renderCapacity(workload.monthCount, workload.monthlyMin, workload.monthlyMax)}` : '';
         return `<li data-preference="${preference}">${marker}${esc(candidate.displayName || candidate.uid)}${load}</li>`;
     }
 

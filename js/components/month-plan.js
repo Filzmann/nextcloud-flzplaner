@@ -1,5 +1,5 @@
 (function() {
-    const { esc, dateShort, dayHeader } = window.ADPlaner.ui;
+    const { esc, dateShort, dayHeader, renderCapacity, hasCapacityLimits } = window.ADPlaner.ui;
     const { render: renderAssignmentControl } = window.ADPlaner.assignmentControl;
     const { render: renderCandidateChip } = window.ADPlaner.candidateChip;
     const { render: renderDayNoteControl } = window.ADPlaner.dayNoteControl;
@@ -12,13 +12,17 @@
         const team = plan.team;
         const segments = plan.segments || [];
         const canCoordinate = !!team.canCoordinate;
+        const personalWorkload = canCoordinate ? null : (plan.workload || []).find(row => row.uid === currentUser?.uid) || null;
         const status = typeof plan.status === 'string' ? plan.status : '';
         const mutable = status === 'draft' || status === 'planned';
+        const days = plan.days || [];
+        const weekGroups = groupWeeks(days);
+        const vacationGroups = groupVacations(days);
 
         return `
             <section class="adp-section">
                 <div class="adp-section-head">
-                    <h2>${esc(team.displayName || team.code)} - ${esc(plan.month)}</h2>
+                    <h2>${esc(team.displayName || team.code)} - ${esc(plan.month)}${personalWorkload ? `<span class="adp-personal-month-capacity" aria-label="Monatsauslastung">${renderCapacity(personalWorkload.monthCount, personalWorkload.monthlyMin, personalWorkload.monthlyMax)}</span>` : ''}</h2>
                     <div class="adp-plan-meta">
                         ${team.settings && team.settings.meetingDay ? `<span class="adp-badge">Treffen ${esc(dateShort(team.settings.meetingDay))}</span>` : ''}
                         ${renderStatus(status, canCoordinate)}
@@ -28,13 +32,15 @@
                     <table class="adp-table adp-month-table">
                         <thead>
                             <tr>
+                                <th scope="col" class="adp-week-column"><span class="adp-visually-hidden">Kalenderwoche</span></th>
+                                <th scope="col" class="adp-vacation-column">Urlaub</th>
                                 <th scope="col">Tag</th>
                                 ${segments.map(segment => `<th scope="col">${esc(segment.label)}<small>${esc(segment.startsAt)}-${esc(segment.endsAt)}</small></th>`).join('')}
                                 <th scope="col">Bemerkungen</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${(plan.days || []).map(day => dayRow(day, segments, team, currentUser, canCoordinate, mutable)).join('')}
+                            ${days.map((day, index) => dayRow(day, segments, team, currentUser, canCoordinate, mutable, personalWorkload, weekGroups.get(index), vacationGroups.get(index))).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -55,15 +61,17 @@
         </div>`;
     }
 
-    function dayRow(day, segments, team, currentUser, canCoordinate, mutable) {
+    function dayRow(day, segments, team, currentUser, canCoordinate, mutable, personalWorkload, weekGroup, vacationGroup) {
         const slotsByKey = {};
         (day.slots || []).forEach(slot => {
             slotsByKey[slot.segmentKey] = slot;
         });
 
         return `
-            <tr>
-                <th scope="row" class="adp-day">${dayHeader(day)}<small>${esc(dateShort(day.date))}</small><span class="adp-week-label">${esc(day.weekLabel || '')}</span>${renderHints(day.hints || [])}</th>
+            <tr${weekGroup?.separated ? ' class="adp-week-start"' : ''}>
+                ${renderWeekCell(weekGroup, personalWorkload)}
+                ${renderVacationCell(vacationGroup)}
+                <th scope="row" class="adp-day">${dayHeader(day)}${renderHints(nonVacationHints(day.hints || []))}</th>
                 ${segments.map(segment => slotCell(slotsByKey[segment.key], team, currentUser, canCoordinate, mutable)).join('')}
                 <td class="adp-note-cell">
                     <div class="adp-eb-note">${renderDayNoteControl(day, canCoordinate && mutable)}</div>
@@ -71,6 +79,96 @@
                 </td>
             </tr>
         `;
+    }
+
+    function groupWeeks(days) {
+        const groups = new Map();
+        let start = 0;
+        while (start < days.length) {
+            const label = days[start].weekLabel || '';
+            let end = start + 1;
+            while (end < days.length && (days[end].weekLabel || '') === label) end++;
+            groups.set(start, { label, span: end - start, separated: start > 0 });
+            start = end;
+        }
+        return groups;
+    }
+
+    function groupVacations(days) {
+        const groups = new Map();
+        let start = 0;
+        while (start < days.length) {
+            const hints = vacationHints(days[start].hints || []);
+            const key = vacationKey(days[start], hints);
+            let end = start + 1;
+            while (end < days.length) {
+                const nextHints = vacationHints(days[end].hints || []);
+                if (vacationKey(days[end], nextHints) !== key) break;
+                end++;
+            }
+            groups.set(start, { hints, span: end - start });
+            start = end;
+        }
+        return groups;
+    }
+
+    function vacationKey(day, hints) {
+        return `${day.weekLabel || ''}|${hints.map(hint => `${hint.employeeUid || hint.displayName || ''}:${hint.marker || ''}`).join('|')}`;
+    }
+
+    function vacationHints(hints) {
+        return hints
+            .filter(hint => hint.type === 'absence')
+            .slice()
+            .sort((left, right) => [left.employeeUid || left.displayName || '', left.marker || ''].join('|').localeCompare([right.employeeUid || right.displayName || '', right.marker || ''].join('|')));
+    }
+
+    function nonVacationHints(hints) {
+        return hints.filter(hint => hint.type !== 'absence');
+    }
+
+    function renderVacationCell(group) {
+        if (!group) return '';
+        if (!group.hints.length) {
+            return `<td rowspan="${esc(group.span)}" class="adp-vacation-cell adp-vacation-cell--empty" aria-label="Kein Urlaub"></td>`;
+        }
+        const entries = group.hints.map(hint => `${hint.marker || 'U'} ${hint.displayName || hint.employeeUid || ''}`);
+        return `<td rowspan="${esc(group.span)}" class="adp-vacation-cell" aria-label="Urlaub: ${entries.map(esc).join(', ')}"><div class="adp-vacation-label">${entries.map(entry => `<span class="adp-vacation-entry">${esc(entry)}</span>`).join('')}</div></td>`;
+    }
+
+    function renderWeekCell(group, workload) {
+        if (!group) return '';
+        const label = String(group.label || '');
+        const number = label.replace(/^KW\s*/i, '') || '–';
+        const week = workload ? (workload.weeks || []).find(item => item.label === label) : null;
+        const capacity = weekCapacity(week, workload);
+        const statusClass = capacity?.status ? ` adp-capacity--${capacity.status}` : '';
+        const capacityLabel = capacity ? `<span>${esc(capacity.text)}</span>` : '';
+        const title = capacity ? ` title="${esc(capacity.title)}"` : '';
+        return `<th scope="rowgroup" rowspan="${esc(group.span)}" class="adp-week-cell${statusClass}"${title} aria-label="${esc(label || 'Kalenderwoche')}${capacity ? `, ${esc(capacity.title)}` : ''}"><span>KW</span><strong>${esc(number)}</strong>${capacityLabel}</th>`;
+    }
+
+    function weekCapacity(week, workload) {
+        if (!week || !workload) return null;
+        const count = Number(week.count) || 0;
+        const minimum = finiteOrNull(workload.weeklyMin);
+        const maximum = finiteOrNull(workload.weeklyMax);
+        if (!hasCapacityLimits(minimum, maximum)) {
+            return { status: null, text: String(count), title: `${count} Schichten` };
+        }
+        if (minimum !== null && count < minimum) {
+            return { status: 'under', text: `<${minimum}`, title: `${count} von mindestens ${minimum}` };
+        }
+        if (maximum !== null) {
+            return { status: count > maximum ? 'over' : 'within', text: `${count}/${maximum}`, title: `${count} von maximal ${maximum}` };
+        }
+        return { status: 'within', text: String(count), title: `${count} Schichten` };
+    }
+
+    function finiteOrNull(value) {
+        if (value === null || value === undefined || value === '') return null;
+        const number = Number(value);
+        return Number.isFinite(number) ? number : null;
     }
 
     function renderCandidateNotes(day, segments, mutable) {

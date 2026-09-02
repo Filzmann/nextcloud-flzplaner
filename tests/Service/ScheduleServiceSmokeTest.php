@@ -167,6 +167,7 @@ class FakeTeamAccessServiceForSchedule extends TeamAccessService {
 }
 
 class FakePlanningHintServiceForSchedule extends PlanningHintService {
+    public bool $blockVacation = false;
     public function __construct() {}
     public function forMonth(string $month, array $employeeUids): array {
         return [$month . '-01' => [[
@@ -176,6 +177,15 @@ class FakePlanningHintServiceForSchedule extends PlanningHintService {
             'label' => 'Urlaub',
             'blocks' => false,
         ]]];
+    }
+    public function contextForMonth(string $month, array $employeeUids, array $segments): array {
+        return [
+            'hints'=>$this->forMonth($month,$employeeUids),
+            'unavailable'=>$this->blockVacation ? [$month.'-01|early'=>['assistant-a'=>true]] : [],
+        ];
+    }
+    public function assertAvailableForSlot(ShiftSlot $slot, string $employeeUid): void {
+        if ($this->blockVacation && $employeeUid === 'assistant-a') throw new \DomainException('Urlaub blockiert diese Schicht.');
     }
 }
 
@@ -201,7 +211,8 @@ $mappedTeam = Team::get($ebTeam->toArray());
 assertSameValue('Team A1', $mappedTeam->toArray()['displayName'], 'Team::get should keep the API payload shape.');
 
 $store = new FakeShiftPlanStoreForSchedule();
-$service = new ScheduleService($store, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($store), new FixedShiftService($store, new ShiftConfigService()));
+$planningHints = new FakePlanningHintServiceForSchedule();
+$service = new ScheduleService($store, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), $planningHints, new WorkloadPreferenceService($store), new FixedShiftService($store, new ShiftConfigService()));
 
 $approvalRaceStore = new FakeShiftPlanStoreForSchedule();
 $approvalRaceStore->statusOnNextLock = 'approved';
@@ -217,6 +228,17 @@ assertSameValue('assistant-a', $store->added[0]['assistantUid'] ?? null, 'Assist
 
 $service->addCandidate($ebTeam, '2026-07', 9, 'assistant-a', 'test-eb');
 assertSameValue('assistant-a', $store->added[1]['assistantUid'] ?? null, 'EB should be able to assign an assistant.');
+
+$planningHints->blockVacation = true;
+$addedBeforeVacation = count($store->added);
+assertDomainException(
+    static fn() => $service->addCandidate($ebTeam, '2026-07', 9, 'assistant-a', 'test-eb'),
+    'Urlaub muss eine neue manuelle Zuweisung verhindern.'
+);
+assertSameValue($addedBeforeVacation, count($store->added), 'Eine wegen Urlaub abgewiesene Zuweisung darf nichts speichern.');
+$vacationPlan = $service->monthPlan($ebTeam, '2026-07', 'test-eb');
+assertSameValue(true, $vacationPlan['days'][0]['slots'][0]['candidates'][0]['unavailable'] ?? false, 'Bestehende Wünsche im Urlaub müssen als Konflikt markiert werden.');
+$planningHints->blockVacation = false;
 
 $service->removeCandidate($assistantTeam, '2026-07', 9, '', 'assistant-a');
 assertSameValue(

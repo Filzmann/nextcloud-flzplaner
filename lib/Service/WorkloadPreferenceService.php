@@ -138,6 +138,9 @@ final class WorkloadPreferenceService {
     }
 
     private function status(int $count, ?int $minimum, ?int $maximum): string {
+        if (($minimum === null && $maximum === null) || ($minimum === 0 && $maximum === 0)) {
+            return 'normal';
+        }
         if ($minimum !== null && $count < $minimum) {
             return 'under';
         }

@@ -2,6 +2,19 @@
 
 Diese Datei bündelt geplante Erweiterungen und offene Produktentscheidungen. Verbindliche Fach-, Sicherheits- und Architekturregeln stehen in `AGENTS.md`.
 
+## Nextcloud-Kompatibilitätsgate
+
+### ADP-NC-COMPAT – OpenDesk-Boden 33 und künftige Majors nachweisen
+
+Status: `info.xml` bleibt bei 34/34; NC 33.0.7 ist bislang nur statisch
+plausibel. Vor `min-version="33"` müssen der vorhandene rote PHP-Konflikttest
+unabhängig geklärt sowie Fresh Install/Upgrade, DI, Migrationen,
+Wunschdienst-/Konfliktpfade, Jobs, Standalone- und Kalenderkombination,
+Assets und sichtbare Oberfläche auf NC 33 grün sein. Anschließend wird jede
+weitere deklarierte Major lückenlos mit
+`verify-nextcloud-future-compatibility` geprüft; die Obergrenze ist die
+höchste grüne Major und kein festes „latest“.
+
 ## Aktueller Fokus
 
 - Die manuellen Prüfungen werden im ausfüllbaren
@@ -24,17 +37,12 @@ Diese Datei bündelt geplante Erweiterungen und offene Produktentscheidungen. Ve
   festgelegt. Tests decken mindestens kleine Viewports, beide Rollen,
   Menü-/Filterbedienung, Fokusreihenfolge, Zoom, lange Beschriftungen sowie
   vertikales und gegebenenfalls lokal begrenztes horizontales Scrollen ab.
-- **ADP-L10N – vollständige Lokalisierung (später, nicht freigegeben):**
-  AdPlaner wird im Rahmen des suiteweiten L10N-Rollouts auf die aktive
-  Nextcloud-Locale und Nextcloud-l10n umgestellt. Manuelle Monats- und
-  Wochentagsnamen sowie sichtbare UI-, Status-, Validierungs- und
-  Fehlermeldungen werden dabei vollständig migriert. ISO-Daten,
-  Monatsnummern, Schichtzeiten, Statuswerte, Teamcodes und API-Schlüssel
-  bleiben unverändert; Abkürzungen werden nicht durch Abschneiden gebildet.
-  Erforderlich sind Tests für deutsche Ausgabe, mindestens eine weitere
-  Locale, Fallback, Monats-/Jahresgrenzen, Pluralformen, Platzhalter und
-  Escaping in PHP und JavaScript. Pilot-App, Reihenfolge und Rohtext-Gate
-  werden vor Umsetzung suiteweit separat freigegeben.
+- **ADP-L10N – app-lokaler Umsetzungsschnitt (systemweit gegatet):** Erst
+  nach Freigabe des Root-Vorhabens `ZM-06` sichtbare Texte, Monats- und
+  Wochentagsnamen auf Nextcloud-l10n umstellen. ISO-Daten, Monatsnummern,
+  Schichtzeiten, Statuswerte, Teamcodes und API-Schlüssel bleiben
+  sprachneutral; Deutsch, eine weitere Locale, Fallback, Plural,
+  Platzhalter und Escaping werden app-lokal getestet.
 - Persönliche Monatsansicht „Alle meine Einsätze“ mit PDF-Export und optionaler Verbindung zu gängigen Kalendern.
 - Benachrichtigungen für relevante Planungs- und Statusänderungen.
 - Teambezogene Konfigurierbarkeit nur dort erweitern, wo konkrete Teams unterschiedliche Regeln benötigen.

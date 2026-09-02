@@ -12,9 +12,10 @@
         }
 
         render(state, team) {
+            const workloadOpen = state.activeView === 'workload' && !!team?.canCoordinate;
             if (this.workloadOverlay) {
-                this.workloadOverlay.hidden = state.activeView !== 'workload';
-                this.workloadOverlay.innerHTML = state.activeView === 'workload'
+                this.workloadOverlay.hidden = !workloadOpen;
+                this.workloadOverlay.innerHTML = workloadOpen
                     ? `<button type="button" class="adp-overlay-close" aria-label="Auslastung schließen" title="Schließen" data-action="close-workload">&times;</button>${this.renderWorkload(state.monthPlan, state.currentUser)}`
                     : '';
             }
@@ -33,7 +34,7 @@
                 this.bindPersonalRegularShiftsForm();
                 return;
             }
-            if (state.activeView === 'workload') {
+            if (workloadOpen) {
                 this.panel.innerHTML = this.renderMonth(state.monthPlan, state.currentUser);
                 return;
             }

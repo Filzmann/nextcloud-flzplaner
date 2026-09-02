@@ -31,6 +31,35 @@
         return '';
     }
 
+    function renderCapacity(countValue, minimumValue, maximumValue) {
+        const count = Number(countValue) || 0;
+        const minimum = finiteOrNull(minimumValue);
+        const maximum = finiteOrNull(maximumValue);
+        if (!hasCapacityLimits(minimum, maximum)) {
+            return `<span class="adp-capacity adp-capacity--plain" title="${esc(count)} Schichten">${esc(count)}</span>`;
+        }
+        if (minimum !== null && count < minimum) {
+            return `<span class="adp-capacity adp-capacity--under" title="${esc(count)} von mindestens ${esc(minimum)}">&lt;${esc(minimum)}</span>`;
+        }
+        if (maximum !== null) {
+            const status = count > maximum ? 'over' : 'within';
+            return `<span class="adp-capacity adp-capacity--${status}" title="${esc(count)} von maximal ${esc(maximum)}">${esc(count)}/${esc(maximum)}</span>`;
+        }
+        return `<span class="adp-capacity adp-capacity--within" title="${esc(count)} Schichten">${esc(count)}</span>`;
+    }
+
+    function hasCapacityLimits(minimumValue, maximumValue) {
+        const minimum = finiteOrNull(minimumValue);
+        const maximum = finiteOrNull(maximumValue);
+        return !((minimum === null && maximum === null) || (minimum === 0 && maximum === 0));
+    }
+
+    function finiteOrNull(value) {
+        if (value === null || value === undefined || value === '') return null;
+        const number = Number(value);
+        return Number.isFinite(number) ? number : null;
+    }
+
     function showNotice(message) {
         notice.show(message);
     }
@@ -40,5 +69,5 @@
     }
 
     window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.ui = { byId, esc, dateShort, dayHeader, monthHeader, statusLabel, showNotice, showError };
+    window.ADPlaner.ui = { byId, esc, dateShort, dayHeader, monthHeader, statusLabel, renderCapacity, hasCapacityLimits, showNotice, showError };
 })();

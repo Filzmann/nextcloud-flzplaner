@@ -72,8 +72,8 @@ $slots = [
     new ShiftSlot(10,'A1','2026-09','2026-09-07','early','Früh','08:00','14:10',true),
     new ShiftSlot(11,'A1','2026-09','2026-09-07','late','Spät','14:00','20:00',true),
 ];
-$service->materializeMonth($assistantTeam, $slots);
-assertSameValue([['slotId'=>10,'uid'=>'a'],['slotId'=>11,'uid'=>'a']], $store->materialized, 'Jede passende Wochenregel muss genau den konkreten Slot materialisieren.');
+$service->materializeMonth($assistantTeam, $slots, ['2026-09-07|early'=>['a'=>true]]);
+assertSameValue([['slotId'=>11,'uid'=>'a']], $store->materialized, 'Urlaub muss die automatische Festschicht materialisierung verhindern, andere Regeln aber erhalten.');
 
 $fixedA = new ShiftCandidate(1,10,'a','a',preference:'neutral',note:'',source:'regular');
 $fixedB = new ShiftCandidate(2,10,'b','b',preference:'neutral',note:'',source:'regular');

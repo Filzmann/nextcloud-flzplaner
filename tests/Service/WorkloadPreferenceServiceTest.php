@@ -25,6 +25,7 @@ final class WorkloadStoreFake extends ShiftPlanStore {
 $assistants = [
     ['uid'=>'self','displayName'=>'Selbst','isEb'=>false,'canReceiveShifts'=>true],
     ['uid'=>'other','displayName'=>'Andere Person','isEb'=>false,'canReceiveShifts'=>true],
+    ['uid'=>'unbounded','displayName'=>'Ohne Grenzen','isEb'=>false,'canReceiveShifts'=>true],
     ['uid'=>'eb','displayName'=>'EB','isEb'=>true,'canReceiveShifts'=>false],
 ];
 $selfTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, false, []);
@@ -46,17 +47,21 @@ try {
 $store->limits = [
     'self' => ['weeklyMin'=>2,'weeklyMax'=>4,'monthlyMin'=>8,'monthlyMax'=>10],
     'other' => ['weeklyMin'=>null,'weeklyMax'=>1,'monthlyMin'=>null,'monthlyMax'=>1],
+    'unbounded' => ['weeklyMin'=>0,'weeklyMax'=>0,'monthlyMin'=>0,'monthlyMax'=>0],
 ];
 $store->assignments = [
     ['assistant_uid'=>'self','work_date'=>'2026-09-01','segment_key'=>'early','assignment_source'=>'manual','fixed_deleted'=>false],
     ['assistant_uid'=>'other','work_date'=>'2026-09-02'],
     ['assistant_uid'=>'other','work_date'=>'2026-09-03'],
+    ['assistant_uid'=>'unbounded','work_date'=>'2026-09-04'],
 ];
 $store->rules = [['userUid'=>'self','weekday'=>1,'segmentKey'=>'early']];
 $overview = $service->overview($ebTeam, '2026-09', 'eb');
 assertSameValue('under', $overview[0]['monthStatus'] ?? null, 'Monatlich unter Minimum muss kräftig markiert werden.');
 assertSameValue(2, $overview[0]['weeks'][0]['count'] ?? null, 'Eine Kalenderwoche muss einschließlich einer noch nicht materialisierten Festschicht aus dem Vormonat gezählt werden.');
 assertSameValue('over', $overview[1]['monthStatus'] ?? null, 'Monatlich über Maximum muss blasser markiert werden.');
+assertSameValue('normal', $overview[2]['monthStatus'] ?? null, '0/0 bedeutet keine Monatsgrenze und darf keine Überlastung markieren.');
+assertSameValue('normal', $overview[2]['weeks'][0]['status'] ?? null, '0/0 bedeutet keine Wochengrenze und darf keine Überlastung markieren.');
 
 $ownOverview = $service->overview($selfTeam, '2026-09', 'self');
 assertSameValue(['self'], array_column($ownOverview, 'uid'), 'Assistenzkräfte dürfen nur die eigene Auslastung erhalten.');

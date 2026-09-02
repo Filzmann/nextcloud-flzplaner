@@ -423,6 +423,21 @@ class ShiftPlanRepository {
         return $qb->executeQuery()->fetchAllAssociative();
     }
 
+    /** @return list<array<string,mixed>> */
+    public function candidateIntervalsForEmployee(string $employeeUid, DateTimeImmutable $start, DateTimeImmutable $end): array {
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('c.assistant_uid', 'c.fixed_deleted', 's.work_date', 's.starts_at', 's.ends_at')
+            ->from('adp_shift_candidates', 'c')
+            ->innerJoin('c', 'adp_shift_slots', 's', $qb->expr()->eq('s.id', 'c.slot_id'))
+            ->where($qb->expr()->eq('c.assistant_uid', $qb->createNamedParameter($employeeUid)))
+            ->andWhere($qb->expr()->eq('c.fixed_deleted', $qb->createNamedParameter(false, IQueryBuilder::PARAM_BOOL)))
+            ->andWhere($qb->expr()->eq('s.enabled', $qb->createNamedParameter(1, IQueryBuilder::PARAM_INT)))
+            ->andWhere($qb->expr()->gte('s.work_date', $qb->createNamedParameter($start->modify('-1 day')->format('Y-m-d'))))
+            ->andWhere($qb->expr()->lte('s.work_date', $qb->createNamedParameter($end->format('Y-m-d'))));
+
+        return $qb->executeQuery()->fetchAllAssociative();
+    }
+
     private function workloadLimit(string $teamCode, string $uid): ?array {
         $qb = $this->db->getQueryBuilder();
         $qb->select('*')->from('adp_workload_limits')

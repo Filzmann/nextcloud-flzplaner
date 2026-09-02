@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\AdPlaner\AppInfo;
 
 use OCA\AdPlaner\Listener\IntegrationCapabilityQueryListener;
+use OCA\AdPlaner\Listener\ScheduleConflictQueryListener;
 use OCA\AdPlaner\Listener\StandaloneNavigationListener;
 use OCA\AdPlaner\Privacy\PlanerPrivacyProviderListener;
 use OCA\AdPlaner\Permission\PlanerPermissionProviderListener;
@@ -17,6 +18,7 @@ use OCA\AdPlaner\Service\TemporaryAdminAccessService;
 use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
 use OCA\FilzmannPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
 use OCA\LocalBase\Integration\IntegrationCapabilityQueryEvent;
+use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -33,6 +35,7 @@ class Application extends App implements IBootstrap {
 
     public function register(IRegistrationContext $context): void {
         $context->registerEventListener(IntegrationCapabilityQueryEvent::class, IntegrationCapabilityQueryListener::class);
+        $context->registerEventListener(ScheduleConflictQueryEvent::class, ScheduleConflictQueryListener::class);
         $context->registerEventListener(LoadAdditionalEntriesEvent::class, StandaloneNavigationListener::class);
         $context->registerEventListener(RegisterPersonalDataProvidersEvent::class, PlanerPrivacyProviderListener::class);
         $context->registerEventListener(RegisterPermissionProvidersEvent::class, PlanerPermissionProviderListener::class);
