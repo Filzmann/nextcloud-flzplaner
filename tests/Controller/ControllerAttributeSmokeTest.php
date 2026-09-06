@@ -50,19 +50,34 @@ namespace {
         throw new \RuntimeException('Page index should be available to regular users.');
     }
 
-    $apiActions = [
+    $readActions = [
         'state',
         'monthPlan',
+    ];
+    foreach ($readActions as $action) {
+        $method = new \ReflectionMethod(ApiController::class, $action);
+        if ($method->getAttributes(NoAdminRequired::class) === []) {
+            throw new \RuntimeException($action . ' should be available to regular users.');
+        }
+        if ($method->getAttributes(NoCSRFRequired::class) === []) {
+            throw new \RuntimeException($action . ' should be readable without a CSRF header.');
+        }
+    }
+
+    $writeActions = [
         'saveTeamSettings',
         'saveDayNote',
         'addShiftCandidate',
         'removeShiftCandidate',
         'updateCandidateMetadata',
         'savePersonalWorkload',
+        'savePersonalRegularShifts',
         'transitionMonthStatus',
+        'reportFixedConflict',
+        'resolveFixedConflict',
     ];
 
-    foreach ($apiActions as $action) {
+    foreach ($writeActions as $action) {
         $method = new \ReflectionMethod(ApiController::class, $action);
         if ($method->getAttributes(NoAdminRequired::class) === []) {
             throw new \RuntimeException($action . ' should be available to regular users.');

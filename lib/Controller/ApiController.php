@@ -14,6 +14,7 @@ use OCA\AdPlaner\Service\FixedShiftService;
 use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
@@ -31,7 +32,7 @@ class ApiController extends Controller {
         parent::__construct(Application::APP_ID, $request);
     }
 
-    #[NoAdminRequired]
+    #[NoAdminRequired, NoCSRFRequired]
     public function state(): DataResponse {
         return $this->responder->respond(function (): array {
             $uid = $this->teamAccess->currentUserId();
@@ -56,7 +57,7 @@ class ApiController extends Controller {
         }, [$this->logger, 'error'], 'state');
     }
 
-    #[NoAdminRequired]
+    #[NoAdminRequired, NoCSRFRequired]
     public function monthPlan(string $teamCode, string $month): DataResponse {
         return $this->responder->respond(function () use ($teamCode, $month): array {
             $team = $this->teamAccess->assertTeamAccess($teamCode);
