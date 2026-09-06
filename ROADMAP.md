@@ -5,19 +5,6 @@ und Freigabegates. Der aktuelle Funktionsumfang steht in `README.md`,
 erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 `docs/architecture.md`.
 
-## Nextcloud-Kompatibilitätsgate
-
-### ADP-NC-COMPAT – OpenDesk-Boden 33 und künftige Majors nachweisen
-
-Status: `info.xml` bleibt bei 34/34; NC 33.0.7 ist bislang nur statisch
-plausibel. Vor `min-version="33"` müssen der vorhandene rote PHP-Konflikttest
-unabhängig geklärt sowie Fresh Install/Upgrade, DI, Migrationen,
-Wunschdienst-/Konfliktpfade, Jobs, Standalone- und Kalenderkombination,
-Assets und sichtbare Oberfläche auf NC 33 grün sein. Anschließend wird jede
-weitere deklarierte Major lückenlos mit
-`verify-nextcloud-future-compatibility` geprüft; die Obergrenze ist die
-höchste grüne Major und kein festes „latest“.
-
 ## Aktueller Fokus
 
 - Die manuellen Prüfungen werden im ausfüllbaren

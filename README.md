@@ -4,10 +4,16 @@ Monatliche Wunschdienstplanung für Assistenzteams. Urlaubsplanung liegt ausschl
 
 ## Staging-Kompatibilität
 
-- Nextcloud 34
-- PHP 8.3 oder neuer innerhalb des von Nextcloud 34 unterstützten Bereichs
+- Nextcloud 33 und 34
+- PHP 8.3 oder neuer innerhalb des von der jeweiligen Nextcloud-Version unterstützten Bereichs
 - Laufzeitbasis: `localbase`; `orgsuite` ist ab zwei AD-Fachprodukten optional aktiv
 - App-ID und Installationsordner: `adplaner`
+
+Der deklarierte Bereich wurde mit einer frischen Installation auf Nextcloud
+33.0.7 und einem anschließenden Upgrade mit synthetischen Bestandsdaten auf
+34.0.2 geprüft. Dabei waren Datenbankmigration, Kommandoauflösung,
+Rollen-/Negativpfade, Privacy- und Permission-Provider, Assets sowie die
+sichtbare mobile Oberfläche grün.
 
 ## Installation
 

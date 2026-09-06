@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Den unterstützten Nextcloud-Bereich nach grüner Neuinstallation auf 33.0.7
+  und grünem Upgrade mit synthetischen Bestandsdaten auf 34.0.2 auf die
+  lückenlosen Hauptversionen 33 bis 34 erweitert.
+- Permission-Provider-Listener an den Nextcloud-EventListener-Vertrag
+  angepasst.
 - Dokumentations- und Steuerungsstruktur vereinheitlicht.
 - Belegte Assistenzschichten als versionierte read-only Planungskonflikte
   veröffentlicht; Kalenderdienste blockieren Planvorschlag, Festschichten und
