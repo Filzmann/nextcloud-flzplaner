@@ -54,7 +54,11 @@
 
         setCandidateNoteEditor(button, open) {
             const selector = `[data-candidate-note-entry][data-slot-id="${CSS.escape(button.dataset.slotId || '')}"][data-target-uid="${CSS.escape(button.dataset.targetUid || '')}"]`;
-            const editor = this.panel.querySelector(selector)?.querySelector('.adp-shift-note-editor');
+            const closestEntry = button.closest(selector);
+            const surface = button.closest('.adp-mobile-plan, .adp-desktop-plan');
+            const surfaceEntry = surface && typeof surface.querySelector === 'function' ? surface.querySelector(selector) : null;
+            const entry = closestEntry && typeof closestEntry.querySelector === 'function' ? closestEntry : (surfaceEntry || this.panel.querySelector(selector));
+            const editor = entry?.querySelector('.adp-shift-note-editor');
             if (!editor) return;
             editor.hidden = !open;
             if (open) editor.querySelector('[data-candidate-note]')?.focus();

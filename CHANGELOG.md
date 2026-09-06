@@ -7,6 +7,14 @@
   lückenlosen Hauptversionen 33 bis 34 erweitert.
 - Permission-Provider-Listener an den Nextcloud-EventListener-Vertrag
   angepasst.
+- Die mobile Schichtnotizbearbeitung an die sichtbare Tageslistenprojektion
+  gebunden.
+- Den Monatsplan auf Smartphone-Viewports als semantische Tagesliste mit
+  Schichtzeiten, Status, Hinweisen, Anmerkungen und den bestehenden
+  rollenabhängigen Assistenz-/EB-Aktionen umgesetzt.
+- Kompakte Tab-Navigation, mindestens 44 Pixel hohe Touchziele und eindeutig
+  zugeordnete Zuteilungsdialoge für die mobile Bedienung ergänzt; genehmigte
+  und unbekannte Status bleiben auch dort fail-closed.
 - Dokumentations- und Steuerungsstruktur vereinheitlicht.
 - Belegte Assistenzschichten als versionierte read-only Planungskonflikte
   veröffentlicht; Kalenderdienste blockieren Planvorschlag, Festschichten und

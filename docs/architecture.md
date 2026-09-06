@@ -34,6 +34,16 @@ in Services und Browserlogik in getrennten Modulen und Komponenten. Der
 Monatsplan verwendet den App-Root als vertikalen Scrollcontainer und leitet
 Rechte niemals aus Sichtbarkeit oder Navigation ab.
 
+Die Desktopmatrix und die bis 700 Pixel eingeblendete mobile Tagesliste sind
+zwei Darstellungen desselben bereits serverseitig autorisierten Planpayloads.
+Beide verwenden dieselben Komponenten und Aktionskennungen für Wünsche,
+Zuweisungen, Präferenzen, Notizen, Konflikte und Status. Verdeckte
+Desktop-Bedienelemente nehmen mobil weder an Fokusreihenfolge noch
+Interaktion teil; mehrfach dargestellte Zuteilungsdialoge besitzen eindeutige
+IDs. Zuteilungsdialoge und Schichtnotiz-Editoren werden relativ zur Oberfläche
+ihres auslösenden Steuerelements geöffnet. Der App-Root bleibt der einzige
+vertikale Seiten-Scroller.
+
 ## Datenschutz und Administration
 
 PersonalDataProvider und PermissionProvider bilden Schichtbezüge,

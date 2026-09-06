@@ -40,6 +40,12 @@ werden im Einstellungstab gepflegt. Die eigene Auslastung ist einblendbar;
 die zuständige EB sieht die Teamübersicht und erkennt Unter- beziehungsweise
 Überschreitungen zusätzlich zu ihrer visuellen Markierung immer auch als Text.
 
+Auf Smartphone-Viewports wird derselbe Monatsplan als semantische Tagesliste
+mit Schichtzeiten, Zuständigkeiten, Status, Hinweisen und Anmerkungen
+dargestellt. Assistenz und EB verwenden dort dieselben rollenabhängigen
+Aktionen wie in der Desktopmatrix; genehmigte und unbekannte Planstatus
+bleiben auch mobil ohne fachliche Mutationsangebote.
+
 Native Nextcloud-Administration erteilt keinen automatischen Zugriff auf den
 fachlichen Demo-Datenpfad. Dieser wird je Admin app-lokal für höchstens 24
 Stunden freigegeben; Beginn, geplantes Ende und Widerruf bleiben auditierbar.

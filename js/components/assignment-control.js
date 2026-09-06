@@ -1,12 +1,12 @@
 (function() {
     const { esc } = window.ADPlaner.ui;
 
-    function render(slot, team, candidates) {
+    function render(slot, team, candidates, surface = 'default') {
         const assigned = new Set((candidates || []).map(candidate => candidate.uid));
         const assistants = (team.assistants || []).filter(assistant => {
             return assistant.canReceiveShifts !== false && !assigned.has(assistant.uid);
         });
-        const pickerId = `adp-assignment-picker-${esc(slot.id)}`;
+        const pickerId = `adp-assignment-picker-${esc(slot.id)}-${esc(surface)}`;
 
         return `
             <span class="adp-assignment-control" data-assignment-control="${esc(slot.id)}">
@@ -28,7 +28,10 @@
             return;
         }
 
-        const picker = document.querySelector(`[data-assignment-picker="${CSS.escape(slotId)}"]`);
+        const control = typeof button.closest === 'function' ? button.closest('[data-assignment-control]') : null;
+        const picker = control
+            ? control.querySelector(`[data-assignment-picker="${CSS.escape(slotId)}"]`)
+            : document.querySelector(`[data-assignment-picker="${CSS.escape(slotId)}"]`);
         const shouldOpen = !!picker && picker.hidden;
         document.querySelectorAll('[data-assignment-picker]').forEach(candidate => {
             candidate.hidden = true;

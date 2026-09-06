@@ -58,5 +58,10 @@ foreach (['.adp-capacity--under', '.adp-capacity--within', '.adp-capacity--over'
         throw new RuntimeException("Die kompakte Auslastungsampel fehlt: {$contract}");
     }
 }
+foreach (['.adp-desktop-plan', '.adp-mobile-plan', 'display: none', '@media (max-width: 700px)', '.adp-mobile-day', '.adp-mobile-shift', 'min-height: 44px', 'overflow-x: hidden'] as $contract) {
+    if (!str_contains($css, $contract)) {
+        throw new RuntimeException("Der smartphone-taugliche Tageslistenvertrag fehlt: {$contract}");
+    }
+}
 
 echo "AdPlaner layout smoke test passed\n";

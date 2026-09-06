@@ -671,6 +671,10 @@
     color: var(--color-text-maxcontrast);
 }
 
+.adp-mobile-plan {
+    display: none;
+}
+
 @media (max-width: 700px) {
     #adplaner-app {
         padding: 14px;
@@ -687,6 +691,92 @@
 
     .adp-controls label {
         flex: 1 1 160px;
+    }
+
+    .adp-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2px;
+    }
+
+    #adplaner-app .adp-tab,
+    #adplaner-app .adp-small,
+    #adplaner-app .adp-icon-button,
+    #adplaner-app .adp-chip button {
+        min-height: 44px;
+    }
+
+    .adp-desktop-plan {
+        display: none;
+    }
+
+    .adp-mobile-plan {
+        display: grid;
+        gap: 14px;
+    }
+
+    .adp-mobile-day {
+        display: grid;
+        gap: 12px;
+        min-width: 0;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 12px;
+        background: var(--color-main-background);
+    }
+
+    .adp-mobile-day-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .adp-mobile-day-head h3,
+    .adp-mobile-shift h4 {
+        margin: 0;
+    }
+
+    .adp-mobile-day-head h3 span {
+        margin-left: 5px;
+    }
+
+    .adp-mobile-day-head small,
+    .adp-mobile-shift small {
+        display: block;
+        color: var(--color-text-maxcontrast);
+        font-weight: 400;
+    }
+
+    .adp-mobile-shifts {
+        display: grid;
+        gap: 10px;
+    }
+
+    .adp-mobile-shift {
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+        border-top: 1px solid var(--color-border);
+        padding-top: 10px;
+    }
+
+    .adp-mobile-notes {
+        display: grid;
+        gap: 8px;
+        border-top: 1px solid var(--color-border);
+        padding-top: 10px;
+    }
+
+    .adp-mobile-notes textarea {
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .adp-workload-overlay {
+        right: auto;
+        left: 0;
+        width: calc(100vw - 28px);
     }
 
     .adp-shift-row {

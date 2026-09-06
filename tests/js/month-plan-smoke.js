@@ -131,6 +131,11 @@ assert(assistantHtml.includes('data-action="set-candidate-preference"'));
 assert(assistantHtml.includes('KW 27'), 'Die im Auslastungs-Overlay verwendete Kalenderwoche muss im Monatsplan erkennbar sein.');
 assert(assistantHtml.includes('class="adp-week-cell adp-capacity--under"'), 'Die gesamte KW-Zelle muss die persönliche Auslastungsfarbe tragen.');
 assert(assistantHtml.includes('<span>KW</span><strong>27</strong><span>&lt;2</span>'), 'KW, Nummer und Auslastung müssen platzsparend untereinander stehen.');
+assert(assistantHtml.includes('class="adp-mobile-plan" role="list"'), 'Kleine Viewports brauchen eine semantische Tagesliste statt der Desktopmatrix.');
+assert(assistantHtml.includes('class="adp-mobile-day" role="listitem"'), 'Jeder mobile Planungstag muss als eigener Listeneintrag erkennbar sein.');
+assert(assistantHtml.includes('class="adp-mobile-shift"'), 'Schichtzeiten und Zuständigkeit müssen mobil je Tag zusammenbleiben.');
+assert(assistantHtml.includes('class="adp-mobile-notes"'), 'Tages- und persönliche Anmerkungen müssen mobil erreichbar bleiben.');
+assert.strictEqual((assistantHtml.match(/data-action="add-self" data-slot-id="10"/g) || []).length, 2, 'Die eigene Wunschaktion muss in Desktop- und Mobilprojektion verfügbar sein.');
 
 const weekSpanPlan = JSON.parse(JSON.stringify(basePlan));
 weekSpanPlan.days.push({
@@ -255,6 +260,9 @@ assert(!ebHtml.includes('adp-workload-table'), 'Die Team-Auslastung darf nicht m
 assert(!ebHtml.includes('adp-personal-month-capacity'), 'Die EB erhält die Teamübersicht im Overlay und keine persönliche Monatsanzeige im Plan.');
 assert(!ebHtml.includes('adp-personal-week-capacity'), 'Die EB erhält keine persönliche KW-Anzeige im Plan.');
 assert(!ebHtml.includes('data-action="set-candidate-preference"'), 'EB darf fremde Präferenzen nicht verändern.');
+assert(ebHtml.includes('id="adp-assignment-picker-10-desktop"'), 'Die Desktop-Zuteilung braucht eine eindeutige Steuerelement-ID.');
+assert(ebHtml.includes('id="adp-assignment-picker-10-mobile"'), 'Die mobile Zuteilung darf keine ID der Desktopprojektion duplizieren.');
+assert.strictEqual((ebHtml.match(/data-action="add-selected" data-slot-id="10" data-target-uid="assistant-b"/g) || []).length, 2, 'EB-Zuteilungen müssen in Desktop- und Mobilprojektion denselben Aktionsvertrag verwenden.');
 
 const approvedHtml = monthPlan.render({
     ...basePlan,
@@ -272,6 +280,7 @@ assert(approvedHtml.includes('data-action="transition-status" data-target-status
 assert(!approvedHtml.includes('adp-assignment-control'));
 assert(!approvedHtml.includes('data-action="remove-candidate"'));
 assert(!approvedHtml.includes('<textarea'));
+assert(!approvedHtml.includes('data-action="add-self"'), 'Ein genehmigter Plan darf auch mobil keine eigenen Mutationen anbieten.');
 
 const unknownStatusHtml = monthPlan.render({
     ...basePlan,

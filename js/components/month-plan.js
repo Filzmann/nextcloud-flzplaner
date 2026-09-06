@@ -28,8 +28,9 @@
                         ${renderStatus(status, canCoordinate)}
                     </div>
                 </div>
-                <div class="adp-table-wrap">
-                    <table class="adp-table adp-month-table">
+                <div class="adp-desktop-plan">
+                    <div class="adp-table-wrap">
+                        <table class="adp-table adp-month-table">
                         <thead>
                             <tr>
                                 <th scope="col" class="adp-week-column"><span class="adp-visually-hidden">Kalenderwoche</span></th>
@@ -42,7 +43,11 @@
                         <tbody>
                             ${days.map((day, index) => dayRow(day, segments, team, currentUser, canCoordinate, mutable, personalWorkload, weekGroups.get(index), vacationGroups.get(index))).join('')}
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
+                </div>
+                <div class="adp-mobile-plan" role="list" aria-label="Wunschplan nach Tagen">
+                    ${days.map(day => mobileDay(day, segments, team, currentUser, canCoordinate, mutable)).join('')}
                 </div>
             </section>
         `;
@@ -207,6 +212,11 @@
             return '<td class="adp-empty"></td>';
         }
 
+        return `<td>${slotContents(slot, team, currentUser, canCoordinate, mutable, 'desktop')}</td>`;
+    }
+
+    function slotContents(slot, team, currentUser, canCoordinate, mutable, surface) {
+
         const candidates = slot.candidates || [];
         const selfUid = currentUser && currentUser.uid ? currentUser.uid : '';
         const hasSelf = candidates.some(candidate => candidate.uid === selfUid);
@@ -215,7 +225,6 @@
             : '';
 
         return `
-            <td>
                 <div class="adp-candidates">
                     ${candidates.map(candidate => renderCandidateChip(candidate, canCoordinate, slot.id, mutable)).join('')}
                 </div>
@@ -223,10 +232,35 @@
                 <div class="adp-cell-actions">
                     ${selfAction}
                     ${slot.selfUnavailable && !canCoordinate ? '<span class="adp-badge">Nicht verfügbar</span>' : ''}
-                    ${canCoordinate && mutable ? renderAssignmentControl(slot, team, candidates) : ''}
+                    ${canCoordinate && mutable ? renderAssignmentControl(slot, team, candidates, surface) : ''}
                 </div>
-            </td>
         `;
+    }
+
+    function mobileDay(day, segments, team, currentUser, canCoordinate, mutable) {
+        const slotsByKey = Object.fromEntries((day.slots || []).map(slot => [slot.segmentKey, slot]));
+        return `<article class="adp-mobile-day" role="listitem">
+            <header class="adp-mobile-day-head">
+                <h3>${dayHeader(day)}<small>${esc(day.date)}</small></h3>
+                <span class="adp-badge">${esc(day.weekLabel || 'Kalenderwoche')}</span>
+            </header>
+            ${renderHints(day.hints || [])}
+            <div class="adp-mobile-shifts">
+                ${segments.map(segment => mobileShift(day, segment, slotsByKey[segment.key], team, currentUser, canCoordinate, mutable)).join('')}
+            </div>
+            <section class="adp-mobile-notes" aria-label="Bemerkungen">
+                <div class="adp-eb-note">${renderDayNoteControl(day, canCoordinate && mutable)}</div>
+                ${renderCandidateNotes(day, segments, mutable)}
+            </section>
+        </article>`;
+    }
+
+    function mobileShift(day, segment, slot, team, currentUser, canCoordinate, mutable) {
+        const headingId = `adp-mobile-shift-${esc(day.date)}-${esc(segment.key)}`;
+        return `<section class="adp-mobile-shift" aria-labelledby="${headingId}">
+            <h4 id="${headingId}">${esc(segment.label)} <small>${esc(segment.startsAt)}–${esc(segment.endsAt)}</small></h4>
+            ${slot ? slotContents(slot, team, currentUser, canCoordinate, mutable, 'mobile') : '<p>Keine Schicht angelegt.</p>'}
+        </section>`;
     }
 
     function renderFixedConflict(slot,candidates,canCoordinate,mutable) {

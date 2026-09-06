@@ -51,5 +51,20 @@ panel.bindPersonalRegularShiftsForm();
     });
     await panel.handleClick({target:closeButton});
     assert.strictEqual(editor.hidden, true, 'Abbrechen muss den Editor ohne Speichervorgang schließen.');
+
+    const mobileEditor = { hidden:true, querySelector(){ return textarea; } };
+    const mobileEntry = { querySelector(){ return mobileEditor; } };
+    const mobileSurface = { querySelector(){ return mobileEntry; } };
+    const mobileButton = Object.assign(new Element(), {
+        dataset:{action:'open-candidate-note-editor',slotId:'7',targetUid:'self'},
+        closest(selector){
+            if (selector === 'button[data-action]') return this;
+            if (selector === '.adp-mobile-plan, .adp-desktop-plan') return mobileSurface;
+            return null;
+        },
+    });
+    await panel.handleClick({target:mobileButton});
+    assert.strictEqual(mobileEditor.hidden, false, 'Der mobile Schichtchip muss den Editor seiner eigenen Projektion öffnen.');
+    assert.strictEqual(editor.hidden, true, 'Der ausgeblendete Desktop-Editor darf durch eine mobile Aktion nicht geöffnet werden.');
     console.log('AdPlaner personal settings form smoke test passed.');
 })().catch(error => { console.error(error); process.exit(1); });

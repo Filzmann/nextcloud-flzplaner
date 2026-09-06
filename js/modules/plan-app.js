@@ -144,7 +144,8 @@
                     await this.repository.updateCandidateMetadata(team, month, slot, preference, note);
                 }
                 else if (action === 'save-note') {
-                    const textarea = this.panel.panel.querySelector(`textarea[data-note-date="${CSS.escape(button.dataset.date)}"]`);
+                    const noteContainer = button.closest('.adp-note-cell, .adp-mobile-notes');
+                    const textarea = noteContainer?.querySelector(`textarea[data-note-date="${CSS.escape(button.dataset.date)}"]`);
                     await this.repository.saveDayNote(team, month, button.dataset.date, textarea ? textarea.value : '');
                 } else return;
                 mutationCompleted = true;

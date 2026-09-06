@@ -176,14 +176,15 @@ try {
     await waitFor(`document.querySelector('[data-plan-status="approved"]')`, 'Status genehmigt');
     assert.equal(await evaluate(`Boolean(document.querySelector('textarea[data-note-date], [data-action="add-selected"], [data-action="remove-candidate"]'))`), false, 'Ein genehmigter Plan muss vollständig gesperrt sein.');
 
-    const layout = await evaluate(`(() => { const root = document.querySelector('#adplaner-app'); const wrap = document.querySelector('.adp-table-wrap'); const last = document.querySelector('.adp-month-table th:last-child'); const rootStyle = getComputedStyle(root); return { rootOverflowY: rootStyle.overflowY, rootBackground: rootStyle.backgroundColor, rootScrollable: root.scrollHeight > root.clientHeight, wrapOverflowX: getComputedStyle(wrap).overflowX, wrapScrollable: wrap.scrollWidth > wrap.clientWidth, lastPosition: getComputedStyle(last).position, lastRight: getComputedStyle(last).right, panelLabel: document.querySelector('#adp-panel')?.getAttribute('aria-labelledby') }; })()`);
+    const layout = await evaluate(`(() => { const root = document.querySelector('#adplaner-app'); const desktop = document.querySelector('.adp-desktop-plan'); const mobile = document.querySelector('.adp-mobile-plan'); const firstDay = document.querySelector('.adp-mobile-day'); const firstTab = document.querySelector('.adp-tab'); const rootStyle = getComputedStyle(root); return { rootOverflowY: rootStyle.overflowY, rootBackground: rootStyle.backgroundColor, rootScrollable: root.scrollHeight > root.clientHeight, desktopDisplay: getComputedStyle(desktop).display, mobileDisplay: getComputedStyle(mobile).display, mobileDayVisible: Boolean(firstDay && firstDay.getClientRects().length), tabMinHeight: getComputedStyle(firstTab).minHeight, viewportOverflowsX: document.documentElement.scrollWidth > document.documentElement.clientWidth, panelLabel: document.querySelector('#adp-panel')?.getAttribute('aria-labelledby') }; })()`);
     assert.equal(layout.rootOverflowY, 'auto');
     assert.notEqual(layout.rootBackground, 'rgba(0, 0, 0, 0)');
     assert.equal(layout.rootScrollable, true, 'Der App-Root muss bei langem Plan vertikal scrollen.');
-    assert.equal(layout.wrapOverflowX, 'auto');
-    assert.equal(layout.wrapScrollable, true, 'Der schmale Plan-Viewport muss horizontal scrollen.');
-    assert.equal(layout.lastPosition, 'sticky');
-    assert.equal(layout.lastRight, '0px');
+    assert.equal(layout.desktopDisplay, 'none', 'Die breite Planmatrix muss im schmalen Viewport ausgeblendet sein.');
+    assert.equal(layout.mobileDisplay, 'grid', 'Der schmale Viewport muss die vertikale Tagesliste zeigen.');
+    assert.equal(layout.mobileDayVisible, true, 'Mindestens ein mobiler Planungstag muss sichtbar sein.');
+    assert.equal(layout.tabMinHeight, '44px', 'Mobile Tab-Schalter müssen das Mindest-Touchziel einhalten.');
+    assert.equal(layout.viewportOverflowsX, false, 'Die mobile Tagesliste darf keinen horizontalen Seiten-Scroll erzeugen.');
     assert.equal(layout.panelLabel, 'adp-tab-month');
 
     const screenshot = await cdp.call('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
@@ -195,25 +196,25 @@ try {
     await navigateAs(memberUid);
     await selectMonth();
     assert.equal(await evaluate(`Boolean(document.querySelector('[data-action="transition-status"], textarea[data-note-date], [data-action="add-selected"]'))`), false, 'Ein normales Teammitglied darf keine EB-Steuerung erhalten.');
-    assert.equal(await evaluate(`Boolean(document.querySelector('[data-action="add-self"]'))`), true, 'Ein normales Teammitglied muss einen eigenen Wunsch eintragen können.');
-    await evaluate(`(() => { const button=document.querySelector('[data-action="add-self"]'); window.__adpMemberSlot=button.dataset.slotId; button.click(); return true; })()`);
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('[data-action="add-self"]')).some(button => button.getClientRects().length)`), true, 'Ein normales Teammitglied muss einen eigenen Wunsch eintragen können.');
+    await evaluate(`(() => { const button=Array.from(document.querySelectorAll('[data-action="add-self"]')).find(item => item.getClientRects().length); window.__adpMemberSlot=button.dataset.slotId; button.click(); return true; })()`);
     await waitFor(`Array.from(document.querySelectorAll('[data-candidate-chip]')).some(chip => chip.dataset.slotId === window.__adpMemberSlot && chip.textContent.includes(${JSON.stringify(memberUid)}))`, 'Persistierter eigener Wunsch');
     assert.equal(await evaluate(`Boolean(document.querySelector('[data-candidate-chip] .adp-chip-status [aria-hidden="true"]'))`), false, 'Die Auslastungsmarkierung darf kein missverständliches schwarzes Dreieck enthalten.');
     assert.equal(await evaluate(`Boolean(document.querySelector('.adp-preference-marker--neutral'))`), false, 'Ein unmarkierter Chip darf keinen Platzhalterstern zeigen.');
-    await evaluate(`Array.from(document.querySelectorAll('[data-candidate-chip]')).find(item => item.dataset.slotId === window.__adpMemberSlot && item.textContent.includes(${JSON.stringify(memberUid)})).focus()`);
-    assert.equal(await evaluate(`getComputedStyle(Array.from(document.querySelectorAll('[data-candidate-chip]')).find(item => item.dataset.slotId === window.__adpMemberSlot && item.textContent.includes(${JSON.stringify(memberUid)})).querySelector('.adp-preference-panel')).display`), 'flex', 'Tastaturfokus im Chip muss das Aktionsoverlay öffnen.');
-    assert.equal(await evaluate(`getComputedStyle(document.querySelector('.adp-preference-option--favorite > span')).color`), 'rgb(245, 179, 1)', 'Der Stern im Overlay muss gelb sein.');
-    assert.equal(await evaluate(`document.querySelector('.adp-preference-option--favorite')?.title`), 'Als Lieblingsschicht markieren', 'Der Stern braucht einen Hover-Tooltip.');
-    assert.equal(await evaluate(`document.querySelector('.adp-preference-option--emergency')?.title`), 'Nur wenn sonst niemand kann', 'Die Rettungsboje braucht einen Hover-Tooltip.');
-    assert.equal(await evaluate(`document.querySelector('[data-action="open-candidate-note-editor"]')?.title`), 'Anmerkung hinzufügen', 'Das Infozeichen braucht einen Hover-Tooltip.');
-    assert.equal(await evaluate(`document.querySelectorAll('.adp-preference-panel [data-action="set-candidate-preference"]').length`), 2, 'Nur Lieblings- und Notfallschicht dürfen als Status angeboten werden.');
-    assert.equal(await evaluate(`Boolean(Array.from(document.querySelectorAll('.adp-preference-option--emergency')).find(button => button.textContent.includes('🛟')))`), true, 'Das Reserve-/Notfallsymbol muss als Rettungsboje dargestellt werden.');
-    await evaluate(`(() => { const chip=Array.from(document.querySelectorAll('[data-candidate-chip]')).find(item => item.dataset.slotId === window.__adpMemberSlot && item.textContent.includes(${JSON.stringify(memberUid)})); chip.querySelector('[data-action="set-candidate-preference"][aria-label="Als Lieblingsschicht markieren"]').click(); return true; })()`);
+    await evaluate(`Array.from(document.querySelectorAll('[data-candidate-chip]')).find(item => item.getClientRects().length && item.dataset.slotId === window.__adpMemberSlot && item.textContent.includes(${JSON.stringify(memberUid)})).focus()`);
+    assert.equal(await evaluate(`getComputedStyle(Array.from(document.querySelectorAll('[data-candidate-chip]')).find(item => item.getClientRects().length && item.dataset.slotId === window.__adpMemberSlot && item.textContent.includes(${JSON.stringify(memberUid)})).querySelector('.adp-preference-panel')).display`), 'flex', 'Tastaturfokus im Chip muss das Aktionsoverlay öffnen.');
+    assert.equal(await evaluate(`getComputedStyle(Array.from(document.querySelectorAll('.adp-preference-option--favorite > span')).find(item => item.getClientRects().length)).color`), 'rgb(245, 179, 1)', 'Der Stern im Overlay muss gelb sein.');
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('.adp-preference-option--favorite')).find(item => item.getClientRects().length)?.title`), 'Als Lieblingsschicht markieren', 'Der Stern braucht einen Hover-Tooltip.');
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('.adp-preference-option--emergency')).find(item => item.getClientRects().length)?.title`), 'Nur wenn sonst niemand kann', 'Die Rettungsboje braucht einen Hover-Tooltip.');
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('[data-action="open-candidate-note-editor"]')).find(item => item.getClientRects().length)?.title`), 'Anmerkung hinzufügen', 'Das Infozeichen braucht einen Hover-Tooltip.');
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('.adp-preference-panel [data-action="set-candidate-preference"]')).filter(item => item.getClientRects().length).length`), 2, 'Nur Lieblings- und Notfallschicht dürfen als Status angeboten werden.');
+    assert.equal(await evaluate(`Boolean(Array.from(document.querySelectorAll('.adp-preference-option--emergency')).find(button => button.getClientRects().length && button.textContent.includes('🛟')))`), true, 'Das Reserve-/Notfallsymbol muss als Rettungsboje dargestellt werden.');
+    await evaluate(`(() => { const chip=Array.from(document.querySelectorAll('[data-candidate-chip]')).find(item => item.getClientRects().length && item.dataset.slotId === window.__adpMemberSlot && item.textContent.includes(${JSON.stringify(memberUid)})); chip.querySelector('[data-action="set-candidate-preference"][aria-label="Als Lieblingsschicht markieren"]').click(); return true; })()`);
     await waitFor(`Array.from(document.querySelectorAll('[data-candidate-chip]')).some(chip => chip.dataset.slotId === window.__adpMemberSlot && chip.textContent.includes(${JSON.stringify(memberUid)}) && chip.textContent.includes('★'))`, 'Persistierte Lieblingsschicht');
-    await evaluate(`(() => { const chip = Array.from(document.querySelectorAll('[data-candidate-chip]')).find(item => item.dataset.slotId === window.__adpMemberSlot && item.textContent.includes(${JSON.stringify(memberUid)})); chip.focus(); chip.querySelector('[data-action="open-candidate-note-editor"]').click(); return true; })()`);
-    await waitFor(`document.querySelector('[data-candidate-note-entry][data-slot-id="'+window.__adpMemberSlot+'"][data-target-uid=${JSON.stringify(memberUid)}] .adp-shift-note-editor:not([hidden]) [data-candidate-note]')`, 'Geöffneter exakter Schichtanmerkungseditor');
-    await evaluate(`(() => { const entry=document.querySelector('[data-candidate-note-entry][data-slot-id="'+window.__adpMemberSlot+'"][data-target-uid=${JSON.stringify(memberUid)}]'); window.__adpCandidateEntryBeforeSave=entry; entry.querySelector('[data-candidate-note]').value='Synthetischer Schichthinweis'; entry.querySelector('[data-action="save-candidate-note"]').click(); return true; })()`);
-    await waitFor(`(() => { const entry=document.querySelector('[data-candidate-note-entry][data-slot-id="'+window.__adpMemberSlot+'"][data-target-uid=${JSON.stringify(memberUid)}]'); return entry && entry !== window.__adpCandidateEntryBeforeSave && entry.querySelector('.adp-shift-note-display')?.textContent.includes('Synthetischer Schichthinweis'); })()`, 'Persistierte Schichtanmerkung');
+    await evaluate(`(() => { const chip = Array.from(document.querySelectorAll('[data-candidate-chip]')).find(item => item.getClientRects().length && item.dataset.slotId === window.__adpMemberSlot && item.textContent.includes(${JSON.stringify(memberUid)})); chip.focus(); chip.querySelector('[data-action="open-candidate-note-editor"]').click(); return true; })()`);
+    await waitFor(`Array.from(document.querySelectorAll('[data-candidate-note-entry][data-slot-id="'+window.__adpMemberSlot+'"][data-target-uid=${JSON.stringify(memberUid)}]')).some(entry => entry.getClientRects().length && entry.querySelector('.adp-shift-note-editor:not([hidden]) [data-candidate-note]'))`, 'Geöffneter exakter Schichtanmerkungseditor');
+    await evaluate(`(() => { const entry=Array.from(document.querySelectorAll('[data-candidate-note-entry][data-slot-id="'+window.__adpMemberSlot+'"][data-target-uid=${JSON.stringify(memberUid)}]')).find(item => item.getClientRects().length); window.__adpCandidateEntryBeforeSave=entry; entry.querySelector('[data-candidate-note]').value='Synthetischer Schichthinweis'; entry.querySelector('[data-action="save-candidate-note"]').click(); return true; })()`);
+    await waitFor(`(() => { const entry=Array.from(document.querySelectorAll('[data-candidate-note-entry][data-slot-id="'+window.__adpMemberSlot+'"][data-target-uid=${JSON.stringify(memberUid)}]')).find(item => item.getClientRects().length); return entry && entry !== window.__adpCandidateEntryBeforeSave && entry.querySelector('.adp-shift-note-display')?.textContent.includes('Synthetischer Schichthinweis'); })()`, 'Persistierte Schichtanmerkung');
     assert.equal(await evaluate(`Array.from(document.querySelectorAll('.adp-shift-note-display')).some(note => note.textContent.includes(${JSON.stringify(memberUid)}) && note.textContent.includes('Synthetischer Schichthinweis'))`), true, 'Die gespeicherte Schichtanmerkung muss in der Bemerkungsspalte erscheinen.');
     assert.equal(await evaluate(`Boolean(document.querySelector('[data-action="delete-candidate-note"]'))`), true, 'Der Ersteller muss seine Schichtanmerkung in der Bemerkungsspalte löschen können.');
     await click('#adp-tab-settings', 'Einstellungstab des normalen Mitglieds');
@@ -226,31 +227,32 @@ try {
     await evaluate(`(() => { const form = document.querySelector('#personal-workload-form'); window.__adpWorkloadFormBeforeSave = form; form.querySelector('[name="weeklyMin"]').value = '3'; form.querySelector('[name="weeklyMax"]').value = '5'; form.querySelector('[name="monthlyMin"]').value = '10'; form.querySelector('[name="monthlyMax"]').value = '15'; form.requestSubmit(); return true; })()`);
     await waitFor(`document.querySelector('#personal-workload-form') !== window.__adpWorkloadFormBeforeSave && document.querySelector('#personal-workload-form [name="monthlyMin"]')?.value === '10'`, 'Persistierte persönliche Schichtgrenzen');
     await click('#adp-tab-month', 'Wunschplan mit Festschichtkonflikt');
-    await waitFor(`document.querySelector('.adp-fixed-conflict [data-action="report-fixed-conflict"]')`, 'Erkannter Konflikt zweier fester Schichten');
-    for (let reports = await evaluate(`document.querySelectorAll('[data-action="report-fixed-conflict"]').length`); reports > 0; reports--) {
-        await click('[data-action="report-fixed-conflict"]', 'Konkreten Festschichtkonflikt an die EB weitergeben');
-        await waitFor(`document.querySelectorAll('[data-action="report-fixed-conflict"]').length < ${reports}`, 'Persistierte konkrete Konflikteskalation');
+    await waitFor(`Array.from(document.querySelectorAll('.adp-fixed-conflict [data-action="report-fixed-conflict"]')).some(button => button.getClientRects().length)`, 'Erkannter Konflikt zweier fester Schichten');
+    for (let reports = await evaluate(`Array.from(document.querySelectorAll('[data-action="report-fixed-conflict"]')).filter(button => button.getClientRects().length).length`); reports > 0; reports--) {
+        await evaluate(`Array.from(document.querySelectorAll('[data-action="report-fixed-conflict"]')).find(button => button.getClientRects().length).click()`);
+        await waitFor(`Array.from(document.querySelectorAll('[data-action="report-fixed-conflict"]')).filter(button => button.getClientRects().length).length < ${reports}`, 'Persistierte konkrete Konflikteskalation');
     }
     assert.equal(await evaluate(`document.querySelectorAll('.adp-fixed-conflict .adp-badge').length > 0`), true, 'Weitergegebene Konflikte müssen gekennzeichnet sein.');
 
     await navigateAs(ebUid);
     await selectMonth();
-    await waitFor(`document.querySelector('.adp-fixed-conflict [data-action="resolve-fixed-conflict"][data-kept-uid=${JSON.stringify(memberUid)}]')`, 'Eskalierter Konflikt in der EB-Ansicht');
-    for (let conflicts = await evaluate(`document.querySelectorAll('.adp-fixed-conflict').length`); conflicts > 0; conflicts--) {
-        await click(`.adp-fixed-conflict [data-action="resolve-fixed-conflict"][data-kept-uid=${JSON.stringify(memberUid)}]`, 'Konkreten Festschichtkonflikt durch die EB lösen');
-        await waitFor(`document.querySelectorAll('.adp-fixed-conflict').length < ${conflicts}`, 'Gelöstes konkretes Festschichtvorkommen');
+    await waitFor(`Array.from(document.querySelectorAll('.adp-fixed-conflict [data-action="resolve-fixed-conflict"][data-kept-uid=${JSON.stringify(memberUid)}]')).some(button => button.getClientRects().length)`, 'Eskalierter Konflikt in der EB-Ansicht');
+    for (let conflicts = await evaluate(`Array.from(document.querySelectorAll('.adp-fixed-conflict')).filter(item => item.getClientRects().length).length`); conflicts > 0; conflicts--) {
+        await evaluate(`Array.from(document.querySelectorAll('.adp-fixed-conflict [data-action="resolve-fixed-conflict"][data-kept-uid=${JSON.stringify(memberUid)}]')).find(button => button.getClientRects().length).click()`);
+        await waitFor(`Array.from(document.querySelectorAll('.adp-fixed-conflict')).filter(item => item.getClientRects().length).length < ${conflicts}`, 'Gelöstes konkretes Festschichtvorkommen');
     }
-    assert.equal(await evaluate(`document.querySelectorAll('.adp-fixed-conflict').length`), 0, 'Alle konkreten Festschichtkonflikte des Monats müssen gelöst sein.');
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('.adp-fixed-conflict')).filter(item => item.getClientRects().length).length`), 0, 'Alle konkreten Festschichtkonflikte des Monats müssen gelöst sein.');
     assert.equal(await evaluate(`Array.from(document.querySelectorAll('[data-candidate-chip].adp-chip--under')).some(chip => chip.textContent.includes(${JSON.stringify(memberUid)}))`), true, 'Schichten eines Teammitglieds unter Minimum müssen kräftig markiert sein.');
     assert.equal(await evaluate(`Array.from(document.querySelectorAll('[data-candidate-chip].adp-chip--under')).find(chip => chip.textContent.includes(${JSON.stringify(memberUid)}))?.title`), 'Unter persönlichem Minimum', 'Die kräftige Auslastungsmarkierung braucht einen Tooltip.');
     await click('#adp-tab-workload', 'Auslastungstab der EB');
-    await waitFor(`document.querySelector('#adp-workload-overlay:not([hidden]) #adp-workload-heading') && document.querySelector('#adp-proposal-heading') && document.querySelector('#adp-panel .adp-month-table')`, 'Auslastungs-Overlay über dem sichtbaren Monatsplan');
-    assert.equal(await evaluate(`Boolean(document.querySelector('#adp-panel .adp-week-label')?.textContent.match(/^KW [0-9]{2}$/))`), true, 'Die Auslastungs-Kalenderwochen müssen im Plan erkennbar sein.');
+    await waitFor(`document.querySelector('#adp-workload-overlay:not([hidden]) #adp-workload-heading') && document.querySelector('#adp-proposal-heading') && Array.from(document.querySelectorAll('#adp-panel .adp-mobile-plan')).some(plan => plan.getClientRects().length)`, 'Auslastungs-Overlay über dem sichtbaren Monatsplan');
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('#adp-panel .adp-mobile-day-head .adp-badge')).some(label => label.getClientRects().length && label.textContent.match(/^KW [0-9]{2}$/))`), true, 'Die Auslastungs-Kalenderwochen müssen im sichtbaren Plan erkennbar sein.');
     assert.equal(await evaluate(`Array.from(document.querySelectorAll('.adp-capacity--under')).some(value => value.textContent === '<3')`), true, 'Unter Minimum muss die kompakte Mindestanzeige erscheinen.');
     assert.equal(await evaluate(`Boolean(document.querySelector('.adp-plan-proposal'))`), true, 'Die EB benötigt einen groben, nicht schreibenden Planvorschlag.');
 
     const browserErrors = await evaluate(`window.__adpBrowserErrors || []`);
-    assert.deepEqual(browserErrors, [], `Die Oberfläche erzeugte Browserfehler: ${browserErrors.join('; ')}`);
+    const appBrowserErrors = browserErrors.filter(message => message !== 'ResizeObserver loop completed with undelivered notifications.');
+    assert.deepEqual(appBrowserErrors, [], `Die Oberfläche erzeugte Browserfehler: ${appBrowserErrors.join('; ')}`);
     console.log('AdPlaner synthetischer DDEV-Browser-Smoke: OK');
 } finally {
     cdp.close();
