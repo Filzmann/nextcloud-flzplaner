@@ -53,6 +53,12 @@ PermissionProvider und PersonalDataProvider bilden die kombinierte
 Adminbedingung beziehungsweise den eigenen Freigabebezug ab, ohne andere
 Admin-Kennungen in der Selbstauskunft offenzulegen.
 
+Der app-eigene Processing-Katalog beschreibt Wunschdienstplanung und
+temporäre Adminfreigaben über den öffentlichen V1-Vertrag des
+Datenschutz-Centers. Er enthält ausschließlich Policy-Metadaten; offene
+Rechtsgrundlagen, Aufbewahrungs-, Backup- und Betroffenenrechtsentscheidungen
+sind ausdrücklich als `PRIVACY-DECISION-REQUIRED` gekennzeichnet.
+
 ## Roadmap
 
 Geplante Erweiterungen und offene Produktentscheidungen stehen in der [Roadmap](ROADMAP.md).

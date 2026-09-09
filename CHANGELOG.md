@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Einen app-eigenen Processing-Metadata-Katalog für Wunschdienstplanung und
+  temporäre Adminfreigaben über den öffentlichen V1-Vertrag des
+  Datenschutz-Centers veröffentlicht.
 - Den unterstützten Nextcloud-Bereich nach grüner Neuinstallation auf 33.0.7
   und grünem Upgrade mit synthetischen Bestandsdaten auf 34.0.2 auf die
   lückenlosen Hauptversionen 33 bis 34 erweitert.

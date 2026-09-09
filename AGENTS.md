@@ -99,6 +99,11 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
   interne Bearbeitungsreferenzen an Zuweisungen, Tagesnotizen und Monatsplänen
   aus. Fremde Personenkennungen und unkontrollierte freie Tagesnotiztexte
   werden nicht in die Self-Service-Auskunft übernommen.
+- Der `ProcessingMetadataProvider` registriert sich ebenfalls lazy über den
+  öffentlichen V1-Vertrag des Datenschutz-Centers. Seine einzige fachliche
+  Policyquelle ist `resources/privacy-processing.json`; sie enthält keine
+  personenbezogenen Laufzeitdaten und weist ungeklärte Entscheidungen als
+  `PRIVACY-DECISION-REQUIRED` aus.
 - PersonalDataProvider und PermissionProvider umfassen die app-lokale
   Adminfreigabe; fremde Admin-Kennungen werden in der Selbstauskunft nicht
   offengelegt.

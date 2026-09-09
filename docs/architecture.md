@@ -49,3 +49,10 @@ vertikale Seiten-Scroller.
 PersonalDataProvider und PermissionProvider bilden Schichtbezüge,
 Bearbeitungsreferenzen und die app-lokale temporäre Adminfreigabe ab. Native
 Nextcloud-Administration allein erteilt keinen fachlichen Vollzugriff.
+
+Der zusätzliche `ProcessingMetadataProvider` veröffentlicht den app-eigenen
+Katalog `resources/privacy-processing.json` lazy über den öffentlichen
+Standalone-V1-Vertrag des Datenschutz-Centers. Der Katalog ist die kanonische
+Policyquelle für die Verarbeitungen `shift_planning_management` und
+`temporary_admin_full_access`, enthält keine personenbezogenen Laufzeitdaten
+und ersetzt fehlende fachliche Entscheidungen nicht durch technische Defaults.
