@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
+namespace OCP {
+    if (!interface_exists(IGroupManager::class)) {
+        interface IGroupManager { public function get($gid); public function getUserGroupIds($user); }
+    }
+    if (!interface_exists(IUserSession::class)) {
+        interface IUserSession { public function getUser(); }
+    }
+}
+
 namespace {
-    if (!interface_exists(\OCP\IGroupManager::class)) {
-        eval('namespace OCP; interface IGroupManager { public function get($gid); public function getUserGroupIds($user); }');
-    }
-    if (!interface_exists(\OCP\IUserSession::class)) {
-        eval('namespace OCP; interface IUserSession { public function getUser(); }');
-    }
 
     require_once dirname(__DIR__) . '/bootstrap.php';
 

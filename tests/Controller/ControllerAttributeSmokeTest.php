@@ -2,28 +2,40 @@
 
 declare(strict_types=1);
 
+namespace OCP {
+    if (!interface_exists(IRequest::class)) {
+        interface IRequest {}
+    }
+}
+
+namespace OCP\AppFramework {
+    if (!class_exists(Controller::class)) {
+        class Controller { public function __construct(string $appName, \OCP\IRequest $request) {} }
+    }
+}
+
+namespace OCP\AppFramework\Http {
+    if (!class_exists(Response::class)) {
+        class Response {}
+    }
+    if (!class_exists(DataResponse::class)) {
+        class DataResponse extends Response { public function __construct(mixed $data = [], int $status = 200) {} }
+    }
+    if (!class_exists(TemplateResponse::class)) {
+        class TemplateResponse extends Response { public function __construct(string $appName, string $templateName) {} }
+    }
+}
+
+namespace OCP\AppFramework\Http\Attribute {
+    if (!class_exists(NoAdminRequired::class)) {
+        #[\Attribute(\Attribute::TARGET_METHOD)] class NoAdminRequired {}
+    }
+    if (!class_exists(NoCSRFRequired::class)) {
+        #[\Attribute(\Attribute::TARGET_METHOD)] class NoCSRFRequired {}
+    }
+}
+
 namespace {
-    if (!class_exists(\OCP\AppFramework\Controller::class)) {
-        eval('namespace OCP\AppFramework; class Controller { public function __construct(string $appName, \OCP\IRequest $request) {} }');
-    }
-    if (!interface_exists(\OCP\IRequest::class)) {
-        eval('namespace OCP; interface IRequest {}');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Response::class)) {
-        eval('namespace OCP\AppFramework\Http; class Response {}');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\DataResponse::class)) {
-        eval('namespace OCP\AppFramework\Http; class DataResponse extends Response { public function __construct(mixed $data = [], int $status = 200) {} }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\TemplateResponse::class)) {
-        eval('namespace OCP\AppFramework\Http; class TemplateResponse extends Response { public function __construct(string $appName, string $templateName) {} }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Attribute\NoAdminRequired::class)) {
-        eval('namespace OCP\AppFramework\Http\Attribute; #[\Attribute(\Attribute::TARGET_METHOD)] class NoAdminRequired {}');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Attribute\NoCSRFRequired::class)) {
-        eval('namespace OCP\AppFramework\Http\Attribute; #[\Attribute(\Attribute::TARGET_METHOD)] class NoCSRFRequired {}');
-    }
 }
 
 namespace OCA\AdPlaner\AppInfo {
