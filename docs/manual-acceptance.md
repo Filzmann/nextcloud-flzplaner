@@ -198,3 +198,18 @@ Unterminimum-Markierung. Statuspersistenz, Datenschutz-Runtime und
 Rechtematrix blieben grün; die Cleanup-Nachprüfung fand keine synthetischen
 Konten, Gruppen oder AdPlaner-Daten. Dieser automatisierte Lauf ersetzt keine
 neue fachliche und visuelle Freigabeentscheidung.
+
+### Lokaler Nachweis vom 11.09.2026
+
+Im Rahmen der risikoarmen Luna-Prüfung wurden aus dem Repository-Root nur die
+lokalen, nicht mutierenden Prüfungen ausgeführt:
+
+| Prüfung | Ergebnis | Aussagegrenze |
+|---|---|---|
+| `php tests/run.php` | erfolgreich | PHP-Syntax sowie Planungs-, Rechte-, Privacy-, Processing-Metadata-, Migrations- und Integrationsverträge sind grün. |
+| `node tests/run-js.mjs` | erfolgreich | JavaScript-Syntax und die vorhandenen Workflow-/UI-Smokes sind grün. |
+| `git diff --check` | erfolgreich | Keine Whitespace-Fehler im aktuellen Arbeitsbaum. |
+
+DDEV, `occ`, Installation, App-Aktivierung, Planungsdaten und optionale
+Provider wurden nicht verändert. Die offene manuelle fachliche und visuelle
+Wiederholungsabnahme bleibt bestehen.
