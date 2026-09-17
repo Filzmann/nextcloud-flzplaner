@@ -17,12 +17,6 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 ## Geplante Erweiterungen
 
-- **ADP-L10N – app-lokaler Umsetzungsschnitt (systemweit gegatet):** Erst
-  nach Freigabe des Root-Vorhabens `ZM-06` sichtbare Texte, Monats- und
-  Wochentagsnamen auf Nextcloud-l10n umstellen. ISO-Daten, Monatsnummern,
-  Schichtzeiten, Statuswerte, Teamcodes und API-Schlüssel bleiben
-  sprachneutral; Deutsch, eine weitere Locale, Fallback, Plural,
-  Platzhalter und Escaping werden app-lokal getestet.
 - Persönliche Monatsansicht „Alle meine Einsätze“ mit PDF-Export und optionaler Verbindung zu gängigen Kalendern.
 - Benachrichtigungen für relevante Planungs- und Statusänderungen.
 - Teambezogene Konfigurierbarkeit nur dort erweitern, wo konkrete Teams unterschiedliche Regeln benötigen.
@@ -31,3 +25,19 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 - Exportformate, Zielsysteme und Datenschutzumfang.
 - Benachrichtigungskanäle, Empfänger*innen und auslösende Ereignisse.
+
+## Bewusst zurückgestellt – niedrigste Priorität
+
+### ADP-L10N – app-lokaler Umsetzungsschnitt
+
+Status seit 17. September 2026: Die Umsetzung beginnt erst nach allen höher
+priorisierten Roadmap-Aufgaben und einer erneuten ausdrücklichen Freigabe des
+Root-Vorhabens `ZM-06`. Neue Funktionen und Codeänderungen berücksichtigen
+die spätere Lokalisierbarkeit an den jeweils berührten Stellen, lösen aber
+keine flächige Umstellung oder Übersetzungsimplementierung aus.
+
+Bei der späteren Umsetzung werden sichtbare Texte sowie Monats- und
+Wochentagsnamen auf Nextcloud-l10n umgestellt. ISO-Daten, Monatsnummern,
+Schichtzeiten, Statuswerte, Teamcodes und API-Schlüssel bleiben
+sprachneutral; Deutsch, eine weitere Locale, Fallback, Plural, Platzhalter
+und Escaping werden app-lokal getestet.
