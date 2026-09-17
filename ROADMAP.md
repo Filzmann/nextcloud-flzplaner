@@ -1,5 +1,9 @@
 # Roadmap – AdPlaner
 
+## Offene suiteweite Admin-Freigabe
+
+Nur Mitglieder von `Datenschutzbeauftragte` dürfen pro App und aktivem Nextcloud-Administrationskonto eine Freigabe erteilen oder widerrufen. Die Freigabe bleibt auf höchstens 24 Stunden begrenzt und app-lokal auditierbar; native Administration allein genügt nicht. Ohne Freigabe gilt eine aussagekräftige sichere Meldung, ein direkter Freigabelink erscheint nur bei gleichzeitiger Datenschutzbeauftragten- und Admin-Rolle. Runtime-, UI-, Controller- und Allow-/Deny-Tests bleiben offen.
+
 Diese Datei enthält ausschließlich offene Arbeit, zurückgestellte Vorhaben
 und Freigabegates. Der aktuelle Funktionsumfang steht in `README.md`,
 erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
