@@ -34,6 +34,11 @@ namespace {
     if (array_key_exists('personal_runtime_data', $catalog->toArray())) {
         throw new RuntimeException('Der Processing-Katalog enthält personenbezogene Laufzeitdaten.');
     }
+    $encodedCatalog = json_encode($catalog->toArray(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+    if (!str_contains($encodedCatalog, 'App-lokaler Freigabevorgang durch Datenschutzbeauftragte im AD Planer')
+        || str_contains($encodedCatalog, 'Freigabevorgang im Nextcloud-Adminbereich')) {
+        throw new RuntimeException('Der Processing-Katalog projiziert die DPO-Freigabesteuerung nicht korrekt.');
+    }
 
     $registration = new RegisterProcessingMetadataProvidersEvent();
     $listener = new PlanerProcessingMetadataProviderListener($provider);

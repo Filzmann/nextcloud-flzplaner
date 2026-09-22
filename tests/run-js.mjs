@@ -7,6 +7,7 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 runJavaScriptSuite({
     root,
     testFiles: [
+        'tests/js/admin-access-smoke.js',
         'tests/js/admin-smoke.js',
         'tests/js/assignment-control-smoke.js',
         'tests/js/local-test-account-password-contract.js',

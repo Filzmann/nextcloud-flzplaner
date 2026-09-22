@@ -51,6 +51,7 @@ namespace {
 
     use OCA\AdPlaner\Controller\ApiController;
     use OCA\AdPlaner\Controller\PageController;
+    use OCA\AdPlaner\Controller\TemporaryAdminAccessController;
     use OCP\AppFramework\Http\Attribute\NoAdminRequired;
     use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 
@@ -96,6 +97,20 @@ namespace {
         }
         if ($method->getAttributes(NoCSRFRequired::class) !== []) {
             throw new \RuntimeException($action . ' should keep the default CSRF protection.');
+        }
+    }
+
+    $grantStatus = new \ReflectionMethod(TemporaryAdminAccessController::class, 'status');
+    if ($grantStatus->getAttributes(NoAdminRequired::class) === [] || $grantStatus->getAttributes(NoCSRFRequired::class) === []) {
+        throw new \RuntimeException('DPO-Nichtadmins müssen den authentifizierten read-only Freigabestatus erreichen.');
+    }
+    foreach (['activate', 'revoke'] as $action) {
+        $method = new \ReflectionMethod(TemporaryAdminAccessController::class, $action);
+        if ($method->getAttributes(NoAdminRequired::class) === []) {
+            throw new \RuntimeException($action . ' muss für authentifizierte DPO-Nichtadmins erreichbar sein.');
+        }
+        if ($method->getAttributes(NoCSRFRequired::class) !== []) {
+            throw new \RuntimeException($action . ' muss den standardmäßigen CSRF-Schutz behalten.');
         }
     }
 

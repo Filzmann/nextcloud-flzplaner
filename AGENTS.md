@@ -71,8 +71,11 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
 - Native Nextcloud-Administration allein erteilt kein Recht auf den fachlichen
   Demo-Datenpfad. Dafür ist je Admin eine app-lokale Freigabe von höchstens 24
   Stunden erforderlich; Beginn, geplantes Ende und Widerruf werden
-  protokolliert. Der technische Adminbereich bleibt zum Erteilen und
-  Widerrufen dieser Freigabe erreichbar.
+  protokolliert. Ausschließlich Mitglieder der kanonischen Nextcloud-Gruppe
+  `Datenschutzbeauftragte` dürfen die Freigabe in der Hauptoberfläche erteilen
+  oder widerrufen; nativer Adminstatus allein reicht dafür nicht. Der sichere
+  Eintrittshinweis erscheint nur für betroffene native Administrationskonten
+  und verlinkt die Steuerung nur bei zusätzlicher Datenschutzrolle.
 - Fremde oder LDAP-verwaltete Konten werden nicht als Demokonten übernommen. Bestehende read-only LDAP-Team- oder Rollengruppen brechen die Demo-Installation im Preflight vor jeder Mutation ab.
 - Ausschließlich lokal erzeugte Test- und Demokonten erhalten initial ihr
   jeweiliges Benutzerkürzel als Passwort. Diese bewusst einfache Vorgabe darf

@@ -232,7 +232,7 @@
         }
       ],
       "data_sources": [
-        "App-lokaler Freigabevorgang im Nextcloud-Adminbereich",
+        "App-lokaler Freigabevorgang durch Datenschutzbeauftragte im AD Planer",
         "App-eigene Tabelle adp_admin_access"
       ],
       "legal_basis": {

@@ -54,7 +54,7 @@ namespace {
         public function revokeActive(string $targetUid,string $revokedBy,\DateTimeImmutable $revokedAt):bool{return false;}
         public function activeFor(string $targetUid,\DateTimeImmutable $at):?array{return null;}
         public function history():array{return [];}
-        public function historyForUid(string $uid,int $limit):array{return $uid==='self'?[['id'=>99,'targetUid'=>$uid,'grantedBy'=>'other-admin','startsAt'=>new \DateTimeImmutable('2026-08-25T10:00:00Z'),'endsAt'=>new \DateTimeImmutable('2026-08-25T14:00:00Z'),'revokedAt'=>null,'revokedBy'=>null]]:[];}
+        public function historyForUid(string $uid,int $limit):array{return $uid==='self'?[['id'=>99,'targetUid'=>$uid,'grantedBy'=>$uid,'startsAt'=>new \DateTimeImmutable('2026-08-25T10:00:00Z'),'endsAt'=>new \DateTimeImmutable('2026-08-25T14:00:00Z'),'revokedAt'=>new \DateTimeImmutable('2026-08-25T12:00:00Z'),'revokedBy'=>'other-admin']]:[];}
     };
     $provider = new PlanerPersonalDataProvider(new ShiftPlanRepository(),$adminAccess);
     $descriptor = $provider->descriptor();
@@ -70,7 +70,7 @@ namespace {
     ], $report->entries());
     if (array_column($items, 'categoryLabel') !== ['Zeitlich begrenzter Admin-Vollzugriff', 'Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan', 'Persönliche Schichtgrenzen', 'Regelmäßige feste Schicht', 'Festschichtkonflikt']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
     $encoded = json_encode($items, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    foreach (['Admin-Vollzugriff','Ziel der Vollzugriffsfreigabe','12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','Lieblingsschicht','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr','Persönliche Schichtgrenzen','Minimum pro Woche','05.08.26, 12:30 Uhr','Regelmäßige feste Schicht','Montag','Festschichtkonflikt','resolved'] as $expected) {
+    foreach (['Admin-Vollzugriff','Ziel der Vollzugriffsfreigabe','Freigebendes Mitglied von Datenschutzbeauftragte','App-lokale Freigabesteuerung im AD Planer','Datenschutz-Prüfrolle','12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','Lieblingsschicht','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr','Persönliche Schichtgrenzen','Minimum pro Woche','05.08.26, 12:30 Uhr','Regelmäßige feste Schicht','Montag','Festschichtkonflikt','resolved'] as $expected) {
         if (!str_contains($encoded, $expected)) throw new RuntimeException('Menschenlesbare Planerauskunft fehlt: ' . $expected);
     }
     foreach (['foreign-user','planner','other-admin','Enthält den Namen einer anderen Person','Enthält eine andere Person','assistant_uid','created_by_uid','Art'] as $forbidden) {

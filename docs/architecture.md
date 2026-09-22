@@ -50,6 +50,17 @@ PersonalDataProvider und PermissionProvider bilden Schichtbezüge,
 Bearbeitungsreferenzen und die app-lokale temporäre Adminfreigabe ab. Native
 Nextcloud-Administration allein erteilt keinen fachlichen Vollzugriff.
 
+Der temporäre fachliche Admin-Vollzugriff wird ausschließlich von Mitgliedern
+der kanonischen Nextcloud-Gruppe `Datenschutzbeauftragte` erteilt und
+widerrufen. Nativer Adminstatus allein erteilt weder Vollzugriff noch Zugriff
+auf Freigabehistorie oder -steuerung. Ziel ist immer ein aktuell von
+Nextcloud bestätigtes Administrationskonto; die app-lokale Freigabe gilt
+höchstens 24 Stunden und wird bei Ablauf, Widerruf, Verlust des nativen
+Adminstatus oder Prüffehlern deny by default unwirksam. Die Steuerung liegt
+rollenabhängig in der Hauptoberfläche. Der Eintrittshinweis erscheint nur für
+native Administrationskonten ohne aktive Freigabe; ein Direktlink wird nur
+bei zusätzlicher Datenschutzrolle gerendert.
+
 Der zusätzliche `ProcessingMetadataProvider` veröffentlicht den app-eigenen
 Katalog `resources/privacy-processing.json` lazy über den öffentlichen
 Standalone-V1-Vertrag des Datenschutz-Centers. Der Katalog ist die kanonische

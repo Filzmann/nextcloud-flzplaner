@@ -1,5 +1,6 @@
 <?php
 \OCP\Util::addScript('localbase', 'api/api-client');
+\OCP\Util::addScript('adplaner', 'admin-access');
 \OCP\Util::addScript('adplaner', 'modules/api');
 \OCP\Util::addScript('localbase', 'ui/ui');
 \OCP\Util::addScript('adplaner', 'modules/ui');
@@ -46,6 +47,44 @@
             </label>
         </div>
     </header>
+
+    <?php if ($_['showMissingAdminGrant'] ?? false): ?>
+        <section class="adp-admin-access adp-notice" aria-labelledby="adp-admin-access-required-heading">
+            <h2 id="adp-admin-access-required-heading">Kein fachlicher Admin-Vollzugriff</h2>
+            <p>Native Nextcloud-Administration erteilt keinen fachlichen Vollzugriff. Für den geschützten Demo-Datenpfad fehlt eine aktive app-lokale Freigabe.</p>
+            <?php if ($_['showAdminAccessLink'] ?? false): ?>
+                <p><a href="#adp-full-access">Zur app-lokalen Freigabesteuerung</a></p>
+            <?php endif; ?>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($_['canManageAdminAccess'] ?? false): ?>
+        <section id="adp-full-access" class="adp-admin-access" aria-labelledby="adp-full-access-heading">
+            <h2 id="adp-full-access-heading">Zeitlich begrenzter Admin-Vollzugriff</h2>
+            <p>Ausschließlich Mitglieder von Datenschutzbeauftragte dürfen einem aktuellen Nextcloud-Administrationskonto fachlichen Vollzugriff erteilen oder ihn widerrufen. Maximal 24 Stunden sind zulässig.</p>
+            <form id="adp-full-access-form">
+                <label>Admin-Benutzerkennung <input name="targetUid" required maxlength="64" autocomplete="off"></label>
+                <label>Dauer
+                    <select name="durationMinutes" required>
+                        <option value="60">1 Stunde</option>
+                        <option value="240">4 Stunden</option>
+                        <option value="480">8 Stunden</option>
+                        <option value="1440">24 Stunden</option>
+                    </select>
+                </label>
+                <label><input id="adp-full-access-enabled" name="enabled" type="checkbox" required> Vollzugriff für diesen Zeitraum aktivieren</label>
+                <button type="submit" class="primary">Freigabe aktivieren</button>
+            </form>
+            <p id="adp-full-access-status" role="status" aria-live="polite"></p>
+            <div class="adp-table-wrap">
+                <table class="adp-table">
+                    <caption>Protokollierte Admin-Vollzugriffszeiträume</caption>
+                    <thead><tr><th>Ziel-Admin</th><th>Freigegeben von</th><th>Von</th><th>Geplant bis</th><th>Tatsächlich bis / Status</th><th>Aktion</th></tr></thead>
+                    <tbody id="adp-full-access-history"><tr><td colspan="6">Freigaben werden geladen.</td></tr></tbody>
+                </table>
+            </div>
+        </section>
+    <?php endif; ?>
 
     <div class="adp-tab-area">
         <nav class="adp-tabs" role="tablist" aria-label="Planbereiche">

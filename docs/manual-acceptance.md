@@ -213,3 +213,21 @@ lokalen, nicht mutierenden Prüfungen ausgeführt:
 DDEV, `occ`, Installation, App-Aktivierung, Planungsdaten und optionale
 Provider wurden nicht verändert. Die offene manuelle fachliche und visuelle
 Wiederholungsabnahme bleibt bestehen.
+
+## Offene Runtime-Abnahme des temporären Admin-Vollzugriffs
+
+Die automatisierten Service-, Controller-, UI- und Provider-Verträge sichern
+die app-lokale Freigabegrenze ab. Vor einem Releaseurteil bleibt in DDEV oder
+Staging mit synthetischen Konten manuell zu prüfen:
+
+- `Datenschutzbeauftragte` ohne nativen Adminstatus können Historie lesen und
+  ein bestätigtes Administrationskonto freigeben sowie widerrufen.
+- Native Administration ohne Datenschutzrolle erhält weder Steuerung noch
+  Direktlink und direkte Schreibrequests bleiben mutationsfrei mit HTTP 403.
+- Ein gewöhnliches Konto sieht weder Eintrittshinweis noch Steuerung und
+  erhält keine Historie.
+- Ungültige Zielkennung, mehr als 24 Stunden und fehlendes Requesttoken
+  ändern keine Freigabehistorie.
+- Ablauf, Widerruf und Verlust des nativen Adminstatus entziehen den
+  fachlichen Vollzugriff; der rollenabhängige Einstieg bleibt per Tastatur
+  erreichbar und legt gewöhnlichen Konten keinen Schutzstatus offen.

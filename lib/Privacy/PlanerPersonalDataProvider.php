@@ -48,9 +48,32 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
         return new PersonalDataPage($complete ? 'complete' : 'partial', $items, $complete ? [] : ['Ausgabelimit erreicht; weitere Planungsdaten können vorhanden sein.']);
     }
 
-    private function adminAccessItem(array $row,string $subjectUid):PersonalDataEntry {
-        $roles=[];if($row['targetUid']===$subjectUid)$roles[]='Ziel der Vollzugriffsfreigabe';if($row['grantedBy']===$subjectUid)$roles[]='Freigebende Administration';if($row['revokedBy']===$subjectUid)$roles[]='Widerrufende Administration';$actualEnd=$row['revokedAt']??$row['endsAt'];
-        return $this->entry('admin-access','Zeitlich begrenzter Admin-Vollzugriff',self::shortDateTime($row['startsAt']),'admin-access:'.(string)$row['id'],['Eigene Rolle im Vorgang'=>implode(', ',$roles),'Beginn'=>$row['startsAt']->format(DATE_ATOM),'Geplantes Ende'=>$row['endsAt']->format(DATE_ATOM),'Tatsächliches Ende'=>$actualEnd->format(DATE_ATOM),'Status'=>$row['revokedAt']===null?'planmäßig beendet oder noch aktiv':'widerrufen'],'Nachweis einer zeitlich begrenzten administrativen Planer-Freigabe','Kennungen anderer beteiligter Administrator*innen werden nicht ausgegeben.');
+    private function adminAccessItem(array $row, string $subjectUid): PersonalDataEntry {
+        $roles = [];
+        if ($row['targetUid'] === $subjectUid) $roles[] = 'Ziel der Vollzugriffsfreigabe';
+        if ($row['grantedBy'] === $subjectUid) $roles[] = 'Freigebendes Mitglied von Datenschutzbeauftragte';
+        if ($row['revokedBy'] === $subjectUid) $roles[] = 'Widerrufendes Mitglied von Datenschutzbeauftragte';
+        $actualEnd = $row['revokedAt'] ?? $row['endsAt'];
+        return new PersonalDataEntry(
+            'admin-access',
+            'Zeitlich begrenzter Admin-Vollzugriff',
+            'admin-access:' . (string)$row['id'],
+            self::shortDateTime($row['startsAt']),
+            'Nachweis einer zeitlich begrenzten administrativen Planer-Freigabe',
+            'App-lokale Freigabesteuerung im AD Planer',
+            ['Betroffene Person und ausdrücklich berechtigte Datenschutz-Prüfrolle'],
+            self::RETENTION,
+            'Durch AD Planer sind keine Drittlandübermittlungen vorgesehen.',
+            'Der Server beendet den Vollzugriff spätestens nach 24 Stunden automatisch; es findet keine Entscheidung mit rechtlicher oder vergleichbar erheblicher Wirkung statt.',
+            'Kennungen anderer beteiligter Personen werden nicht ausgegeben.',
+            [
+                'Eigene Rolle im Vorgang' => implode(', ', $roles),
+                'Beginn' => $row['startsAt']->format(DATE_ATOM),
+                'Geplantes Ende' => $row['endsAt']->format(DATE_ATOM),
+                'Tatsächliches Ende' => $actualEnd->format(DATE_ATOM),
+                'Status' => $row['revokedAt'] === null ? 'planmäßig beendet oder noch aktiv' : 'widerrufen',
+            ],
+        );
     }
 
     private function candidateItem(array $row, string $subjectUid): PersonalDataEntry {

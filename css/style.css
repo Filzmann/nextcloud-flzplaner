@@ -118,6 +118,41 @@
     background: var(--color-warning-light);
 }
 
+.adp-admin-access {
+    margin-bottom: 14px;
+    padding: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-main-background);
+}
+
+.adp-admin-access h2 {
+    margin-top: 0;
+}
+
+.adp-admin-access form {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.adp-admin-access form label {
+    display: grid;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.adp-admin-access .adp-table-wrap {
+    max-height: 240px;
+    margin-top: 8px;
+}
+
+.adp-admin-access :is(button, input, select, a):focus-visible {
+    outline: 2px solid var(--color-primary-element);
+    outline-offset: 2px;
+}
+
 .adp-section {
     border: 1px solid var(--color-border);
     border-radius: 8px;

@@ -47,8 +47,13 @@ Aktionen wie in der Desktopmatrix; genehmigte und unbekannte Planstatus
 bleiben auch mobil ohne fachliche Mutationsangebote.
 
 Native Nextcloud-Administration erteilt keinen automatischen Zugriff auf den
-fachlichen Demo-Datenpfad. Dieser wird je Admin app-lokal für höchstens 24
-Stunden freigegeben; Beginn, geplantes Ende und Widerruf bleiben auditierbar.
+fachlichen Demo-Datenpfad. Ausschließlich Mitglieder der kanonischen
+Nextcloud-Gruppe `Datenschutzbeauftragte` können in der Hauptoberfläche ein
+aktuelles Administrationskonto app-lokal für höchstens 24 Stunden freigeben
+oder die Freigabe widerrufen; nativer Adminstatus allein genügt dafür nicht.
+Beginn, geplantes Ende und Widerruf bleiben auditierbar. Der sichere
+Eintrittshinweis erscheint nur für betroffene native Administrationskonten und
+verlinkt die Steuerung nur bei gleichzeitiger Datenschutzrolle.
 PermissionProvider und PersonalDataProvider bilden die kombinierte
 Adminbedingung beziehungsweise den eigenen Freigabebezug ab, ohne andere
 Admin-Kennungen in der Selbstauskunft offenzulegen.
