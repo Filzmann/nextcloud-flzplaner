@@ -23,6 +23,14 @@
     margin: 0;
 }
 
+.adp-title-row { display: flex; align-items: center; gap: 8px; }
+.adp-admin-access-warning { position: relative; display: inline-block; }
+.adp-admin-access-warning summary { display: grid; width: 26px; height: 26px; place-items: center; cursor: pointer; border: 1px solid var(--color-warning); border-radius: 50%; color: var(--color-warning-text, var(--color-main-text)); background: var(--color-warning-light); font-size: 16px; list-style: none; }
+.adp-admin-access-warning summary::-webkit-details-marker { display: none; }
+.adp-admin-access-warning summary:focus-visible { outline: 3px solid var(--color-primary-element); outline-offset: 2px; }
+.adp-admin-access-warning__panel { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; width: min(360px, calc(100vw - 48px)); padding: 12px; border: 1px solid var(--color-warning); border-radius: var(--border-radius-large); background: var(--color-main-background); box-shadow: 0 2px 10px rgba(0, 0, 0, .2); }
+.adp-admin-access-warning__panel p { margin: 8px 0; }
+
 .adp-controls,
 .adp-tabs,
 .adp-section-head,

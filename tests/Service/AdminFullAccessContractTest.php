@@ -30,5 +30,8 @@ foreach (['canManageAdminAccess', 'showMissingAdminGrant', 'showAdminAccessLink'
 }
 if (!str_contains($pageController, "'showAdminAccessLink' => \$canManageAdminAccess && \$showMissingAdminGrant")) throw new RuntimeException('Direktlink ist nicht auf gleichzeitige Datenschutz- und Adminrolle begrenzt.');
 if (str_contains($accessController, 'PublicPage')) throw new RuntimeException('Freigaberouten dürfen nicht öffentlich erreichbar sein.');
+foreach (['adp-admin-access-warning', '<details', '<summary', 'Datenschutzbeauftragte', 'target="_blank"', 'rel="noopener noreferrer"'] as $value) {
+    if (!str_contains($template, $value)) throw new RuntimeException('Kompakte Vollzugriffswarnung am App-Titel fehlt: ' . $value);
+}
 
 echo "AdPlaner admin full access contract tests passed\n";

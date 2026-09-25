@@ -31,7 +31,19 @@
 <div id="adplaner-app">
     <div class="orgsuite-host" data-orgsuite data-suite="ad" data-current-app="adplaner"></div>
     <header class="adp-head">
-        <h1>Assistenzplanung</h1>
+        <div class="adp-title-row">
+            <h1>Assistenzplanung</h1>
+            <?php if ($_['showMissingAdminGrant'] ?? false): ?>
+                <details class="adp-admin-access-warning">
+                    <summary aria-label="Informationen zum fehlenden fachlichen Admin-Vollzugriff"><span aria-hidden="true">⚠</span></summary>
+                    <div class="adp-admin-access-warning__panel">
+                        <strong>Kein fachlicher Admin-Vollzugriff aktiv.</strong>
+                        <p>Native Nextcloud-Administration erteilt keinen fachlichen Vollzugriff. Mitglieder der Gruppe Datenschutzbeauftragte können eine app-lokale Freigabe von höchstens 24 Stunden erteilen.</p>
+                        <?php if ($_['showAdminAccessLink'] ?? false): ?><a href="#adp-full-access" target="_blank" rel="noopener noreferrer">Freigabesteuerung in neuem Tab öffnen</a><?php endif; ?>
+                    </div>
+                </details>
+            <?php endif; ?>
+        </div>
         <div class="adp-controls">
             <label>
                 Assistenznehmer
@@ -47,16 +59,6 @@
             </label>
         </div>
     </header>
-
-    <?php if ($_['showMissingAdminGrant'] ?? false): ?>
-        <section class="adp-admin-access adp-notice" aria-labelledby="adp-admin-access-required-heading">
-            <h2 id="adp-admin-access-required-heading">Kein fachlicher Admin-Vollzugriff</h2>
-            <p>Native Nextcloud-Administration erteilt keinen fachlichen Vollzugriff. Für den geschützten Demo-Datenpfad fehlt eine aktive app-lokale Freigabe.</p>
-            <?php if ($_['showAdminAccessLink'] ?? false): ?>
-                <p><a href="#adp-full-access">Zur app-lokalen Freigabesteuerung</a></p>
-            <?php endif; ?>
-        </section>
-    <?php endif; ?>
 
     <?php if ($_['canManageAdminAccess'] ?? false): ?>
         <section id="adp-full-access" class="adp-admin-access" aria-labelledby="adp-full-access-heading">
