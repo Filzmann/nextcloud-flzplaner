@@ -6,6 +6,10 @@ AdPlaner ist die kanonische Quelle für teambezogene Wunschdienstplanung,
 Schichtdefinitionen, Monatspläne, Zuweisungen und Planungsstatus. AD Urlaub
 bleibt die einzige schreibende Urlaubsquelle; AD Kalender und weitere Apps
 werden ausschließlich über optionale read-only Verträge angebunden.
+Die zuständige Einsatzbegleitung ist fachlicher Owner der Planung im
+jeweiligen Assistenzteam; `Datenschutzbeauftragte` verantwortet davon
+getrennt Retention-Policies, zweckgebundene Sperren und die
+Adminfreigabehistorie.
 
 AdPlaner stellt belegte Schichten über den versionierten
 `ScheduleConflictQueryEvent` als `Assistenz` bereit und konsumiert
@@ -66,4 +70,11 @@ Katalog `resources/privacy-processing.json` lazy über den öffentlichen
 Standalone-V1-Vertrag des Datenschutz-Centers. Der Katalog ist die kanonische
 Policyquelle für die Verarbeitungen `shift_planning_management` und
 `temporary_admin_full_access`, enthält keine personenbezogenen Laufzeitdaten
-und ersetzt fehlende fachliche Entscheidungen nicht durch technische Defaults.
+und enthält die beschlossenen klassenspezifischen Fristen: zwölf Monate für
+Monatsplanung und Konfliktnachweise, 30 Tage nach Monatsende für freie
+Tagesnotizen sowie sechs Monate ab tatsächlichem Ende für die
+Adminfreigabehistorie. Persönliche Präferenzen, Belastungsgrenzen und
+regelmäßige Schichten enden fachlich mit der Planungsaktivität; mangels
+belastbarer Lifecyclequelle wird daraus noch keine automatische Maßnahme.
+Rechtsgrundlage, betriebliche Backupgrenze und der getestete app-lokale
+Ausführungs-/Restorevertrag bleiben offen.

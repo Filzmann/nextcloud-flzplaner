@@ -7,17 +7,7 @@
       "name": "Wunschdienstplanung und Assistenzzuweisung",
       "controller": {
         "component": "Assistenz Dienstplanung",
-        "business_owner": {
-          "status": "PRIVACY-DECISION-REQUIRED",
-          "affected_data": "Dienstplan-, Wunsch-, Notiz- und Belastungsdaten der Assistenzteams",
-          "planned_processing": "Planung, Abstimmung, Genehmigung und Konfliktprüfung von Assistenzdiensten",
-          "missing_decision": "Fachlich verantwortliche Stelle für die Wunschdienstplanung",
-          "reason": "Die technische App-Eigentümerschaft bestimmt keine fachliche Verantwortlichkeit.",
-          "technical_impact": "Die verantwortliche Stelle kann noch nicht verbindlich ausgewiesen werden.",
-          "privacy_preserving_alternative": "Zugriffe auf den bestehenden serverseitigen Team- und Rollenvertrag begrenzen.",
-          "responsible_party": "ungeklärt",
-          "blocking": false
-        }
+        "business_owner": "Zuständige Einsatzbegleitung des jeweiligen Assistenzteams"
       },
       "data_categories": [
         "Nextcloud-UIDs und aktuell aufgelöste Anzeigenamen von Assistenzteammitgliedern",
@@ -91,15 +81,17 @@
         "blocking": false
       },
       "retention": {
-        "status": "PRIVACY-DECISION-REQUIRED",
-        "affected_data": "Vergangene Dienstpläne, Wünsche, Notizen, persönliche Grenzen, Festschichten und Konfliktnachweise",
-        "planned_processing": "Aufbewahrung und spätere Löschung, Anonymisierung, Einschränkung oder Review",
-        "missing_decision": "Fristen, Trigger, Sperren und Maßnahmen je Datenklasse",
-        "reason": "Es besteht keine fachlich freigegebene Aufbewahrungsregel.",
-        "technical_impact": "Keine automatische Retention-Maßnahme ist zulässig.",
-        "privacy_preserving_alternative": "Keine zusätzlichen Historien oder Exporte erzeugen und bestehende Zugriffe eng begrenzen.",
-        "responsible_party": "ungeklärt",
-        "blocking": true
+        "policy_id": "shift_planning_class_specific_retention",
+        "trigger": "Ende des jeweiligen Planmonats; bei aktiven persönlichen Präferenzen, Belastungsgrenzen und regelmäßigen Schichten Ende der Planungsaktivität",
+        "duration_or_deadline": "Monatspläne, Wünsche, Zuweisungen und Konfliktnachweise P12M nach Ende des Planmonats; freie Tagesnotizen P30D nach Ende des betreffenden Monats; aktive persönliche Werte nur bis zum Ende der Planungsaktivität",
+        "action": "delete",
+        "conditions_or_holds": [
+          "Freie Tagesnotizen sind nur für den aktuellen und folgenden Planungsmonat zulässig; Gesundheits-, Diagnose- und unnötige Drittpersonenangaben gehören nicht in Tagesnotizen.",
+          "Nach Löschung verbleibt kein anonymisierter Einzel- oder Detailbestand.",
+          "Eine rechtliche oder datenschutzrechtliche Sperre gilt nur für den dokumentierten Zweck und Umfang, besitzt einen Prüftermin und darf nur durch Datenschutzbeauftragte begründet und auditiert gesetzt oder aufgehoben werden.",
+          "Das Ende der Planungsaktivität wird nicht aus Kontodeaktivierung oder anderen unzuverlässigen Signalen abgeleitet; bis zu einer belastbaren Quelle erfolgt keine automatische Lifecycle-Maßnahme.",
+          "Keine automatische Ausführung vor dem vollständig freigegebenen und getesteten app-lokalen Retention-, Restore- und Backupvertrag."
+        ]
       },
       "logging": {
         "audit_requirements": [
@@ -122,12 +114,12 @@
         "restore_handling": {
           "status": "PRIVACY-DECISION-REQUIRED",
           "affected_data": "Nach Restore erneut vorhandene vergangene Planungsdaten",
-          "planned_processing": "Erneute Anwendung der festzulegenden Aufbewahrungsregeln",
-          "missing_decision": "Umgang mit beim Restore bereits abgelaufenen Fristen",
-          "reason": "Ohne Retentionentscheidung ist kein Restore-Nachlauf festlegbar.",
+          "planned_processing": "Erneute Anwendung der beschlossenen datenklassenspezifischen Aufbewahrungsregeln",
+          "missing_decision": "Sichere Restore-Ausführung und Wiederanlauf für bereits abgelaufene Fristen",
+          "reason": "Fristen und Maßnahmen sind entschieden; die sichere technische Restore-Ausführung fehlt.",
           "technical_impact": "Keine automatische Löschung oder Anonymisierung nach Restore.",
           "privacy_preserving_alternative": "Zugriff weiterhin auf aktuelle serverseitige Team- und Rollenentscheidungen begrenzen.",
-          "responsible_party": "ungeklärt",
+          "responsible_party": "Datenschutzbeauftragte und technische App-Verantwortung",
           "blocking": true
         }
       },
@@ -153,17 +145,7 @@
           "responsible_party": "ungeklärt",
           "blocking": true
         },
-        "erasure_or_anonymization": {
-          "status": "PRIVACY-DECISION-REQUIRED",
-          "affected_data": "Vergangene personenbezogene Planungsdaten",
-          "planned_processing": "Löschung oder Anonymisierung nach festzulegenden Regeln",
-          "missing_decision": "Datenklassenspezifische Lösch- oder Anonymisierungsregeln",
-          "reason": "Fachliche Aufbewahrungs- und Nachweispflichten sind ungeklärt.",
-          "technical_impact": "Keine automatische Löschung oder Anonymisierung.",
-          "privacy_preserving_alternative": "Keine zusätzlichen Kopien oder Exporte erzeugen.",
-          "responsible_party": "ungeklärt",
-          "blocking": true
-        }
+        "erasure_or_anonymization": "Monatspläne, Wünsche, Zuweisungen und Konfliktnachweise werden nach zwölf Monaten, freie Tagesnotizen 30 Tage nach Monatsende und aktive persönliche Werte nach belastbar festgestelltem Ende der Planungsaktivität vollständig gelöscht. Es verbleibt kein anonymisierter Detailbestand; die automatische Ausführung bleibt bis zum getesteten app-lokalen Vertrag deaktiviert."
       },
       "international_transfers": "Assistenz Dienstplanung übermittelt selbst keine Planungsdaten an Drittländer.",
       "automated_decisions": "Planvorschläge, Belastungshinweise und Konfliktprüfungen unterstützen die Bearbeitung; sie treffen keine Entscheidung mit rechtlicher oder vergleichbar erheblicher Wirkung.",
@@ -185,17 +167,7 @@
       "name": "Zeitlich begrenzte fachliche Adminfreigabe",
       "controller": {
         "component": "Assistenz Dienstplanung",
-        "business_owner": {
-          "status": "PRIVACY-DECISION-REQUIRED",
-          "affected_data": "Freigabehistorie für fachlichen Admin-Vollzugriff",
-          "planned_processing": "Erteilen, Beenden, Widerrufen und Nachweisen zeitlich begrenzter Freigaben",
-          "missing_decision": "Fachlich verantwortliche Stelle für Freigabeprozess und Nachweis",
-          "reason": "Technische Administration und fachliche Verantwortung sind getrennt.",
-          "technical_impact": "Die fachliche Ownerbezeichnung bleibt offen.",
-          "privacy_preserving_alternative": "Ohne aktive app-lokale Freigabe keinen fachlichen Vollzugriff erteilen.",
-          "responsible_party": "ungeklärt",
-          "blocking": false
-        }
+        "business_owner": "Datenschutzbeauftragte"
       },
       "data_categories": [
         "Nextcloud-UID des Zielkontos (aktives Nextcloud-Administrationskonto) sowie UIDs der freigebenden und widerrufenden Mitglieder von Datenschutzbeauftragte",
@@ -247,15 +219,16 @@
         "blocking": false
       },
       "retention": {
-        "status": "PRIVACY-DECISION-REQUIRED",
-        "affected_data": "Adminfreigabehistorie mit UIDs und Zeitpunkten",
-        "planned_processing": "Aufbewahrung und spätere Löschung, Anonymisierung, Einschränkung oder Review",
-        "missing_decision": "Frist, Trigger, Sperren und Maßnahme nach Fristablauf",
-        "reason": "Der sicherheitsrelevante Beweiswert muss gegen Datenminimierung abgewogen werden.",
-        "technical_impact": "Keine automatische Retention-Maßnahme ist zulässig.",
-        "privacy_preserving_alternative": "Keine zusätzlichen Historienfelder sammeln und Ausführung deaktiviert lassen.",
-        "responsible_party": "ungeklärt",
-        "blocking": true
+        "policy_id": "temporary_admin_access_history_default_six_months",
+        "trigger": "Tatsächliches Ende der zeitlich begrenzten app-lokalen Adminfreigabe",
+        "duration_or_deadline": "P6M als Standardwert",
+        "action": "delete",
+        "conditions_or_holds": [
+          "Vollständige Löschung ohne anonymisierten oder statistischen Restbestand.",
+          "Aktive rechtliche oder datenschutzrechtliche Sperren gelten nur zweckgebunden mit Prüftermin und werden ausschließlich durch Datenschutzbeauftragte begründet und auditiert gesetzt oder aufgehoben.",
+          "Nach Restore wird der ursprüngliche Trigger neu bewertet; eine Freigabe wird niemals reaktiviert.",
+          "Keine automatische Ausführung vor dem freigegebenen und getesteten app-lokalen Ausführungs-, Restore- und Backupvertrag."
+        ]
       },
       "logging": {
         "audit_requirements": [
@@ -278,12 +251,12 @@
         "restore_handling": {
           "status": "PRIVACY-DECISION-REQUIRED",
           "affected_data": "Nach Restore wieder vorhandene Freigabehistorie",
-          "planned_processing": "Erneute Anwendung der festzulegenden Retention-Regel",
-          "missing_decision": "Umgang mit bereits abgelaufenen Nachweisen",
-          "reason": "Ohne Retentionentscheidung ist kein Restore-Nachlauf festlegbar.",
+          "planned_processing": "Erneute Anwendung der beschlossenen Retention-Regel",
+          "missing_decision": "Sichere Restore-Ausführung und Wiederanlauf für bereits abgelaufene Nachweise",
+          "reason": "Frist, Maßnahme und Nichtreaktivierung sind entschieden; die sichere technische Restore-Ausführung fehlt.",
           "technical_impact": "Keine automatische Löschung oder Anonymisierung nach Restore.",
           "privacy_preserving_alternative": "Freigaben anhand ihres Endzeitpunkts technisch als inaktiv behandeln.",
-          "responsible_party": "ungeklärt",
+          "responsible_party": "Datenschutzbeauftragte und technische App-Verantwortung",
           "blocking": true
         }
       },
@@ -318,17 +291,7 @@
           "responsible_party": "ungeklärt",
           "blocking": true
         },
-        "erasure_or_anonymization": {
-          "status": "PRIVACY-DECISION-REQUIRED",
-          "affected_data": "UIDs und Zeitpunkte in der Freigabehistorie",
-          "planned_processing": "Löschung oder Anonymisierung nach festzulegender Frist",
-          "missing_decision": "Maßnahme und Umgang mit dem Auditbeweis",
-          "reason": "Die fachliche Aufbewahrungsentscheidung fehlt.",
-          "technical_impact": "Keine automatische Löschung oder Anonymisierung.",
-          "privacy_preserving_alternative": "Nur minimale Freigabefelder speichern.",
-          "responsible_party": "ungeklärt",
-          "blocking": true
-        }
+        "erasure_or_anonymization": "Vollständige Löschung sechs Monate nach dem tatsächlichen Ende ohne anonymisierten oder statistischen Restbestand; zweckgebundene Holds mit Prüftermin gehen vor. Die automatische Ausführung bleibt bis zum getesteten app-lokalen Vertrag deaktiviert."
       },
       "international_transfers": "Assistenz Dienstplanung übermittelt die Freigabehistorie nicht an Drittländer.",
       "automated_decisions": "Der Server beendet die Freigabe spätestens nach 24 Stunden; es findet keine automatisierte Entscheidung über eine Person statt.",
