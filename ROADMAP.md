@@ -17,6 +17,21 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
   mit langen Beschriftungen, Tastatur/Fokus, 200-Prozent-Zoom, Touchzielen
   und vertikalem Scrollen abnehmen.
 
+### ADP-STAGING-FOLLOWUP – Abweichungen der laufenden Abnahme schließen
+
+- Die Planstatus `planned` und `approved` einschließlich der fachlichen
+  Änderungssperre vollständig in Oberfläche und serverseitigem Vertrag
+  abbilden.
+- Optionale Urlaubs- und Kalenderhinweise ausschließlich read-only anzeigen;
+  ihr Fehlen darf den Standalone-Monatsplan weiterhin nicht blockieren.
+- Fremdänderungen durch normale Teammitglieder auch per direktem Request
+  negativ prüfen und die Mutationsfreiheit belegen.
+- Monatsnavigation, dauerhaft erreichbare horizontale Scrollleiste,
+  Kommentar-Speicheraktion und Mitarbeiterauswahl nacharbeiten.
+- Die in der Abnahme zusätzlich unterhalb des Monatsplans erschienene
+  Schichtdarstellung prüfen und eine unbeabsichtigte doppelte Darstellung
+  entfernen.
+
 ## Geplante Erweiterungen
 
 - Persönliche Monatsansicht „Alle meine Einsätze“ mit PDF-Export und optionaler Verbindung zu gängigen Kalendern.
