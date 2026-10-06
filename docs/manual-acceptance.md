@@ -31,10 +31,10 @@ Begründung verpflichtend.
 
 | ID | Was wird geprüft? | Auszuführende Schritte | Erwartetes Ergebnis | Ergebnis | Warum/Beleg/Abweichung |
 |---|---|---|---|---|---|
-| A1 | Standalone-Einstieg | AdPlaner ohne aktive OrgSuite öffnen. | Ein eigener Nextcloud-Einstieg ist vorhanden und der Monatsplan wird ohne andere Fachapps geladen. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
-| A2 | Suite-Einstieg | AdPlaner mit aktiver OrgSuite über den AD-Einstieg öffnen und zwischen aktivierten AD-Apps wechseln. | Es gibt keinen doppelten Haupteinstieg; AdPlaner ist im gemeinsamen Menü korrekt markiert. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
-| A3 | Team und Monat | Zwischen mindestens zwei synthetischen Teams sowie vorherigem und nächstem Monat wechseln. | Auswahl, Überschrift, Tage, Schichten und Zuweisungen gehören stets zum gewählten Team und Monat. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
-| A4 | Monatsgrenzen | Februar sowie einen Monats-/Jahreswechsel öffnen. | Kalendertage und gespeicherte Planwerte werden ohne fehlende oder doppelte Tage angezeigt. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| A1 | Standalone-Einstieg | AdPlaner ohne aktive OrgSuite öffnen. | Ein eigener Nextcloud-Einstieg ist vorhanden und der Monatsplan wird ohne andere Fachapps geladen. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| A2 | Suite-Einstieg | AdPlaner mit aktiver OrgSuite über den AD-Einstieg öffnen und zwischen aktivierten AD-Apps wechseln. | Es gibt keinen doppelten Haupteinstieg; AdPlaner ist im gemeinsamen Menü korrekt markiert. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| A3 | Team und Monat | Zwischen mindestens zwei synthetischen Teams sowie vorherigem und nächstem Monat wechseln. | Auswahl, Überschrift, Tage, Schichten und Zuweisungen gehören stets zum gewählten Team und Monat. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| A4 | Monatsgrenzen | Februar sowie einen Monats-/Jahreswechsel öffnen. | Kalendertage und gespeicherte Planwerte werden ohne fehlende oder doppelte Tage angezeigt. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | A5 | Tastatur und Fokus | Team-, Monats-, Tab- und Plansteuerung nur mit Tastatur bedienen. | Alle Funktionen sind erreichbar, der Fokus ist sichtbar und die Tabs melden Auswahl und Zielbereich korrekt. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | A6 | Responsivität und Scrollen | Viele Schichten und Personen bei kleinem Fenster anzeigen und horizontal sowie vertikal scrollen. | App-Inhalte bleiben erreichbar; der App-Root scrollt vertikal und breite Planungselemente sprengen nicht die Nextcloud-Seite. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 
@@ -74,10 +74,10 @@ Begründung verpflichtend.
 
 | Feld | Eintrag |
 |---|---|
-| Anzahl erfolgreich | 20 |
-| Anzahl nicht erfolgreich | 2 |
-| Anzahl nicht geprüft | 1 |
-| Kritische Abweichungen / Ticketreferenzen | B7: Planstatus `planned`/`approved` und Änderungssperre fehlen.<br>D3: Optionale Urlaubs- und Kalenderhinweise werden nicht wie vorgesehen read-only dargestellt.<br>C3: Direkte serverseitige Negativprüfung einer Fremdänderung steht aus.<br>Weitere UI-Punkte: Monatsnavigation A4, sichtbare horizontale Scrollleiste A6, Kommentar-Speicherbutton und Mitarbeiterauswahl B1. |
+| Anzahl erfolgreich | 4 |
+| Anzahl nicht erfolgreich | 0 |
+| Anzahl nicht geprüft | 19 |
+| Kritische Abweichungen / Ticketreferenzen | Siehe `ADP-STAGING-FOLLOWUP` in `ROADMAP.md`.<br>Beobachtet wurden fehlende Planstatus/Änderungssperre, fehlende read-only Integrationshinweise, der ausstehende direkte Fremdänderungs-Deny sowie Abweichungen bei Monatsnavigation, Scrollleiste, Kommentar-Speicheraktion und Mitarbeiterauswahl. Zusätzlich erschien unterhalb des Monatsplans eine weitere Schichtdarstellung. |
 | Erneute Prüfung erforderlich bis | Vor Freigabe einer abnahmefähigen Version; kein konkretes Datum festgelegt |
 | Gesamtentscheidung | [ ] abgenommen [ ] mit Auflagen abgenommen [ ] nicht abgenommen |
 | Begründung der Gesamtentscheidung | Die zentrale Planfreigabe einschließlich Statusverwaltung und Änderungssperre fehlt. Außerdem werden optionale Urlaubs- beziehungsweise Kalenderhinweise nicht wie vorgesehen dargestellt. C3 ist serverseitig noch nicht vollständig geprüft. |
