@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Privacy;
+namespace OCA\FlzPlaner\Privacy;
 
-use OCA\LocalBase\Privacy\PersonalDataProviderRegistryEvent;
+use OCA\FlzDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 
-/** @template-implements IEventListener<PersonalDataProviderRegistryEvent> */
+/** @template-implements IEventListener<RegisterPersonalDataProvidersEvent> */
 final class PlanerPrivacyProviderListener implements IEventListener {
     public function __construct(private PlanerPersonalDataProvider $provider) {}
 
     public function handle(Event $event): void {
-        if ($event instanceof PersonalDataProviderRegistryEvent) $event->register($this->provider);
+        if ($event instanceof RegisterPersonalDataProvidersEvent) $event->register($this->provider);
     }
 }

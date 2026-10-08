@@ -1,0 +1,80 @@
+# Architektur – FlzPlaner
+
+## Verantwortung
+
+FlzPlaner ist die kanonische Quelle für teambezogene Wunschdienstplanung,
+Schichtdefinitionen, Monatspläne, Zuweisungen und Planungsstatus. Filzmann Urlaubsplanung
+bleibt die einzige schreibende Urlaubsquelle; Filzmann Kalender und weitere Apps
+werden ausschließlich über optionale read-only Verträge angebunden.
+Die zuständige Einsatzbegleitung ist fachlicher Owner der Planung im
+jeweiligen Assistenzteam; `Datenschutzbeauftragte` verantwortet davon
+getrennt Retention-Policies, zweckgebundene Sperren und die
+Adminfreigabehistorie.
+
+FlzPlaner stellt belegte Schichten über den versionierten
+`ScheduleConflictQueryEvent` als `Assistenz` bereit und konsumiert
+Kalenderdienste derselben API als `Dienst/Büro`. Requester- und Source-App-ID
+verhindern Eigenmeldungen. Halboffene Intervalle erlauben direkte Übergaben,
+echte Überlappungen blockieren Planvorschlag, Festschichten und Zuweisungen.
+Fehlende Provider sind ein gültiger Standalone-Zustand; Providerfehler werden
+bei schreibenden Prüfungen nicht als Konfliktfreiheit behauptet.
+
+## Fach- und Datenmodell
+
+- Assistenzteams, EB-Rolle und Organisationsschlüssel stammen aus der
+  gemeinsamen LocalBase-Organisationsdefinition.
+- Teambezogene Schichtkonfiguration ist ein FlzPlaner-Fachvertrag und wird
+  durch die zuständige EB gepflegt.
+- Eigene Wünsche und fremde Zuweisungen besitzen getrennte serverseitige
+  Rechte; EB-Konten sind nicht selbst schichtfähig.
+- Planungsstatus und Konflikte werden über zuständige Services verändert oder
+  abgefragt. Optionale Provider dürfen einen Standalone-Monatsplan nicht
+  blockieren.
+
+## Schichten und Oberfläche
+
+Controller bleiben dünn; Persistenz liegt in Repositorys, Fachentscheidungen
+in Services und Browserlogik in getrennten Modulen und Komponenten. Der
+Monatsplan verwendet den App-Root als vertikalen Scrollcontainer und leitet
+Rechte niemals aus Sichtbarkeit oder Navigation ab.
+
+Die Desktopmatrix und die bis 700 Pixel eingeblendete mobile Tagesliste sind
+zwei Darstellungen desselben bereits serverseitig autorisierten Planpayloads.
+Beide verwenden dieselben Komponenten und Aktionskennungen für Wünsche,
+Zuweisungen, Präferenzen, Notizen, Konflikte und Status. Verdeckte
+Desktop-Bedienelemente nehmen mobil weder an Fokusreihenfolge noch
+Interaktion teil; mehrfach dargestellte Zuteilungsdialoge besitzen eindeutige
+IDs. Zuteilungsdialoge und Schichtnotiz-Editoren werden relativ zur Oberfläche
+ihres auslösenden Steuerelements geöffnet. Der App-Root bleibt der einzige
+vertikale Seiten-Scroller.
+
+## Datenschutz und Administration
+
+PersonalDataProvider und PermissionProvider bilden Schichtbezüge,
+Bearbeitungsreferenzen und die app-lokale temporäre Adminfreigabe ab. Native
+Nextcloud-Administration allein erteilt keinen fachlichen Vollzugriff.
+
+Der temporäre fachliche Admin-Vollzugriff wird ausschließlich von Mitgliedern
+der kanonischen Nextcloud-Gruppe `Datenschutzbeauftragte` erteilt und
+widerrufen. Nativer Adminstatus allein erteilt weder Vollzugriff noch Zugriff
+auf Freigabehistorie oder -steuerung. Ziel ist immer ein aktuell von
+Nextcloud bestätigtes Administrationskonto; die app-lokale Freigabe gilt
+höchstens 24 Stunden und wird bei Ablauf, Widerruf, Verlust des nativen
+Adminstatus oder Prüffehlern deny by default unwirksam. Die Steuerung liegt
+rollenabhängig in der Hauptoberfläche. Der Eintrittshinweis erscheint nur für
+native Administrationskonten ohne aktive Freigabe; ein Direktlink wird nur
+bei zusätzlicher Datenschutzrolle gerendert.
+
+Der zusätzliche `ProcessingMetadataProvider` veröffentlicht den app-eigenen
+Katalog `resources/privacy-processing.json` lazy über den öffentlichen
+Standalone-V1-Vertrag des Datenschutz-Centers. Der Katalog ist die kanonische
+Policyquelle für die Verarbeitungen `shift_planning_management` und
+`temporary_admin_full_access`, enthält keine personenbezogenen Laufzeitdaten
+und enthält die beschlossenen klassenspezifischen Fristen: zwölf Monate für
+Monatsplanung und Konfliktnachweise, 30 Tage nach Monatsende für freie
+Tagesnotizen sowie sechs Monate ab tatsächlichem Ende für die
+Adminfreigabehistorie. Persönliche Präferenzen, Belastungsgrenzen und
+regelmäßige Schichten enden fachlich mit der Planungsaktivität; mangels
+belastbarer Lifecyclequelle wird daraus noch keine automatische Maßnahme.
+Rechtsgrundlage, betriebliche Backupgrenze und der getestete app-lokale
+Ausführungs-/Restorevertrag bleiben offen.

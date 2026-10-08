@@ -1,7 +1,7 @@
 (function() {
     const { Model } = window.LocalBase.models;
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.models = window.ADPlaner.models || {};
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.models = window.FlzPlaner.models || {};
 
     class DayNote extends Model {
         constructor(data = {}) {
@@ -24,5 +24,5 @@
         }
     }
 
-    window.ADPlaner.models.DayNote = DayNote;
+    window.FlzPlaner.models.DayNote = DayNote;
 })();

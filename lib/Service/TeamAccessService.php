@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Service;
+namespace OCA\FlzPlaner\Service;
 
-use OCA\AdPlaner\Model\Assistant;
-use OCA\AdPlaner\Model\Team;
-use OCA\LocalBase\Organization\AdOrganizationDefinition;
-use OCA\LocalBase\Organization\AdOrganizationSettingsService;
+use OCA\FlzPlaner\Model\Assistant;
+use OCA\FlzPlaner\Model\Team;
+use OCA\LocalBase\Organization\FlzOrganizationDefinition;
+use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
 use OCP\IGroupManager;
 use OCP\IUserSession;
 
@@ -21,7 +21,7 @@ class TeamAccessService {
         private IGroupManager $groupManager,
         private IUserSession $userSession,
         private TeamSettingsService $settingsService,
-        private ?AdOrganizationSettingsService $organization = null,
+        private ?FlzOrganizationSettingsService $organization = null,
     ) {
     }
 
@@ -193,7 +193,7 @@ class TeamAccessService {
         ];
     }
 
-    private function definition(): AdOrganizationDefinition {
-        return $this->organization?->definition() ?? AdOrganizationDefinition::defaults();
+    private function definition(): FlzOrganizationDefinition {
+        return $this->organization?->definition() ?? FlzOrganizationDefinition::defaults();
     }
 }

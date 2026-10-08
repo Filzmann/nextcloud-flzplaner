@@ -7,7 +7,7 @@ require('../../js/modules/ui.js');
 require('../../js/components/shift-settings-list.js');
 require('../../js/components/settings-panel.js');
 
-const { settingsPanel, shiftSettingsList } = window.ADPlaner;
+const { settingsPanel, shiftSettingsList } = window.FlzPlaner;
 
 const team = {
     code: 'A1',
@@ -25,7 +25,11 @@ assert(settingsPanel.render(null).includes('Kein Assistenznehmer gewählt.'));
 
 const readonlyHtml = settingsPanel.render({
     ...team,
-    canCoordinate: false
+    canCoordinate: false,
+    canSetPersonalWorkload: true,
+    canSetRegularShifts: true,
+    personalRegularShifts: [{weekday:1,segmentKey:'early'}],
+    personalWorkload: { weeklyMin: 1, weeklyMax: 3, monthlyMin: 5, monthlyMax: 12 }
 });
 
 assert(readonlyHtml.includes('Team &lt;Settings&gt;'));
@@ -33,15 +37,23 @@ assert(!readonlyHtml.includes('Team <Settings>'));
 assert(readonlyHtml.includes('<dd>15.07.</dd>'));
 assert(readonlyHtml.includes('Früh &lt;A&gt; 08:00-14:00'));
 assert(!readonlyHtml.includes('Früh <A>'));
-assert(readonlyHtml.includes('adp-readonly-shift is-disabled'));
+assert(readonlyHtml.includes('flz-planer-readonly-shift is-disabled'));
 assert(!readonlyHtml.includes('id="settings-form"'));
+assert(readonlyHtml.includes('id="personal-workload-form"'));
+assert(readonlyHtml.includes('name="weeklyMin"'));
+assert(readonlyHtml.includes('value="12"'));
+assert(readonlyHtml.includes('id="personal-regular-shifts-form"'));
+assert(readonlyHtml.includes('value="1|early" checked'));
 
 const editorHtml = settingsPanel.render({
     ...team,
-    canCoordinate: true
+    canCoordinate: true,
+    canSetPersonalWorkload: false
+    ,canSetRegularShifts: false
 });
 
 assert(editorHtml.includes('id="settings-form"'));
+assert(!editorHtml.includes('id="personal-workload-form"'), 'Nicht schichtfähige EB-Konten erhalten keine persönlichen Schichtgrenzen.');
 assert(editorHtml.includes('name="displayName" type="text" maxlength="255" required'));
 assert(editorHtml.includes('value="Team &lt;Settings&gt;"'));
 assert(editorHtml.includes('value="early"'));
@@ -96,7 +108,7 @@ const originalNow = Date.now;
 Date.now = () => 1234567890;
 global.document = {
     getElementById(id) {
-        assert.strictEqual(id, 'adp-shift-list');
+        assert.strictEqual(id, 'flz-planer-shift-list');
 
         return shiftList;
     }
@@ -126,7 +138,7 @@ removeButton.closest = selector => {
 };
 global.document = {
     getElementById(id) {
-        assert.strictEqual(id, 'adp-shift-list');
+        assert.strictEqual(id, 'flz-planer-shift-list');
 
         return {
             querySelectorAll(selector) {
@@ -168,4 +180,4 @@ function row(values) {
     };
 }
 
-console.log('AdPlaner settings panel smoke test passed.');
+console.log('FlzPlaner settings panel smoke test passed.');

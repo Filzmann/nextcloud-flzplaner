@@ -2,34 +2,46 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!class_exists(\OCP\AppFramework\Controller::class)) {
-        eval('namespace OCP\AppFramework; class Controller { public function __construct(string $appName, \OCP\IRequest $request) {} }');
-    }
-    if (!interface_exists(\OCP\IRequest::class)) {
-        eval('namespace OCP; interface IRequest {}');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Response::class)) {
-        eval('namespace OCP\AppFramework\Http; class Response {}');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\DataResponse::class)) {
-        eval('namespace OCP\AppFramework\Http; class DataResponse extends Response { public function __construct(mixed $data = [], int $status = 200) {} }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\TemplateResponse::class)) {
-        eval('namespace OCP\AppFramework\Http; class TemplateResponse extends Response { public function __construct(string $appName, string $templateName) {} }');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Attribute\NoAdminRequired::class)) {
-        eval('namespace OCP\AppFramework\Http\Attribute; #[\Attribute(\Attribute::TARGET_METHOD)] class NoAdminRequired {}');
-    }
-    if (!class_exists(\OCP\AppFramework\Http\Attribute\NoCSRFRequired::class)) {
-        eval('namespace OCP\AppFramework\Http\Attribute; #[\Attribute(\Attribute::TARGET_METHOD)] class NoCSRFRequired {}');
+namespace OCP {
+    if (!interface_exists(IRequest::class)) {
+        interface IRequest {}
     }
 }
 
-namespace OCA\AdPlaner\AppInfo {
+namespace OCP\AppFramework {
+    if (!class_exists(Controller::class)) {
+        class Controller { public function __construct(string $appName, \OCP\IRequest $request) {} }
+    }
+}
+
+namespace OCP\AppFramework\Http {
+    if (!class_exists(Response::class)) {
+        class Response {}
+    }
+    if (!class_exists(DataResponse::class)) {
+        class DataResponse extends Response { public function __construct(mixed $data = [], int $status = 200) {} }
+    }
+    if (!class_exists(TemplateResponse::class)) {
+        class TemplateResponse extends Response { public function __construct(string $appName, string $templateName) {} }
+    }
+}
+
+namespace OCP\AppFramework\Http\Attribute {
+    if (!class_exists(NoAdminRequired::class)) {
+        #[\Attribute(\Attribute::TARGET_METHOD)] class NoAdminRequired {}
+    }
+    if (!class_exists(NoCSRFRequired::class)) {
+        #[\Attribute(\Attribute::TARGET_METHOD)] class NoCSRFRequired {}
+    }
+}
+
+namespace {
+}
+
+namespace OCA\FlzPlaner\AppInfo {
     if (!class_exists(Application::class)) {
         final class Application {
-            public const APP_ID = 'adplaner';
+            public const APP_ID = 'flzplaner';
         }
     }
 }
@@ -37,8 +49,9 @@ namespace OCA\AdPlaner\AppInfo {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Controller\ApiController;
-    use OCA\AdPlaner\Controller\PageController;
+    use OCA\FlzPlaner\Controller\ApiController;
+    use OCA\FlzPlaner\Controller\PageController;
+    use OCA\FlzPlaner\Controller\TemporaryAdminAccessController;
     use OCP\AppFramework\Http\Attribute\NoAdminRequired;
     use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 
@@ -50,17 +63,34 @@ namespace {
         throw new \RuntimeException('Page index should be available to regular users.');
     }
 
-    $apiActions = [
+    $readActions = [
         'state',
         'monthPlan',
+    ];
+    foreach ($readActions as $action) {
+        $method = new \ReflectionMethod(ApiController::class, $action);
+        if ($method->getAttributes(NoAdminRequired::class) === []) {
+            throw new \RuntimeException($action . ' should be available to regular users.');
+        }
+        if ($method->getAttributes(NoCSRFRequired::class) === []) {
+            throw new \RuntimeException($action . ' should be readable without a CSRF header.');
+        }
+    }
+
+    $writeActions = [
         'saveTeamSettings',
         'saveDayNote',
         'addShiftCandidate',
         'removeShiftCandidate',
+        'updateCandidateMetadata',
+        'savePersonalWorkload',
+        'savePersonalRegularShifts',
         'transitionMonthStatus',
+        'reportFixedConflict',
+        'resolveFixedConflict',
     ];
 
-    foreach ($apiActions as $action) {
+    foreach ($writeActions as $action) {
         $method = new \ReflectionMethod(ApiController::class, $action);
         if ($method->getAttributes(NoAdminRequired::class) === []) {
             throw new \RuntimeException($action . ' should be available to regular users.');
@@ -70,5 +100,19 @@ namespace {
         }
     }
 
-    echo 'AdPlaner controller attribute smoke tests passed' . PHP_EOL;
+    $grantStatus = new \ReflectionMethod(TemporaryAdminAccessController::class, 'status');
+    if ($grantStatus->getAttributes(NoAdminRequired::class) === [] || $grantStatus->getAttributes(NoCSRFRequired::class) === []) {
+        throw new \RuntimeException('DPO-Nichtadmins müssen den authentifizierten read-only Freigabestatus erreichen.');
+    }
+    foreach (['activate', 'revoke'] as $action) {
+        $method = new \ReflectionMethod(TemporaryAdminAccessController::class, $action);
+        if ($method->getAttributes(NoAdminRequired::class) === []) {
+            throw new \RuntimeException($action . ' muss für authentifizierte DPO-Nichtadmins erreichbar sein.');
+        }
+        if ($method->getAttributes(NoCSRFRequired::class) !== []) {
+            throw new \RuntimeException($action . ' muss den standardmäßigen CSRF-Schutz behalten.');
+        }
+    }
+
+    echo 'FlzPlaner controller attribute smoke tests passed' . PHP_EOL;
 }

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Listener;
+namespace OCA\FlzPlaner\Listener;
 
-use OCA\AdPlaner\AppInfo\Application;
-use OCA\LocalBase\Integration\AdIntegrationCapabilities;
+use OCA\FlzPlaner\AppInfo\Application;
+use OCA\LocalBase\Integration\FlzIntegrationCapabilities;
 use OCA\LocalBase\Integration\IntegrationCapabilityQueryEvent;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -14,6 +14,6 @@ use OCP\EventDispatcher\IEventListener;
 final class IntegrationCapabilityQueryListener implements IEventListener {
     public function handle(Event $event): void {
         if (!$event instanceof IntegrationCapabilityQueryEvent) return;
-        $event->provide(Application::APP_ID, [AdIntegrationCapabilities::ASSISTANT_SCHEDULE_READ]);
+        $event->provide(Application::APP_ID, [FlzIntegrationCapabilities::ASSISTANT_SCHEDULE_READ]);
     }
 }

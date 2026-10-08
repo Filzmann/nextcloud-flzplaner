@@ -1,6 +1,6 @@
 (function() {
     const { Repository } = window.LocalBase.repositories;
-    const { ShiftDefinition, ShiftSlot, Team } = window.ADPlaner.models;
+    const { ShiftDefinition, ShiftSlot, Team } = window.FlzPlaner.models;
 
     class PlanRepository extends Repository {
         async state() {
@@ -30,6 +30,26 @@
             return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/slots/' + this.encode(slotId) + '/candidates/remove', {
                 targetUid
             });
+        }
+
+        updateCandidateMetadata(teamCode, month, slotId, preference, note) {
+            return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/slots/' + this.encode(slotId) + '/candidate-metadata', { preference, note });
+        }
+
+        savePersonalWorkload(teamCode, limits) {
+            return this.post(this.teamPath(teamCode) + '/personal-workload', limits);
+        }
+
+        savePersonalRegularShifts(teamCode, rules) {
+            return this.post(this.teamPath(teamCode) + '/personal-regular-shifts', { regularShiftsJson: JSON.stringify(rules) });
+        }
+
+        reportFixedConflict(teamCode, month, slotId) {
+            return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/slots/' + this.encode(slotId) + '/fixed-conflict/report');
+        }
+
+        resolveFixedConflict(teamCode, month, slotId, keptUid) {
+            return this.post(this.teamPath(teamCode) + '/months/' + this.encode(month) + '/slots/' + this.encode(slotId) + '/fixed-conflict/resolve', { keptUid });
         }
 
         saveDayNote(teamCode, month, date, note) {
@@ -74,7 +94,7 @@
 
     }
 
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.repositories = window.ADPlaner.repositories || {};
-    window.ADPlaner.repositories.PlanRepository = PlanRepository;
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.repositories = window.FlzPlaner.repositories || {};
+    window.FlzPlaner.repositories.PlanRepository = PlanRepository;
 })();

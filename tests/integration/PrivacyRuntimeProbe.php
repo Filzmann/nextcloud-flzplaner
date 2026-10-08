@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 4) . '/lib/base.php';
 
-use OCPDBQueryBuilder\IQueryBuilder;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 $mode = (string)($argv[1] ?? '');
@@ -27,7 +27,7 @@ $db = \OC::$server->get(IDBConnection::class);
 $monthRow = static function () use ($db, $teamCode, $month): ?array {
     $qb = $db->getQueryBuilder();
     $qb->select('revision', 'updated_by_uid', 'updated_at')
-        ->from('adp_month_plans')
+        ->from('flz_planer_month_plans')
         ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)))
         ->andWhere($qb->expr()->eq('plan_month', $qb->createNamedParameter($month)));
     $row = $qb->executeQuery()->fetchAssociative();
@@ -59,11 +59,11 @@ $rowCount = static function (string $table, array $conditions) use ($db): int {
 switch ($mode) {
     case 'assert-no-browser-data':
         $remaining = [];
-        foreach (['adp_month_plans', 'adp_day_notes'] as $table) {
+        foreach (['flz_planer_month_plans', 'flz_planer_day_notes'] as $table) {
             $qb = $db->getQueryBuilder();
             $qb->select($qb->func()->count('*', 'row_count'))
                 ->from($table)
-                ->where($qb->expr()->like('updated_by_uid', $qb->createNamedParameter('adp-browser-%')));
+                ->where($qb->expr()->like('updated_by_uid', $qb->createNamedParameter('flz-planer-browser-%')));
             $count = (int)$qb->executeQuery()->fetchOne();
             if ($count > 0) {
                 $remaining[$table] = $count;
@@ -84,14 +84,14 @@ switch ($mode) {
         break;
 
     case 'assert-note-present':
-        if ($workDate === '' || $rowCount('adp_day_notes', ['team_code' => $teamCode, 'work_date' => $workDate]) !== 1) {
+        if ($workDate === '' || $rowCount('flz_planer_day_notes', ['team_code' => $teamCode, 'work_date' => $workDate]) !== 1) {
             throw new RuntimeException('Die synthetische Tagesbemerkung wurde nicht eindeutig persistiert.');
         }
         echo "Synthetische Tagesbemerkung ist physisch vorhanden.\n";
         break;
 
     case 'assert-note-absent':
-        if ($workDate === '' || $rowCount('adp_day_notes', ['team_code' => $teamCode, 'work_date' => $workDate]) !== 0) {
+        if ($workDate === '' || $rowCount('flz_planer_day_notes', ['team_code' => $teamCode, 'work_date' => $workDate]) !== 0) {
             throw new RuntimeException('Die geleerte Tagesbemerkung besitzt weiterhin eine Datenbankzeile.');
         }
         echo "Geleerte Tagesbemerkung besitzt keine Datenbankzeile.\n";
@@ -99,21 +99,27 @@ switch ($mode) {
 
     case 'cleanup':
         $qb = $db->getQueryBuilder();
-        $qb->select('id')->from('adp_shift_slots')
+        $qb->select('id')->from('flz_planer_shift_slots')
             ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)));
         $slotIds = array_map('intval', $qb->executeQuery()->fetchFirstColumn());
         if ($slotIds !== []) {
             $qb = $db->getQueryBuilder();
-            $qb->delete('adp_shift_candidates')
+            $qb->delete('flz_planer_fixed_conflicts')
+                ->where($qb->expr()->in('slot_id', $qb->createNamedParameter($slotIds, IQueryBuilder::PARAM_INT_ARRAY)));
+            $qb->executeStatement();
+            $qb = $db->getQueryBuilder();
+            $qb->delete('flz_planer_shift_candidates')
                 ->where($qb->expr()->in('slot_id', $qb->createNamedParameter($slotIds, IQueryBuilder::PARAM_INT_ARRAY)));
             $qb->executeStatement();
         }
 
         foreach ([
-            ['adp_day_notes', ['team_code' => $teamCode]],
-            ['adp_shift_slots', ['team_code' => $teamCode]],
-            ['adp_month_plans', ['team_code' => $teamCode]],
-            ['adp_team_settings', ['team_code' => $teamCode]],
+            ['flz_planer_day_notes', ['team_code' => $teamCode]],
+            ['flz_planer_workload_limits', ['team_code' => $teamCode]],
+            ['flz_planer_regular_shifts', ['team_code' => $teamCode]],
+            ['flz_planer_shift_slots', ['team_code' => $teamCode]],
+            ['flz_planer_month_plans', ['team_code' => $teamCode]],
+            ['flz_planer_team_settings', ['team_code' => $teamCode]],
         ] as [$table, $conditions]) {
             $qb = $db->getQueryBuilder();
             $qb->delete($table);
@@ -122,16 +128,18 @@ switch ($mode) {
             }
             $qb->executeStatement();
         }
-        echo "Synthetische AdPlaner-Daten wurden bereinigt.\n";
+        echo "Synthetische FlzPlaner-Daten wurden bereinigt.\n";
         break;
 
     case 'assert-clean':
         $remaining = [];
         foreach ([
-            'adp_day_notes' => ['team_code' => $teamCode],
-            'adp_shift_slots' => ['team_code' => $teamCode],
-            'adp_month_plans' => ['team_code' => $teamCode],
-            'adp_team_settings' => ['team_code' => $teamCode],
+            'flz_planer_day_notes' => ['team_code' => $teamCode],
+            'flz_planer_workload_limits' => ['team_code' => $teamCode],
+            'flz_planer_regular_shifts' => ['team_code' => $teamCode],
+            'flz_planer_shift_slots' => ['team_code' => $teamCode],
+            'flz_planer_month_plans' => ['team_code' => $teamCode],
+            'flz_planer_team_settings' => ['team_code' => $teamCode],
         ] as $table => $conditions) {
             $count = $rowCount($table, $conditions);
             if ($count > 0) {
@@ -139,9 +147,9 @@ switch ($mode) {
             }
         }
         if ($remaining !== []) {
-            throw new RuntimeException('Synthetische AdPlaner-Daten verblieben: ' . json_encode($remaining, JSON_THROW_ON_ERROR));
+            throw new RuntimeException('Synthetische FlzPlaner-Daten verblieben: ' . json_encode($remaining, JSON_THROW_ON_ERROR));
         }
-        echo "Keine synthetischen AdPlaner-Daten verblieben.\n";
+        echo "Keine synthetischen FlzPlaner-Daten verblieben.\n";
         break;
 
     default:

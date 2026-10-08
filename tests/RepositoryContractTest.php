@@ -18,4 +18,4 @@ foreach ([$shiftPlan, $teamSettings] as $source) {
 }
 if (!str_contains($shiftPlan, 'fetchAllAssociative()')) throw new RuntimeException('Schichtplanlisten werden nicht explizit assoziativ gelesen.');
 
-echo "AdPlaner repository contract test passed\n";
+echo "FlzPlaner repository contract test passed\n";

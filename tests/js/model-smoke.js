@@ -20,7 +20,7 @@ const {
     ShiftSlot,
     Team,
     TeamSettings
-} = window.ADPlaner.models;
+} = window.FlzPlaner.models;
 
 const assistant = Assistant.get({
     uid: 'anna',
@@ -36,7 +36,11 @@ const candidate = ShiftCandidate.get({
     assistant_uid: 'anna',
     display_name: 'Anna Assistenz',
     createdByUid: 'internal-coordinator',
-    created_at: '2026-08-09T10:00:00Z'
+    fixed: true,
+    created_at: '2026-08-09T10:00:00Z',
+    preference: 'favorite',
+    candidate_note: 'Hinweis',
+    workload_status: 'under'
 });
 
 assert(candidate instanceof ShiftCandidate);
@@ -44,7 +48,13 @@ assert.strictEqual(candidate.uid, 'anna');
 assert.strictEqual(Object.hasOwn(candidate, 'createdByUid'), false);
 assert.strictEqual(Object.hasOwn(candidate, 'createdAt'), false);
 assert.strictEqual(Object.hasOwn(candidate.toArray(), 'createdByUid'), false);
+assert.strictEqual(candidate.fixed, true);
+assert.strictEqual(candidate.toArray().fixed, true);
 assert.strictEqual(Object.hasOwn(candidate.toArray(), 'createdAt'), false);
+assert.strictEqual(candidate.preference, 'favorite');
+assert.strictEqual(candidate.note, 'Hinweis');
+assert.strictEqual(candidate.workloadStatus, 'under');
+assert.strictEqual(ShiftCandidate.get({assistant_uid:'anna',fixed:false}).fixed, false);
 
 const definition = ShiftDefinition.get({
     key: 'day',
@@ -67,7 +77,7 @@ assert.strictEqual(slot.candidates.length, 1);
 
 const team = Team.get({
     code: 'TeamA',
-    group_name: 'ad-ASN-TeamA',
+    group_name: 'flz-ASN-TeamA',
     assistants: [assistant.toArray()]
 });
 
@@ -77,4 +87,4 @@ assert.strictEqual(team.assistants.length, 1);
 assert(TeamSettings.get({ team_code: 'TeamA' }) instanceof TeamSettings);
 assert(DayNote.get({ team_code: 'TeamA', note: 'Hinweis' }) instanceof DayNote);
 
-console.log('AdPlaner model smoke test passed.');
+console.log('FlzPlaner model smoke test passed.');

@@ -1,40 +1,39 @@
-# Roadmap – AdPlaner
+# Roadmap – FlzPlaner
 
-Diese Datei bündelt geplante Erweiterungen und offene Produktentscheidungen. Verbindliche Fach-, Sicherheits- und Architekturregeln stehen in `AGENTS.md`.
+Diese Datei enthält ausschließlich offene Arbeit, zurückgestellte Vorhaben
+und Freigabegates. Der aktuelle Funktionsumfang steht in `README.md`,
+erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
+`docs/architecture.md`.
 
 ## Aktueller Fokus
 
 - Die manuellen Prüfungen werden im ausfüllbaren
   [`docs/manual-acceptance.md`](docs/manual-acceptance.md) dokumentiert.
+- Den umgesetzten temporären Admin-Vollzugriff einschließlich DPO-Steuerung,
+  Rollenmatrix, CSRF und Tastaturbedienung in DDEV und auf Staging abnehmen.
 - Produktive Rechte- und Datenschutzprüfung der Wunschdienstplanung.
 - Monatsplan, variable Schichten, EB-Koordination und Standalone-Betrieb auf einem realitätsnahen Staging fachlich abnehmen.
+- Die mobile Tagesliste für Assistenz und EB in realen Smartphone-Browsern
+  mit langen Beschriftungen, Tastatur/Fokus, 200-Prozent-Zoom, Touchzielen
+  und vertikalem Scrollen abnehmen.
+
+### FLZP-STAGING-FOLLOWUP – Abweichungen der laufenden Abnahme schließen
+
+- Die Planstatus `planned` und `approved` einschließlich der fachlichen
+  Änderungssperre vollständig in Oberfläche und serverseitigem Vertrag
+  abbilden.
+- Optionale Urlaubs- und Kalenderhinweise ausschließlich read-only anzeigen;
+  ihr Fehlen darf den Standalone-Monatsplan weiterhin nicht blockieren.
+- Fremdänderungen durch normale Teammitglieder auch per direktem Request
+  negativ prüfen und die Mutationsfreiheit belegen.
+- Monatsnavigation, dauerhaft erreichbare horizontale Scrollleiste,
+  Kommentar-Speicheraktion und Mitarbeiterauswahl nacharbeiten.
+- Die in der Abnahme zusätzlich unterhalb des Monatsplans erschienene
+  Schichtdarstellung prüfen und eine unbeabsichtigte doppelte Darstellung
+  entfernen.
 
 ## Geplante Erweiterungen
 
-- **ADP-MOBILE – smartphone-taugliche Planung und kompakte Menüs:**
-  Monatsplan, persönliche Einsätze, Schichtauswahl und die wichtigsten
-  Planungsaktionen erhalten eine auf kleinen Smartphone-Viewports vollständig
-  nutzbare responsive Darstellung. Die Lösung darf nicht nur die
-  Desktop-Matrix horizontal scrollbar machen; Prioritäten, Status,
-  Schichtzeiten, Zuständigkeit und erlaubte Aktionen müssen ohne Verlust des
-  fachlichen Kontexts erreichbar bleiben. Menüs und Filter werden kompakter
-  gruppiert, wobei häufige Aktionen direkt sichtbar sowie Beschriftungen,
-  Tastaturbedienung, Fokus und ausreichend große Touch-Ziele erhalten bleiben.
-  Vor der Umsetzung werden die mobilen Kernabläufe für Assistenz und EB
-  festgelegt. Tests decken mindestens kleine Viewports, beide Rollen,
-  Menü-/Filterbedienung, Fokusreihenfolge, Zoom, lange Beschriftungen sowie
-  vertikales und gegebenenfalls lokal begrenztes horizontales Scrollen ab.
-- **ADP-L10N – vollständige Lokalisierung (später, nicht freigegeben):**
-  AdPlaner wird im Rahmen des suiteweiten L10N-Rollouts auf die aktive
-  Nextcloud-Locale und Nextcloud-l10n umgestellt. Manuelle Monats- und
-  Wochentagsnamen sowie sichtbare UI-, Status-, Validierungs- und
-  Fehlermeldungen werden dabei vollständig migriert. ISO-Daten,
-  Monatsnummern, Schichtzeiten, Statuswerte, Teamcodes und API-Schlüssel
-  bleiben unverändert; Abkürzungen werden nicht durch Abschneiden gebildet.
-  Erforderlich sind Tests für deutsche Ausgabe, mindestens eine weitere
-  Locale, Fallback, Monats-/Jahresgrenzen, Pluralformen, Platzhalter und
-  Escaping in PHP und JavaScript. Pilot-App, Reihenfolge und Rohtext-Gate
-  werden vor Umsetzung suiteweit separat freigegeben.
 - Persönliche Monatsansicht „Alle meine Einsätze“ mit PDF-Export und optionaler Verbindung zu gängigen Kalendern.
 - Benachrichtigungen für relevante Planungs- und Statusänderungen.
 - Teambezogene Konfigurierbarkeit nur dort erweitern, wo konkrete Teams unterschiedliche Regeln benötigen.
@@ -43,3 +42,19 @@ Diese Datei bündelt geplante Erweiterungen und offene Produktentscheidungen. Ve
 
 - Exportformate, Zielsysteme und Datenschutzumfang.
 - Benachrichtigungskanäle, Empfänger*innen und auslösende Ereignisse.
+
+## Bewusst zurückgestellt – niedrigste Priorität
+
+### FLZP-L10N – app-lokaler Umsetzungsschnitt
+
+Status seit 17. September 2026: Die Umsetzung beginnt erst nach allen höher
+priorisierten Roadmap-Aufgaben und einer erneuten ausdrücklichen Freigabe des
+Root-Vorhabens `ZM-06`. Neue Funktionen und Codeänderungen berücksichtigen
+die spätere Lokalisierbarkeit an den jeweils berührten Stellen, lösen aber
+keine flächige Umstellung oder Übersetzungsimplementierung aus.
+
+Bei der späteren Umsetzung werden sichtbare Texte sowie Monats- und
+Wochentagsnamen auf Nextcloud-l10n umgestellt. ISO-Daten, Monatsnummern,
+Schichtzeiten, Statuswerte, Teamcodes und API-Schlüssel bleiben
+sprachneutral; Deutsch, eine weitere Locale, Fallback, Plural, Platzhalter
+und Escaping werden app-lokal getestet.

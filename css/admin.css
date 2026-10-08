@@ -1,6 +1,6 @@
-.adp-admin { max-width: 900px; }
-.adp-admin-panel { padding: 18px; border: 1px solid var(--color-border); border-radius: var(--border-radius-large); background: var(--color-main-background); }
-.adp-demo-confirm { display: block; margin: 16px 0 10px; }
-.adp-admin-notice { padding: 10px 12px; border: 2px solid var(--color-primary-element); border-radius: var(--border-radius); background: var(--color-primary-element-light); color: var(--color-main-text); }
-.adp-admin-notice.is-success { border-color: var(--color-success); }
-.adp-admin-notice.is-error { border-color: var(--color-error); background: var(--color-error-hover); }
+.flz-planer-admin { max-width: 900px; }
+.flz-planer-admin-panel { padding: 18px; border: 1px solid var(--color-border); border-radius: var(--border-radius-large); background: var(--color-main-background); }
+.flz-planer-demo-confirm { display: block; margin: 16px 0 10px; }
+.flz-planer-admin-notice { padding: 10px 12px; border: 2px solid var(--color-primary-element); border-radius: var(--border-radius); background: var(--color-primary-element-light); color: var(--color-main-text); }
+.flz-planer-admin-notice.is-success { border-color: var(--color-success); }
+.flz-planer-admin-notice.is-error { border-color: var(--color-error); background: var(--color-error-hover); }

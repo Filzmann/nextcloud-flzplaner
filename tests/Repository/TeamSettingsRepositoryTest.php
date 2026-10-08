@@ -32,10 +32,10 @@ namespace OCP\DB {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Repository\TeamSettingsRepository;
+    use OCA\FlzPlaner\Repository\TeamSettingsRepository;
     use OCP\DB\Exception;
     use OCP\IDBConnection;
-    use function OCA\AdPlaner\Tests\assertSameValue;
+    use function OCA\FlzPlaner\Tests\assertSameValue;
 
     final class TeamSettingsResultFake {
         public function __construct(private array|false $row) {
@@ -159,7 +159,7 @@ namespace {
     } catch (Exception $exception) {
         assertSameValue(Exception::REASON_DRIVER, $exception->getReason(), 'A non-unique database failure must propagate unchanged.');
         assertSameValue(0, $failingConnection->updateAttempts, 'A non-unique database failure must not trigger an update.');
-        echo 'AdPlaner team settings repository tests passed' . PHP_EOL;
+        echo 'FlzPlaner team settings repository tests passed' . PHP_EOL;
         return;
     }
 

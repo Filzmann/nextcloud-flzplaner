@@ -1,8 +1,8 @@
 (function() {
     const { Model } = window.LocalBase.models;
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.models = window.ADPlaner.models || {};
-    const { Assistant } = window.ADPlaner.models;
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.models = window.FlzPlaner.models || {};
+    const { Assistant } = window.FlzPlaner.models;
 
     class Team extends Model {
         constructor(data = {}) {
@@ -14,6 +14,10 @@
             this.isEb = !!(data.isEb ?? data.is_eb ?? data.canCoordinate ?? false);
             this.canCoordinate = !!(data.canCoordinate ?? this.isEb);
             this.settings = data.settings || {};
+            this.personalWorkload = data.personalWorkload || data.personal_workload || {};
+            this.canSetPersonalWorkload = !!(data.canSetPersonalWorkload ?? data.can_set_personal_workload ?? false);
+            this.personalRegularShifts = data.personalRegularShifts || data.personal_regular_shifts || [];
+            this.canSetRegularShifts = !!(data.canSetRegularShifts ?? data.can_set_regular_shifts ?? false);
         }
 
         toArray() {
@@ -24,10 +28,14 @@
                 assistants: this.assistants.map(assistant => assistant.toArray()),
                 isEb: this.isEb,
                 canCoordinate: this.canCoordinate,
-                settings: this.settings
+                settings: this.settings,
+                personalWorkload: this.personalWorkload,
+                canSetPersonalWorkload: this.canSetPersonalWorkload,
+                personalRegularShifts: this.personalRegularShifts,
+                canSetRegularShifts: this.canSetRegularShifts
             };
         }
     }
 
-    window.ADPlaner.models.Team = Team;
+    window.FlzPlaner.models.Team = Team;
 })();

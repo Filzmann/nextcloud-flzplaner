@@ -33,10 +33,10 @@ namespace OCP\DB {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Repository\ShiftPlanRepository;
+    use OCA\FlzPlaner\Repository\ShiftPlanRepository;
     use OCP\DB\Exception;
     use OCP\IDBConnection;
-    use function OCA\AdPlaner\Tests\assertSameValue;
+    use function OCA\FlzPlaner\Tests\assertSameValue;
 
     final class CandidateResultFake {
         public function __construct(private array|false $row = false) {}
@@ -103,7 +103,7 @@ namespace {
             return $this;
         }
         public function executeQuery(): CandidateResultFake {
-            return new CandidateResultFake($this->table === 'adp_month_plans' ? $this->connection->statusRow : false);
+            return new CandidateResultFake($this->table === 'flz_planer_month_plans' ? $this->connection->statusRow : false);
         }
 
         public function executeStatement(): int {
@@ -134,6 +134,17 @@ namespace {
     assertSameValue('planned', $lockRepository->lockMonthStatus('A1', '2026-08', ['draft', 'planned']), 'A matching month status should be locked.');
     assertSameValue(['revision'], $lockConnection->updatedColumns, 'A technical month lock must not persist viewer identity or overwrite the last functional update time.');
 
+    $metadataConnection = new CandidateConnectionFake();
+    $metadataRepository = new ShiftPlanRepository($metadataConnection);
+    assertSameValue(true, $metadataRepository->updateCandidateMetadata(7, 'assistant-a', 'favorite', 'Hinweis'), 'Candidate metadata update should report the scoped write.');
+    assertSameValue(['preference', 'candidate_note', 'metadata_updated_at'], $metadataConnection->updatedColumns, 'Candidate metadata must update only the approved fields.');
+
+    $limitsConnection = new CandidateConnectionFake();
+    $limitsRepository = new ShiftPlanRepository($limitsConnection);
+    $limitsRepository->saveWorkloadLimits('A1', 'assistant-a', ['weeklyMin'=>1,'weeklyMax'=>3,'monthlyMin'=>5,'monthlyMax'=>12]);
+    assertSameValue(1, $limitsConnection->insertAttempts, 'A first workload save should attempt an insert.');
+    assertSameValue(1, $limitsConnection->updateAttempts, 'A concurrent first workload insert must recover with a scoped update.');
+
     $failingConnection = new CandidateConnectionFake();
     $failingConnection->insertFailureReason = Exception::REASON_DRIVER;
     $failingRepository = new ShiftPlanRepository($failingConnection);
@@ -141,7 +152,7 @@ namespace {
         $failingRepository->addCandidate(7, 'assistant-a', 'test-eb');
     } catch (Exception $exception) {
         assertSameValue(Exception::REASON_DRIVER, $exception->getReason(), 'A non-unique candidate database failure must propagate unchanged.');
-        echo 'AdPlaner shift plan repository tests passed' . PHP_EOL;
+        echo 'FlzPlaner shift plan repository tests passed' . PHP_EOL;
         return;
     }
 

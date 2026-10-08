@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Model;
+namespace OCA\FlzPlaner\Model;
 
 use OCA\LocalBase\Model\ModelApiTrait;
 

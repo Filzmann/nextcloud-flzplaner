@@ -43,13 +43,13 @@ namespace Psr\Log {
     }
 }
 
-namespace OCA\AdPlaner\AppInfo {
+namespace OCA\FlzPlaner\AppInfo {
     if (!class_exists(Application::class)) {
-        final class Application { public const APP_ID = 'adplaner'; }
+        final class Application { public const APP_ID = 'flzplaner'; }
     }
 }
 
-namespace OCA\AdPlaner\Service {
+namespace OCA\FlzPlaner\Service {
     if (!class_exists(PlanerDemoPackService::class)) {
         class PlanerDemoPackService {
             public int $installCalls = 0;
@@ -68,8 +68,9 @@ namespace OCA\AdPlaner\Service {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Controller\DemoAdminController;
-    use OCA\AdPlaner\Service\PlanerDemoPackService;
+    use OCA\FlzPlaner\Controller\DemoAdminController;
+    use OCA\FlzPlaner\Service\PlanerDemoPackService;
+    use OCA\FlzPlaner\Service\TemporaryAdminAccessChecker;
     use OCP\IGroupManager;
     use OCP\IRequest;
     use OCP\IUserSession;
@@ -94,7 +95,17 @@ namespace {
         }
     };
     $demoPack = new PlanerDemoPackService();
-    $controller = new DemoAdminController($request, $session, $groups, $demoPack, $logger);
+    $grants = new class implements TemporaryAdminAccessChecker {
+        public bool $active = false;
+        public function hasActiveGrant(string $uid): bool { return $this->active && $uid === 'admin-test'; }
+    };
+    $controller = new DemoAdminController($request, $session, $groups, $demoPack, $logger, $grants);
+
+    $notGranted = $controller->install(true);
+    if ($notGranted->getStatus() !== 403 || $demoPack->installCalls !== 0) {
+        throw new RuntimeException('Native Administration darf das Demo-Pack ohne app-lokale Freigabe nicht installieren.');
+    }
+    $grants->active = true;
 
     $unconfirmed = $controller->install(false);
     if ($unconfirmed->getStatus() !== 400 || $demoPack->installCalls !== 0) {
@@ -134,5 +145,5 @@ namespace {
         throw new RuntimeException('Interne Fehlermeldungen dürfen nur im Serverlog und nie in der API-Antwort landen.');
     }
 
-    echo 'AdPlaner demo admin controller tests passed' . PHP_EOL;
+    echo 'FlzPlaner demo admin controller tests passed' . PHP_EOL;
 }

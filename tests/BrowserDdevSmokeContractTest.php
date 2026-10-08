@@ -14,12 +14,12 @@ foreach (['trap \'cleanup || report_failed_cleanup\' EXIT', 'run_probe assert-cl
         throw new RuntimeException('Dem Browser-Smoke fehlt ein Cleanup-Vertrag: ' . $contract);
     }
 }
-foreach (['transition-status', 'add-self', 'save-note', 'settings-form', 'Page.captureScreenshot', '__adpBrowserErrors'] as $contract) {
+foreach (['transition-status', 'add-self', 'save-note', 'settings-form', 'set-candidate-preference', 'open-candidate-note-editor', 'save-candidate-note', 'delete-candidate-note', 'personal-workload-form', 'personal-regular-shifts-form', 'report-fixed-conflict', 'resolve-fixed-conflict', 'flz-planer-tab-workload', 'flz-planer-workload-overlay:not([hidden])', 'flz-planer-mobile-day-head', 'flz-planer-capacity--under', 'flz-planer-plan-proposal', 'Page.captureScreenshot', '__adpBrowserErrors'] as $contract) {
     if (!str_contains($browser, $contract)) {
         throw new RuntimeException('Dem Browser-Smoke fehlt ein Oberflächenvertrag: ' . $contract);
     }
 }
-foreach (["['adp_shift_slots', ['team_code' => \$teamCode]]", "['adp_month_plans', ['team_code' => \$teamCode]]"] as $contract) {
+foreach (["['flz_planer_shift_slots', ['team_code' => \$teamCode]]", "['flz_planer_month_plans', ['team_code' => \$teamCode]]"] as $contract) {
     if (!str_contains($probe, $contract)) {
         throw new RuntimeException('Der Cleanup-Probe entfernt nicht alle durch initiale Browserloads erzeugten Testmonate.');
     }
@@ -28,4 +28,4 @@ if (str_contains($shell, 'app:disable') || str_contains($shell, 'app:enable')) {
     throw new RuntimeException('Die Browser-Abnahme darf den Nextcloud-App-Zustand nicht verändern.');
 }
 
-echo 'AdPlaner browser DDEV smoke contract test passed' . PHP_EOL;
+echo 'FlzPlaner browser DDEV smoke contract test passed' . PHP_EOL;

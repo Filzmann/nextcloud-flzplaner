@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/bootstrap.php';
 
-use OCA\AdPlaner\Model\ShiftCandidate;
-use OCA\AdPlaner\Model\ShiftSlot;
-use OCA\AdPlaner\Model\Team;
-use OCA\AdPlaner\Service\ScheduleService;
-use OCA\AdPlaner\Service\ShiftConfigService;
-use OCA\AdPlaner\Service\TeamAccessService;
-use OCA\AdPlaner\Service\PlanningHintService;
-use OCA\AdPlaner\Store\ShiftPlanStore;
-use function OCA\AdPlaner\Tests\assertDomainException;
-use function OCA\AdPlaner\Tests\assertSameValue;
+use OCA\FlzPlaner\Model\ShiftCandidate;
+use OCA\FlzPlaner\Model\ShiftSlot;
+use OCA\FlzPlaner\Model\Team;
+use OCA\FlzPlaner\Service\ScheduleService;
+use OCA\FlzPlaner\Service\WorkloadPreferenceService;
+use OCA\FlzPlaner\Service\ShiftConfigService;
+use OCA\FlzPlaner\Service\TeamAccessService;
+use OCA\FlzPlaner\Service\PlanningHintService;
+use OCA\FlzPlaner\Service\FixedShiftService;
+use OCA\FlzPlaner\Store\ShiftPlanStore;
+use function OCA\FlzPlaner\Tests\assertDomainException;
+use function OCA\FlzPlaner\Tests\assertSameValue;
 
 class FakeShiftPlanStoreForSchedule extends ShiftPlanStore {
     public array $added = [];
@@ -23,6 +25,8 @@ class FakeShiftPlanStoreForSchedule extends ShiftPlanStore {
     public array $insertedSlots = [];
     public array $savedNotes = [];
     public array $deletedNotes = [];
+    public array $updatedCandidateMetadata = [];
+    public bool $candidateExists = true;
     public bool $slotEnabled = true;
     public string $status = 'draft';
     public ?string $statusOnNextLock = null;
@@ -65,6 +69,15 @@ class FakeShiftPlanStoreForSchedule extends ShiftPlanStore {
         $this->removed[] = compact('slotId', 'assistantUid');
     }
 
+    public function candidateForSlot(int $slotId, string $assistantUid): ?ShiftCandidate {
+        return $this->candidateExists ? new ShiftCandidate(1, $slotId, $assistantUid, $assistantUid) : null;
+    }
+
+    public function updateCandidateMetadata(int $slotId, string $assistantUid, string $preference, string $note): bool {
+        $this->updatedCandidateMetadata[] = compact('slotId', 'assistantUid', 'preference', 'note');
+        return true;
+    }
+
     public function saveDayNote(string $teamCode, string $workDate, string $note, string $updatedByUid): void {
         $this->savedNotes[] = compact('teamCode', 'workDate', 'note', 'updatedByUid');
     }
@@ -95,6 +108,12 @@ class FakeShiftPlanStoreForSchedule extends ShiftPlanStore {
     public function dayNotesForMonth(string $teamCode, string $month): array {
         return [];
     }
+
+    public function workloadLimitsForTeam(string $teamCode): array { return []; }
+    public function candidateDates(string $teamCode, string $from, string $to): array { return []; }
+    public function regularShiftRulesForTeam(string $teamCode): array { return []; }
+    public function fixedConflictReports(array $slotIds): array { return []; }
+    public function deletedFixedSlotIds(array $slotIds,string $uid): array { return []; }
 
     public function updateSlotDefinition(int $slotId, string $label, string $startsAt, string $endsAt, bool $enabled): void {
         $this->updatedSlots[] = compact('slotId', 'label', 'startsAt', 'endsAt', 'enabled');
@@ -148,6 +167,7 @@ class FakeTeamAccessServiceForSchedule extends TeamAccessService {
 }
 
 class FakePlanningHintServiceForSchedule extends PlanningHintService {
+    public bool $blockVacation = false;
     public function __construct() {}
     public function forMonth(string $month, array $employeeUids): array {
         return [$month . '-01' => [[
@@ -158,6 +178,15 @@ class FakePlanningHintServiceForSchedule extends PlanningHintService {
             'blocks' => false,
         ]]];
     }
+    public function contextForMonth(string $month, array $employeeUids, array $segments): array {
+        return [
+            'hints'=>$this->forMonth($month,$employeeUids),
+            'unavailable'=>$this->blockVacation ? [$month.'-01|early'=>['assistant-a'=>true]] : [],
+        ];
+    }
+    public function assertAvailableForSlot(ShiftSlot $slot, string $employeeUid): void {
+        if ($this->blockVacation && $employeeUid === 'assistant-a') throw new \DomainException('Urlaub blockiert diese Schicht.');
+    }
 }
 
 $assistants = [
@@ -165,9 +194,9 @@ $assistants = [
     ['uid' => 'test-eb', 'displayName' => 'Test EB', 'isEb' => true, 'canReceiveShifts' => false],
 ];
 
-$assistantModel = \OCA\AdPlaner\Model\Assistant::get($assistants[0]);
-$assistantModels = \OCA\AdPlaner\Model\Assistant::get_all($assistants);
-assertSameValue(true, $assistantModel instanceof \OCA\AdPlaner\Model\Assistant, 'Assistant::get should hydrate API data.');
+$assistantModel = \OCA\FlzPlaner\Model\Assistant::get($assistants[0]);
+$assistantModels = \OCA\FlzPlaner\Model\Assistant::get_all($assistants);
+assertSameValue(true, $assistantModel instanceof \OCA\FlzPlaner\Model\Assistant, 'Assistant::get should hydrate API data.');
 assertSameValue(2, count($assistantModels), 'Assistant::get_all should hydrate API lists.');
 
 $settings = [
@@ -176,17 +205,18 @@ $settings = [
     ],
 ];
 
-$assistantTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, false, $settings);
-$ebTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, $settings);
+$assistantTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, $settings);
+$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, $settings);
 $mappedTeam = Team::get($ebTeam->toArray());
 assertSameValue('Team A1', $mappedTeam->toArray()['displayName'], 'Team::get should keep the API payload shape.');
 
 $store = new FakeShiftPlanStoreForSchedule();
-$service = new ScheduleService($store, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule());
+$planningHints = new FakePlanningHintServiceForSchedule();
+$service = new ScheduleService($store, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), $planningHints, new WorkloadPreferenceService($store), new FixedShiftService($store, new ShiftConfigService()));
 
 $approvalRaceStore = new FakeShiftPlanStoreForSchedule();
 $approvalRaceStore->statusOnNextLock = 'approved';
-$approvalRaceService = new ScheduleService($approvalRaceStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule());
+$approvalRaceService = new ScheduleService($approvalRaceStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($approvalRaceStore), new FixedShiftService($approvalRaceStore, new ShiftConfigService()));
 $approvalRacePlan = $approvalRaceService->monthPlan($ebTeam, '2026-07', 'test-eb');
 assertSameValue('approved', $approvalRacePlan['status'] ?? null, 'A concurrent approval must win over mutable month materialization.');
 assertSameValue([], $approvalRaceStore->updatedSlots, 'A concurrent approval must prevent slot-definition rewrites.');
@@ -198,6 +228,17 @@ assertSameValue('assistant-a', $store->added[0]['assistantUid'] ?? null, 'Assist
 
 $service->addCandidate($ebTeam, '2026-07', 9, 'assistant-a', 'test-eb');
 assertSameValue('assistant-a', $store->added[1]['assistantUid'] ?? null, 'EB should be able to assign an assistant.');
+
+$planningHints->blockVacation = true;
+$addedBeforeVacation = count($store->added);
+assertDomainException(
+    static fn() => $service->addCandidate($ebTeam, '2026-07', 9, 'assistant-a', 'test-eb'),
+    'Urlaub muss eine neue manuelle Zuweisung verhindern.'
+);
+assertSameValue($addedBeforeVacation, count($store->added), 'Eine wegen Urlaub abgewiesene Zuweisung darf nichts speichern.');
+$vacationPlan = $service->monthPlan($ebTeam, '2026-07', 'test-eb');
+assertSameValue(true, $vacationPlan['days'][0]['slots'][0]['candidates'][0]['unavailable'] ?? false, 'Bestehende Wünsche im Urlaub müssen als Konflikt markiert werden.');
+$planningHints->blockVacation = false;
 
 $service->removeCandidate($assistantTeam, '2026-07', 9, '', 'assistant-a');
 assertSameValue(
@@ -211,6 +252,37 @@ assertSameValue(
     $store->removed[1] ?? null,
     'The responsible EB should be able to remove another assistant assignment.'
 );
+
+$service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'favorite', '  Nur vormittags  ', 'assistant-a');
+assertSameValue(
+    [['slotId'=>9, 'assistantUid'=>'assistant-a', 'preference'=>'favorite', 'note'=>'Nur vormittags']],
+    $store->updatedCandidateMetadata,
+    'Eine Assistenzkraft muss den eigenen vorhandenen Wunsch kennzeichnen und kommentieren können.'
+);
+$store->candidateExists = false;
+assertDomainException(
+    static fn() => $service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'emergency', '', 'assistant-a'),
+    'Eine fremde oder entfernte Kandidatenreferenz muss ohne Änderung abgewiesen werden.'
+);
+assertSameValue(1, count($store->updatedCandidateMetadata), 'Eine abgewiesene Kandidatenreferenz darf keine Metadaten verändern.');
+$store->candidateExists = true;
+try {
+    $service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'like', '', 'assistant-a');
+    throw new RuntimeException('Eine unbekannte Präferenz wurde akzeptiert.');
+} catch (InvalidArgumentException) {}
+assertSameValue(1, count($store->updatedCandidateMetadata), 'Eine ungültige Präferenz darf nichts speichern.');
+try {
+    $service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'favorite', str_repeat('Ä', 501), 'assistant-a');
+    throw new RuntimeException('Eine zu lange Schichtanmerkung wurde akzeptiert.');
+} catch (InvalidArgumentException) {}
+assertSameValue(1, count($store->updatedCandidateMetadata), 'Eine zu lange Schichtanmerkung darf nichts speichern.');
+$store->status = 'approved';
+assertDomainException(
+    static fn() => $service->updateCandidateMetadata($assistantTeam, '2026-07', 9, 'emergency', '', 'assistant-a'),
+    'Ein genehmigter Monat muss auch Schichtpräferenzen und -anmerkungen sperren.'
+);
+assertSameValue(1, count($store->updatedCandidateMetadata), 'Eine abgewiesene Änderung im genehmigten Monat darf nichts speichern.');
+$store->status = 'draft';
 
 assertDomainException(
     static fn() => $service->addCandidate($ebTeam, '2026-07', 9, '', 'test-eb'),
@@ -312,6 +384,9 @@ $plan = $service->monthPlan($ebTeam, '2026-07', 'test-eb');
 $slotCandidates = $plan['days'][0]['slots'][0]['candidates'] ?? [];
 assertSameValue(['assistant-a'], array_column($slotCandidates, 'uid'), 'Month plan should hide non-assignable EB candidates.');
 assertSameValue(false, array_key_exists('createdByUid', $slotCandidates[0] ?? []), 'Month plans must not expose the internal candidate creator uid.');
+assertSameValue(false, $slotCandidates[0]['fixed'] ?? null, 'An assignment created by the EB must remain manual and must not impersonate a regular fixed shift.');
+assertSameValue(false, (new ShiftCandidate(3, 1, 'assistant-a', 'assistant-a'))->toArray([], 'assistant-a')['fixed'] ?? null, 'A self-entered shift wish must not be marked as fixed.');
+assertSameValue(true, (new ShiftCandidate(4, 1, 'assistant-a', 'assistant-a', source: 'regular'))->toArray([], 'assistant-a')['fixed'] ?? null, 'Only a materialized regular shift may be marked as fixed.');
 assertSameValue('Assistant A', $plan['days'][0]['hints'][0]['displayName'] ?? null, 'Planning hints use the visible team label without exposing foreign details.');
 assertSameValue(false, array_key_exists('employeeUid', $plan['days'][0]['hints'][0] ?? []), 'Public planning hints must not expose an internal Nextcloud uid once the visible label is resolved.');
 
@@ -320,14 +395,14 @@ $configuredStore->slots = [
     new ShiftSlot(10, 'A1', '2026-07', '2026-07-01', 'early', 'Altfrüh', '07:00', '13:00', true),
     new ShiftSlot(11, 'A1', '2026-07', '2026-07-01', 'obsolete', 'Alt', '00:00', '01:00', true),
 ];
-$configuredTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, [
+$configuredTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, [
     'shifts' => [
         ['key' => 'early', 'label' => 'Früh neu', 'startsAt' => '08:00', 'endsAt' => '14:00', 'enabled' => true],
         ['key' => 'late', 'label' => 'Spät', 'startsAt' => '14:00', 'endsAt' => '20:00', 'enabled' => true],
         ['key' => 'night', 'label' => 'Nacht', 'startsAt' => '20:00', 'endsAt' => '08:00', 'enabled' => false],
     ],
 ]);
-$configuredService = new ScheduleService($configuredStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule());
+$configuredService = new ScheduleService($configuredStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($configuredStore), new FixedShiftService($configuredStore, new ShiftConfigService()));
 $configuredPlan = $configuredService->monthPlan($configuredTeam, '2026-07', 'test-eb');
 $updatesById = [];
 foreach ($configuredStore->updatedSlots as $updatedSlot) {
@@ -340,4 +415,4 @@ assertSameValue('late', $configuredStore->insertedSlots[0]['segmentKey'] ?? null
 assertSameValue(false, in_array('night', array_column($configuredStore->insertedSlots, 'segmentKey'), true), 'Disabled shift segments should not be inserted.');
 assertSameValue('Früh neu', $configuredPlan['days'][0]['slots'][0]['label'] ?? null, 'Month plan should use refreshed slot definitions.');
 
-echo 'AdPlaner schedule smoke tests passed' . PHP_EOL;
+echo 'FlzPlaner schedule smoke tests passed' . PHP_EOL;

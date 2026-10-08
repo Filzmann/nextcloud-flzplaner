@@ -6,7 +6,7 @@ require('../../../localbase/js/ui/ui.js');
 require('../../js/modules/ui.js');
 require('../../js/components/assignment-control.js');
 
-const { assignmentControl } = window.ADPlaner;
+const { assignmentControl } = window.FlzPlaner;
 
 const html = assignmentControl.render(
     { id: 7 },
@@ -26,7 +26,7 @@ assert(html.includes('data-action="open-assignment-picker"'));
 assert(html.includes('aria-label="Assistenz zuteilen"'));
 assert(html.includes('data-assignment-trigger="7"'));
 assert(html.includes('aria-expanded="false"'));
-assert(html.includes('class="adp-assignment-picker"'));
+assert(html.includes('class="flz-planer-assignment-picker"'));
 assert(html.includes('role="group"'));
 assert(html.includes('aria-label="Assistenz auswählen"'));
 assert(html.includes('data-action="add-selected" data-slot-id="7" data-target-uid="alice"'));
@@ -72,7 +72,7 @@ const triggerTwo = {
     }
 };
 const pickerOne = {
-    id: 'adp-assignment-picker-1',
+    id: 'flz-planer-assignment-picker-1',
     dataset: { assignmentPicker: '1' },
     hidden: false,
     querySelector() {
@@ -80,7 +80,7 @@ const pickerOne = {
     }
 };
 const pickerTwo = {
-    id: 'adp-assignment-picker-2',
+    id: 'flz-planer-assignment-picker-2',
     dataset: { assignmentPicker: '2' },
     hidden: true,
     querySelector(selector) {
@@ -128,4 +128,4 @@ assignmentControl.open(triggerTwo);
 assert.strictEqual(pickerTwo.hidden, true);
 assert.deepStrictEqual(expanded.at(-1), ['2', 'false']);
 
-console.log('AdPlaner assignment control smoke test passed.');
+console.log('FlzPlaner assignment control smoke test passed.');

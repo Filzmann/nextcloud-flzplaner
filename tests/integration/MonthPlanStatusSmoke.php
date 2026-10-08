@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 4) . '/lib/base.php';
 
-use OCA\AdPlaner\Repository\ShiftPlanRepository;
-use OCA\AdPlaner\Model\Team;
-use OCA\AdPlaner\Service\ScheduleService;
-use OCA\AdPlaner\Store\ShiftPlanStore;
+use OCA\FlzPlaner\Repository\ShiftPlanRepository;
+use OCA\FlzPlaner\Model\Team;
+use OCA\FlzPlaner\Service\ScheduleService;
+use OCA\FlzPlaner\Store\ShiftPlanStore;
 use OCP\IDBConnection;
 
 $teamCode = 'TXSTATUS';
@@ -16,7 +16,7 @@ $db = \OC::$server->get(IDBConnection::class);
 $repository = \OC::$server->get(ShiftPlanRepository::class);
 $store = \OC::$server->get(ShiftPlanStore::class);
 $service = \OC::$server->get(ScheduleService::class);
-$team = new Team($teamCode, 'ad-ASN-' . $teamCode, 'Transaktionstest', [], true, [
+$team = new Team($teamCode, 'flz-ASN-' . $teamCode, 'Transaktionstest', [], true, [
     'shifts' => [[
         'key' => 'early',
         'label' => 'Früh',
@@ -28,20 +28,20 @@ $team = new Team($teamCode, 'ad-ASN-' . $teamCode, 'Transaktionstest', [], true,
 
 $cleanup = static function () use ($db, $teamCode, $month): void {
     $qb = $db->getQueryBuilder();
-    $qb->delete('adp_day_notes')
+    $qb->delete('flz_planer_day_notes')
         ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)))
         ->andWhere($qb->expr()->gte('work_date', $qb->createNamedParameter($month . '-01')))
         ->andWhere($qb->expr()->lte('work_date', $qb->createNamedParameter($month . '-28')));
     $qb->executeStatement();
 
     $qb = $db->getQueryBuilder();
-    $qb->delete('adp_shift_slots')
+    $qb->delete('flz_planer_shift_slots')
         ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)))
         ->andWhere($qb->expr()->eq('plan_month', $qb->createNamedParameter($month)));
     $qb->executeStatement();
 
     $qb = $db->getQueryBuilder();
-    $qb->delete('adp_month_plans')
+    $qb->delete('flz_planer_month_plans')
         ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)))
         ->andWhere($qb->expr()->eq('plan_month', $qb->createNamedParameter($month)));
     $qb->executeStatement();
@@ -88,7 +88,7 @@ try {
 
     $qb = $db->getQueryBuilder();
     $qb->select('revision')
-        ->from('adp_month_plans')
+        ->from('flz_planer_month_plans')
         ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)))
         ->andWhere($qb->expr()->eq('plan_month', $qb->createNamedParameter($month)));
     $row = $qb->executeQuery()->fetchAssociative();
@@ -108,4 +108,4 @@ try {
     $cleanup();
 }
 
-echo "AdPlaner real month plan status persistence smoke passed\n";
+echo "FlzPlaner real month plan status persistence smoke passed\n";

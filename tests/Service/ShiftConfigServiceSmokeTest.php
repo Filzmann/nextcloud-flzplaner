@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/bootstrap.php';
 
-use OCA\AdPlaner\Service\ShiftConfigService;
-use function OCA\AdPlaner\Tests\assertSameValue;
+use OCA\FlzPlaner\Service\ShiftConfigService;
+use function OCA\FlzPlaner\Tests\assertSameValue;
 
 $service = new ShiftConfigService();
 $defaults = $service->defaults();
 $defaultSegments = $service->segments($defaults);
-$defaultModels = \OCA\AdPlaner\Model\ShiftDefinition::get_all($defaultSegments);
+$defaultModels = \OCA\FlzPlaner\Model\ShiftDefinition::get_all($defaultSegments);
 
 assertSameValue(['early', 'late', 'night'], array_column($defaultSegments, 'key'), 'Default shifts should use the normal three-shift setup.');
 assertSameValue(3, count($defaultModels), 'ShiftDefinition::get_all should hydrate API lists.');
@@ -168,4 +168,4 @@ $assertInvalidArgument(
 );
 assertSameValue(false, $service->normalize($invalidEnabledShift('false'))['shifts'][0]['enabled'], 'The explicit false string remains supported.');
 
-echo 'AdPlaner shift config smoke tests passed' . PHP_EOL;
+echo 'FlzPlaner shift config smoke tests passed' . PHP_EOL;

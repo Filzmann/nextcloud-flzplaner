@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Settings;
+namespace OCA\FlzPlaner\Settings;
 
-use OCA\AdPlaner\AppInfo\Application;
+use OCA\FlzPlaner\AppInfo\Application;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Settings\ISettings;
 

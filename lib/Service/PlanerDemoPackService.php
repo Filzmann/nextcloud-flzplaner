@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Service;
+namespace OCA\FlzPlaner\Service;
 
-use OCA\LocalBase\Organization\AdOrganizationDefinition;
-use OCA\LocalBase\Organization\AdOrganizationSettingsService;
+use OCA\LocalBase\Organization\FlzOrganizationDefinition;
+use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
 use OCA\LocalBase\Service\DemoAccountProvisioningService;
 
 /**
@@ -17,12 +17,12 @@ final class PlanerDemoPackService {
         private DemoAccountProvisioningService $accounts,
         private TeamSettingsService $settings,
         private ShiftConfigService $shiftConfig,
-        private ?AdOrganizationSettingsService $organization = null,
+        private ?FlzOrganizationSettingsService $organization = null,
     ) {}
 
     /** @return array{accounts:array,teams:list<string>} */
     public function install(): array {
-        $definition = $this->organization?->definition() ?? AdOrganizationDefinition::defaults();
+        $definition = $this->organization?->definition() ?? FlzOrganizationDefinition::defaults();
         $teamCodes = ['A', 'B', 'C'];
         $ebGroup = $definition->roleGroupId('eb');
         $fixtures = [];
@@ -30,20 +30,20 @@ final class PlanerDemoPackService {
             $teamGroup = $definition->teamGroupPrefix() . $teamCode;
             $coordinatorNames = ['Enna Busch', 'Emil Weber', 'Eda Sommer'];
             $fixtures[] = [
-                'uid' => 'ad-demo-eb-' . strtolower($teamCode),
+                'uid' => 'flz-demo-eb-' . strtolower($teamCode),
                 'displayName' => $coordinatorNames[$index] . " (EB, Team {$teamCode})",
                 'groups' => [$ebGroup, $teamGroup],
             ];
             foreach ([1, 2] as $number) {
                 $fixtures[] = [
-                    'uid' => 'ad-demo-assistenz-' . strtolower($teamCode) . $number,
+                    'uid' => 'flz-demo-assistenz-' . strtolower($teamCode) . $number,
                     'displayName' => "Demo Assistenz {$teamCode}{$number} (Team {$teamCode})",
                     'groups' => [$teamGroup],
                 ];
             }
         }
 
-        $accounts = $this->accounts->provision('ad-suite-demo', $fixtures);
+        $accounts = $this->accounts->provision('flz-full-suite-demo', $fixtures);
         foreach ($teamCodes as $teamCode) {
             $this->settings->save($teamCode, "Team {$teamCode}", $this->shiftConfig->defaults());
         }

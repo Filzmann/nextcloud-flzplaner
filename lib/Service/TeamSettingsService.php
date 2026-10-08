@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Service;
+namespace OCA\FlzPlaner\Service;
 
-use OCA\AdPlaner\Model\TeamSettings;
-use OCA\AdPlaner\Store\TeamSettingsStore;
+use OCA\FlzPlaner\Model\TeamSettings;
+use OCA\FlzPlaner\Store\TeamSettingsStore;
 
 class TeamSettingsService {
     public function __construct(

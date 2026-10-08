@@ -1,8 +1,8 @@
 (function() {
-    const client = new window.LocalBase.api.ApiClient({ appId: 'adplaner' });
+    const client = new window.LocalBase.api.ApiClient({ appId: 'flzplaner' });
 
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.api = {
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.api = {
         request: client.request.bind(client),
         encode: client.encode.bind(client)
     };

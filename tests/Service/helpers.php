@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Tests;
+namespace OCA\FlzPlaner\Tests;
 
 use function OCA\LocalBase\Tests\Support\assertSameValue as supportAssertSameValue;
 use function OCA\LocalBase\Tests\Support\assertThrows as supportAssertThrows;

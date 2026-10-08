@@ -21,4 +21,4 @@ if (str_contains($smoke, 'Die abgewiesene Fremdänderung wurde dennoch gespeiche
     throw new RuntimeException('Der C3-HTTP-Smoke verwechselt einen bereits vorhandenen Fremdeintrag mit einer neuen Mutation.');
 }
 
-echo 'AdPlaner access smoke contract test passed' . PHP_EOL;
+echo 'FlzPlaner access smoke contract test passed' . PHP_EOL;

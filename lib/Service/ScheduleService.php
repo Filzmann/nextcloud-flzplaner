@@ -2,33 +2,39 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Service;
+namespace OCA\FlzPlaner\Service;
 
-use OCA\AdPlaner\Model\ShiftCandidate;
-use OCA\AdPlaner\Model\ShiftSlot;
-use OCA\AdPlaner\Model\Team;
-use OCA\AdPlaner\Store\ShiftPlanStore;
+use OCA\FlzPlaner\Model\ShiftCandidate;
+use OCA\FlzPlaner\Model\ShiftSlot;
+use OCA\FlzPlaner\Model\Team;
+use OCA\FlzPlaner\Store\ShiftPlanStore;
 
 class ScheduleService {
     private const STATUS_DRAFT = 'draft';
     private const STATUS_PLANNED = 'planned';
     private const STATUS_APPROVED = 'approved';
     private const MAX_DAY_NOTE_LENGTH = 2000;
+    private const MAX_CANDIDATE_NOTE_LENGTH = 500;
 
     public function __construct(
         private ShiftPlanStore $store,
         private ShiftConfigService $shiftConfig,
         private TeamAccessService $teamAccess,
-        private PlanningHintService $planningHints
+        private PlanningHintService $planningHints,
+        private WorkloadPreferenceService $workloadPreferences,
+        private FixedShiftService $fixedShifts
     ) {
     }
 
     public function monthPlan(Team $team, string $month, string $currentUid): array {
         $month = $this->shiftConfig->normalizeMonth($month);
+        $assignableUids = $team->assignableAssistantUidMap();
+        $planningSegments = array_values(array_filter($this->shiftConfig->segments($team->settings), static fn(array $segment): bool => $segment['enabled']));
+        $planningContext = $this->planningHints->contextForMonth($month, array_keys($assignableUids), $planningSegments);
         $status = $this->store->monthStatus($team->code, $month);
         if ($status !== self::STATUS_APPROVED) {
             $this->store->ensureMonthStatus($team->code, $month, $currentUid);
-            $status = $this->store->transactional(function () use ($team, $month): string {
+            $status = $this->store->transactional(function () use ($team, $month, $planningContext): string {
                 $lockedStatus = $this->store->lockMonthStatus(
                     $team->code,
                     $month,
@@ -39,6 +45,7 @@ class ScheduleService {
                 }
 
                 $this->ensureMonthSlots($team, $month);
+                $this->fixedShifts->materializeMonth($team, $this->store->slotsForMonth($team->code, $month), $planningContext['unavailable']);
 
                 return $lockedStatus;
             });
@@ -50,10 +57,13 @@ class ScheduleService {
             ? $this->segmentsFromFrozenSlots($enabledSlots)
             : array_values(array_filter($this->shiftConfig->segments($team->settings), static fn(array $segment): bool => $segment['enabled']));
         $candidatesBySlot = $this->store->candidatesForSlotIds(array_map(static fn(ShiftSlot $slot): int => $slot->id, $enabledSlots));
+        $fixedConflicts = $this->fixedShifts->conflictsForSlots($team, array_map(static fn(ShiftSlot $slot): int => $slot->id, $enabledSlots), $currentUid);
+        $deletedFixedSlots=array_flip($this->store->deletedFixedSlotIds(array_map(static fn(ShiftSlot $slot):int=>$slot->id,$enabledSlots),$currentUid));
         $assistantLabels = $team->assistantLabelMap();
-        $assignableUids = $team->assignableAssistantUidMap();
         $notes = $this->store->dayNotesForMonth($team->code, $month);
-        $hints = $this->planningHints->forMonth($month, array_keys($assignableUids));
+        $hints = $planningContext['hints'];
+        $workload = $this->workloadPreferences->overview($team, $month, $currentUid);
+        $workloadByUid = array_column($workload, null, 'uid');
         $slotsByDate = [];
 
         foreach ($enabledSlots as $slot) {
@@ -61,8 +71,11 @@ class ScheduleService {
                 $candidatesBySlot[$slot->id] ?? [],
                 static fn(ShiftCandidate $candidate): bool => isset($assignableUids[$candidate->assistantUid])
             ));
-            $slot->candidates = $this->candidatePayload($slotCandidates, $assistantLabels, $currentUid);
-            $slotsByDate[$slot->workDate][] = $slot->toArray();
+            $slot->candidates = $this->candidatePayload($slotCandidates, $assistantLabels, $currentUid, $slot->workDate, $slot->segmentKey, $workloadByUid, $planningContext['unavailable']);
+            $slotPayload = $slot->toArray();
+            $slotPayload['fixedConflict'] = $fixedConflicts[$slot->id] ?? null;
+            $slotPayload['selfUnavailable'] = isset($deletedFixedSlots[$slot->id]);
+            $slotsByDate[$slot->workDate][] = $slotPayload;
         }
 
         $days = [];
@@ -72,6 +85,7 @@ class ScheduleService {
                 'date' => $date,
                 'dayOfMonth' => $day['dayOfMonth'],
                 'weekday' => $day['weekday'],
+                'weekLabel' => 'KW ' . (new \DateTimeImmutable($date))->format('W'),
                 'slots' => $slotsByDate[$date] ?? [],
                 'note' => isset($notes[$date]) ? $notes[$date]->note : '',
                 'hints' => array_map(static function (array $hint) use ($assistantLabels): array {
@@ -89,6 +103,7 @@ class ScheduleService {
             'status' => $status,
             'segments' => $segments,
             'days' => $days,
+            'workload' => $workload,
         ];
     }
 
@@ -104,6 +119,8 @@ class ScheduleService {
 
         $this->assertCandidateMutationAllowed($team, $targetUid, $currentUid);
         $this->assertAssignableAssistantInTeam($team, $targetUid);
+        $requestedSlot = $this->requireSlot($slotId, $team->code, $month);
+        $this->planningHints->assertAvailableForSlot($requestedSlot, $targetUid);
 
         $this->withMutableMonth($team->code, $month, $currentUid, function () use ($slotId, $team, $month, $targetUid, $currentUid): void {
             $slot = $this->requireSlot($slotId, $team->code, $month);
@@ -118,9 +135,56 @@ class ScheduleService {
         $this->assertCandidateMutationAllowed($team, $targetUid, $currentUid);
         $this->assertAssignableAssistantInTeam($team, $targetUid);
 
-        $this->withMutableMonth($team->code, $month, $currentUid, function () use ($slotId, $team, $month, $targetUid): void {
+        $this->withMutableMonth($team->code, $month, $currentUid, function () use ($slotId, $team, $month, $targetUid, $currentUid): void {
             $slot = $this->requireSlot($slotId, $team->code, $month);
+            $candidate = $this->store->candidateForSlot($slot->id, $targetUid);
+            if ($candidate?->source === 'regular') {
+                if ($targetUid !== $currentUid) throw new \DomainException('Feste Schichten werden durch die betroffene Assistenz oder über die Konfliktlösung geändert.');
+                if (!$this->fixedShifts->deleteOwnOccurrence($team, $slot, $targetUid)) throw new \DomainException('Die feste Schicht wurde zwischenzeitlich geändert. Bitte neu laden.');
+                return;
+            }
             $this->store->removeCandidate($slot->id, $targetUid);
+        });
+    }
+
+    public function reportFixedConflict(Team $team, string $month, int $slotId, string $currentUid): void {
+        $month = $this->shiftConfig->normalizeMonth($month);
+        $this->withMutableMonth($team->code,$month,$currentUid,function() use($team,$month,$slotId,$currentUid): void {
+            $this->fixedShifts->reportConflict($team,$month,$this->requireSlot($slotId,$team->code,$month),$currentUid);
+        });
+    }
+
+    public function resolveFixedConflict(Team $team, string $month, int $slotId, string $keptUid, string $currentUid): void {
+        $month = $this->shiftConfig->normalizeMonth($month);
+        $this->withMutableMonth($team->code,$month,$currentUid,function() use($team,$month,$slotId,$keptUid,$currentUid): void {
+            $this->fixedShifts->resolveConflict($team,$month,$this->requireSlot($slotId,$team->code,$month),$keptUid,$currentUid);
+        });
+    }
+
+    public function updateCandidateMetadata(Team $team, string $month, int $slotId, string $preference, string $note, string $currentUid): void {
+        $month = $this->shiftConfig->normalizeMonth($month);
+        $this->assertAssignableAssistantInTeam($team, $currentUid);
+        $preference = strtolower(trim($preference));
+        if (!in_array($preference, ['neutral', 'favorite', 'emergency'], true)) {
+            throw new \InvalidArgumentException('Unbekannte Schichtpräferenz.');
+        }
+        $note = trim($note);
+        $length = preg_match_all('/./us', $note);
+        if ($length === false) {
+            throw new \InvalidArgumentException('Schichtanmerkungen müssen gültiges UTF-8 enthalten.');
+        }
+        if ($length > self::MAX_CANDIDATE_NOTE_LENGTH) {
+            throw new \InvalidArgumentException('Schichtanmerkungen dürfen höchstens 500 Zeichen lang sein.');
+        }
+
+        $this->withMutableMonth($team->code, $month, $currentUid, function () use ($slotId, $team, $month, $currentUid, $preference, $note): void {
+            $slot = $this->requireSlot($slotId, $team->code, $month);
+            if ($this->store->candidateForSlot($slot->id, $currentUid) === null) {
+                throw new \DomainException('Nur der eigene vorhandene Schichtwunsch darf gekennzeichnet werden.');
+            }
+            if (!$this->store->updateCandidateMetadata($slot->id, $currentUid, $preference, $note)) {
+                throw new \DomainException('Der Schichtwunsch wurde zwischenzeitlich geändert. Bitte neu laden.');
+            }
         });
     }
 
@@ -163,13 +227,25 @@ class ScheduleService {
         }
 
         $this->store->ensureMonthStatus($team->code, $month, $currentUid);
-        return $this->store->transactional(function () use ($team, $month, $targetStatus, $currentUid, $currentStatus): string {
+        $unavailable = $targetStatus === self::STATUS_APPROVED
+            ? $this->planningHints->contextForMonth(
+                $month,
+                array_keys($team->assignableAssistantUidMap()),
+                array_values(array_filter($this->shiftConfig->segments($team->settings), static fn(array $segment): bool => $segment['enabled']))
+            )['unavailable']
+            : [];
+        return $this->store->transactional(function () use ($team, $month, $targetStatus, $currentUid, $currentStatus, $unavailable): string {
             $lockedStatus = $this->store->lockMonthStatus($team->code, $month, [$currentStatus]);
             if ($lockedStatus !== $currentStatus) {
                 throw new \DomainException('Der Planstatus wurde zwischenzeitlich geändert. Bitte neu laden.');
             }
             if ($targetStatus === self::STATUS_APPROVED) {
                 $this->ensureMonthSlots($team, $month);
+                $slots = array_values(array_filter($this->store->slotsForMonth($team->code,$month), static fn(ShiftSlot $slot): bool => $slot->enabled));
+                $this->fixedShifts->materializeMonth($team,$slots,$unavailable);
+                if ($this->fixedShifts->conflictsForSlots($team,array_map(static fn(ShiftSlot $slot): int => $slot->id,$slots),$currentUid) !== []) {
+                    throw new \DomainException('Offene Festschichtkonflikte müssen vor der Genehmigung gelöst werden.');
+                }
             }
             if (!$this->store->transitionMonthStatus($team->code, $month, $currentStatus, $targetStatus, $currentUid)) {
                 throw new \DomainException('Der Planstatus wurde zwischenzeitlich geändert. Bitte neu laden.');
@@ -262,11 +338,22 @@ class ScheduleService {
         return $slot;
     }
 
-    private function candidatePayload(array $candidates, array $assistantLabels, string $currentUid): array {
-        return array_map(
-            static fn(ShiftCandidate $candidate): array => $candidate->toArray($assistantLabels, $currentUid),
-            $candidates
-        );
+    private function candidatePayload(array $candidates, array $assistantLabels, string $currentUid, string $workDate, string $segmentKey, array $workloadByUid, array $unavailable): array {
+        return array_map(function (ShiftCandidate $candidate) use ($assistantLabels, $currentUid, $workDate, $segmentKey, $workloadByUid, $unavailable): array {
+            $payload = $candidate->toArray($assistantLabels, $currentUid);
+            $entry = $workloadByUid[$candidate->assistantUid] ?? [];
+            $weekKey = (new \DateTimeImmutable($workDate))->format('o-W');
+            $week = null;
+            foreach ($entry['weeks'] ?? [] as $item) {
+                if (($item['key'] ?? '') === $weekKey) {
+                    $week = $item;
+                }
+            }
+            $statuses = [$entry['monthStatus'] ?? 'normal', $week['status'] ?? 'normal'];
+            $payload['workloadStatus'] = in_array('under', $statuses, true) ? 'under' : (in_array('over', $statuses, true) ? 'over' : 'normal');
+            $payload['unavailable'] = isset($unavailable[$workDate.'|'.$segmentKey][$candidate->assistantUid]);
+            return $payload;
+        }, $candidates);
     }
 
     private function assertCandidateMutationAllowed(Team $team, string $targetUid, string $currentUid): void {

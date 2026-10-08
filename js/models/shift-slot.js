@@ -1,8 +1,8 @@
 (function() {
     const { Model } = window.LocalBase.models;
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.models = window.ADPlaner.models || {};
-    const { ShiftCandidate } = window.ADPlaner.models;
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.models = window.FlzPlaner.models || {};
+    const { ShiftCandidate } = window.FlzPlaner.models;
 
     class ShiftSlot extends Model {
         constructor(data = {}) {
@@ -17,6 +17,8 @@
             this.endsAt = data.endsAt || data.ends_at || '';
             this.enabled = data.enabled ?? true;
             this.candidates = ShiftCandidate.get_all(data.candidates || []);
+            this.fixedConflict = data.fixedConflict || data.fixed_conflict || null;
+            this.selfUnavailable = !!(data.selfUnavailable ?? data.self_unavailable ?? false);
         }
 
         toArray() {
@@ -30,10 +32,12 @@
                 startsAt: this.startsAt,
                 endsAt: this.endsAt,
                 enabled: this.enabled,
-                candidates: this.candidates.map(candidate => candidate.toArray())
+                candidates: this.candidates.map(candidate => candidate.toArray()),
+                fixedConflict: this.fixedConflict,
+                selfUnavailable: this.selfUnavailable
             };
         }
     }
 
-    window.ADPlaner.models.ShiftSlot = ShiftSlot;
+    window.FlzPlaner.models.ShiftSlot = ShiftSlot;
 })();

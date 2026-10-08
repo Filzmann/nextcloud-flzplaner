@@ -1,0 +1,311 @@
+{
+  "schema_version": "1.0",
+  "app_id": "flzplaner",
+  "processings": [
+    {
+      "processing_id": "shift_planning_management",
+      "name": "Wunschdienstplanung und Assistenzzuweisung",
+      "controller": {
+        "component": "Assistenz Dienstplanung",
+        "business_owner": "Zuständige Einsatzbegleitung des jeweiligen Assistenzteams"
+      },
+      "data_categories": [
+        "Nextcloud-UIDs und aktuell aufgelöste Anzeigenamen von Assistenzteammitgliedern",
+        "Schichtwünsche, Zuweisungen, Präferenzen und kurze persönliche Anmerkungen",
+        "Tagesnotizen mit möglichen Angaben zu Drittpersonen",
+        "Monatsplanstatus und Bearbeitungsreferenzen",
+        "Persönliche Wochen- und Monatsgrenzen sowie regelmäßige feste Schichten",
+        "Festschichtkonflikte und technische Erstellungs- oder Änderungszeitpunkte"
+      ],
+      "data_subjects": [
+        "Schichtfähige Mitglieder der Assistenzteams",
+        "Einsatzbegleitungen mit planungsbezogenen Bearbeitungsreferenzen",
+        "Möglicherweise in freien Anmerkungen oder Tagesnotizen genannte Drittpersonen"
+      ],
+      "purposes": [
+        "Erfassung und Abstimmung monatlicher Schichtwünsche",
+        "Berechtigte Zuweisung und Genehmigung von Assistenzdiensten",
+        "Darstellung persönlicher Belastungsgrenzen und regelmäßiger Festschichten",
+        "Erkennung und Auflösung planungsbezogener Konflikte"
+      ],
+      "access_roles": [
+        "Schichtfähige Assistenz für eigene Wünsche, Präferenzen, Grenzen und Festschichten",
+        "Zuständige Einsatzbegleitung für das jeweilige Assistenzteam",
+        "Teammitglieder für die im Monatsplan erforderliche gemeinsame Darstellung",
+        "Native Nextcloud-Administration nur mit aktiver app-lokaler Freigabe von höchstens 24 Stunden"
+      ],
+      "recipients": [
+        {
+          "category": "Mitglieder des jeweiligen Assistenzteams",
+          "allowed_disclosures": [
+            "Für die gemeinsame Dienstplanung erforderliche Schichten, Zuständigkeiten, Status und Hinweise"
+          ],
+          "conditions": [
+            "Aktuelle serverseitig geprüfte Teamzugehörigkeit"
+          ]
+        },
+        {
+          "category": "Zuständige Einsatzbegleitungen",
+          "allowed_disclosures": [
+            "Für Koordination, Konfliktlösung und Genehmigung erforderliche Teamplanung"
+          ],
+          "conditions": [
+            "Aktuelle serverseitig geprüfte EB-Rolle im betroffenen Team"
+          ]
+        },
+        {
+          "category": "Betroffene Person",
+          "allowed_disclosures": [
+            "Eigene Planungsdaten und eigene Bearbeitungsreferenzen in der Art.-15-Auskunft"
+          ],
+          "conditions": [
+            "Subject wird serverseitig aus der authentifizierten Sitzung gebunden",
+            "Drittpersonenkennungen und freie Drittpersonenangaben werden redigiert"
+          ]
+        }
+      ],
+      "data_sources": [
+        "Nextcloud-Gruppen und serverseitig gebundene Session-UID",
+        "Eingaben der Assistenz und berechtigter Einsatzbegleitungen",
+        "App-eigene Tabellen flz_planer_shift_candidates, flz_planer_day_notes, flz_planer_month_plans, flz_planer_workload_limits, flz_planer_regular_shifts und flz_planer_fixed_conflicts"
+      ],
+      "legal_basis": {
+        "status": "PRIVACY-DECISION-REQUIRED",
+        "affected_data": "Personenbezogene Wunsch-, Einsatz-, Belastungs-, Notiz- und Konfliktdaten",
+        "planned_processing": "Teambezogene Wunschdienstplanung und Genehmigung",
+        "missing_decision": "Anwendbare Rechtsgrundlage und dokumentierte Erforderlichkeit je Datenklasse",
+        "reason": "Die Rechtsgrundlage kann nicht aus der technischen Implementierung abgeleitet werden.",
+        "technical_impact": "Der Katalog behauptet keine freigegebene Rechtsgrundlage.",
+        "privacy_preserving_alternative": "Nur die für den bestehenden Planungsablauf erforderlichen Daten verarbeiten und Exporte deaktiviert lassen.",
+        "responsible_party": "ungeklärt",
+        "blocking": false
+      },
+      "retention": {
+        "policy_id": "shift_planning_class_specific_retention",
+        "trigger": "Ende des jeweiligen Planmonats; bei aktiven persönlichen Präferenzen, Belastungsgrenzen und regelmäßigen Schichten Ende der Planungsaktivität",
+        "duration_or_deadline": "Monatspläne, Wünsche, Zuweisungen und Konfliktnachweise P12M nach Ende des Planmonats; freie Tagesnotizen P30D nach Ende des betreffenden Monats; aktive persönliche Werte nur bis zum Ende der Planungsaktivität",
+        "action": "delete",
+        "conditions_or_holds": [
+          "Freie Tagesnotizen sind nur für den aktuellen und folgenden Planungsmonat zulässig; Gesundheits-, Diagnose- und unnötige Drittpersonenangaben gehören nicht in Tagesnotizen.",
+          "Nach Löschung verbleibt kein anonymisierter Einzel- oder Detailbestand.",
+          "Eine rechtliche oder datenschutzrechtliche Sperre gilt nur für den dokumentierten Zweck und Umfang, besitzt einen Prüftermin und darf nur durch Datenschutzbeauftragte begründet und auditiert gesetzt oder aufgehoben werden.",
+          "Das Ende der Planungsaktivität wird nicht aus Kontodeaktivierung oder anderen unzuverlässigen Signalen abgeleitet; bis zu einer belastbaren Quelle erfolgt keine automatische Lifecycle-Maßnahme.",
+          "Keine automatische Ausführung vor dem vollständig freigegebenen und getesteten app-lokalen Retention-, Restore- und Backupvertrag."
+        ]
+      },
+      "logging": {
+        "audit_requirements": [
+          "Status- und Konfliktfehler müssen ohne unnötige Planungsinhalte diagnostizierbar bleiben"
+        ],
+        "personal_data_policy": "Keine freien Notiztexte, vollständigen Planpayloads oder unnötigen UIDs in Standardlogs übernehmen."
+      },
+      "backup": {
+        "relevance": {
+          "status": "PRIVACY-DECISION-REQUIRED",
+          "affected_data": "Persistierte personenbezogene Planungsdaten in der Nextcloud-Datenbank",
+          "planned_processing": "Einbeziehung in betriebliche Sicherung und Wiederherstellung",
+          "missing_decision": "Backup-Relevanz und Aufbewahrungsdauer",
+          "reason": "Der App-Code kennt den betrieblichen Backupzyklus nicht.",
+          "technical_impact": "Die App kann keinen Entfall aus Sicherungen behaupten.",
+          "privacy_preserving_alternative": "Keine separate app-eigene Sicherungskopie anlegen.",
+          "responsible_party": "ungeklärt",
+          "blocking": false
+        },
+        "restore_handling": {
+          "status": "PRIVACY-DECISION-REQUIRED",
+          "affected_data": "Nach Restore erneut vorhandene vergangene Planungsdaten",
+          "planned_processing": "Erneute Anwendung der beschlossenen datenklassenspezifischen Aufbewahrungsregeln",
+          "missing_decision": "Sichere Restore-Ausführung und Wiederanlauf für bereits abgelaufene Fristen",
+          "reason": "Fristen und Maßnahmen sind entschieden; die sichere technische Restore-Ausführung fehlt.",
+          "technical_impact": "Keine automatische Löschung oder Anonymisierung nach Restore.",
+          "privacy_preserving_alternative": "Zugriff weiterhin auf aktuelle serverseitige Team- und Rollenentscheidungen begrenzen.",
+          "responsible_party": "Datenschutzbeauftragte und technische App-Verantwortung",
+          "blocking": true
+        }
+      },
+      "exports_and_reports": {
+        "article_15_relevance": "Eigene Planungsdaten und Bearbeitungsreferenzen werden subjectgebunden ausgegeben; Drittpersonenkennungen und freie Drittpersonenangaben werden redigiert.",
+        "other_outputs": [
+          "Gemeinsamer Monatsplan für das jeweilige Assistenzteam",
+          "Persönliche und für die EB erforderliche Auslastungsdarstellung"
+        ],
+        "minimization": "Ausgaben auf den erforderlichen Team- und Subject-Scope begrenzen; freie Texte nicht ungeprüft in Datenschutzberichte übernehmen."
+      },
+      "data_subject_rights": {
+        "article_15": "Subjectgebundene Ausgabe der eigenen Schicht-, Aktivitäts-, Belastungs-, Festschicht- und Konfliktdaten ist über den app-eigenen PersonalDataProvider implementiert.",
+        "rectification": "Eigene Wünsche, Präferenzen und persönliche Konfigurationen können innerhalb des geltenden Planstatus- und Rollenvertrags berichtigt werden.",
+        "restriction": {
+          "status": "PRIVACY-DECISION-REQUIRED",
+          "affected_data": "Strittige oder zu sperrende Planungsdaten",
+          "planned_processing": "Einschränkung von Anzeige und weiterer Verarbeitung",
+          "missing_decision": "Fachliche Sperrgründe und technische Wirkung",
+          "reason": "Ein Einschränkungsworkflow ist fachlich nicht definiert.",
+          "technical_impact": "Kein automatischer Einschränkungspfad wird angeboten.",
+          "privacy_preserving_alternative": "Zugriffe unverändert auf aktuelle Team- und Rollenberechtigungen begrenzen.",
+          "responsible_party": "ungeklärt",
+          "blocking": true
+        },
+        "erasure_or_anonymization": "Monatspläne, Wünsche, Zuweisungen und Konfliktnachweise werden nach zwölf Monaten, freie Tagesnotizen 30 Tage nach Monatsende und aktive persönliche Werte nach belastbar festgestelltem Ende der Planungsaktivität vollständig gelöscht. Es verbleibt kein anonymisierter Detailbestand; die automatische Ausführung bleibt bis zum getesteten app-lokalen Vertrag deaktiviert."
+      },
+      "international_transfers": "Assistenz Dienstplanung übermittelt selbst keine Planungsdaten an Drittländer.",
+      "automated_decisions": "Planvorschläge, Belastungshinweise und Konfliktprüfungen unterstützen die Bearbeitung; sie treffen keine Entscheidung mit rechtlicher oder vergleichbar erheblicher Wirkung.",
+      "special_safeguards": [
+        "Serverseitige Bindung an aktuelle Nextcloud-Gruppen, Team- und EB-Rollen",
+        "Genehmigte und unbekannte Planstatus bleiben fail-closed gegen Änderungen",
+        "Drittpersonenkennungen und freie Notizinhalte werden in der Art.-15-Auskunft redigiert",
+        "Optionale Integrationen liefern nur datensparsame read-only Planungshinweise",
+        "Keine automatische Retention-Ausführung"
+      ],
+      "systems": [
+        "Nextcloud",
+        "Assistenz Dienstplanung",
+        "App-eigene flz_planer_-Tabellen"
+      ]
+    },
+    {
+      "processing_id": "temporary_admin_full_access",
+      "name": "Zeitlich begrenzte fachliche Adminfreigabe",
+      "controller": {
+        "component": "Assistenz Dienstplanung",
+        "business_owner": "Datenschutzbeauftragte"
+      },
+      "data_categories": [
+        "Nextcloud-UID des Zielkontos (aktives Nextcloud-Administrationskonto) sowie UIDs der freigebenden und widerrufenden Mitglieder von Datenschutzbeauftragte",
+        "Beginn, geplantes Ende, tatsächliches Ende und Status der Freigabe"
+      ],
+      "data_subjects": [
+        "Administrationskonten mit Bezug zu einer app-lokalen Vollzugriffsfreigabe"
+      ],
+      "purposes": [
+        "Durchsetzung einer höchstens 24 Stunden gültigen fachlichen Adminfreigabe",
+        "Sicherheits- und Auditnachweis der Freigabehistorie"
+      ],
+      "access_roles": [
+        "Erteilen und Widerrufen: Mitglied der kanonischen Nextcloud-Gruppe Datenschutzbeauftragte; nativer Adminstatus ist dafür weder erforderlich noch ausreichend",
+        "Ziel: ausschließlich aktives Nextcloud-Administrationskonto",
+        "Betroffene Person für die eigene Art.-15-Projektion",
+        "Ausdrücklich berechtigte Datenschutz-Prüfrolle"
+      ],
+      "recipients": [
+        {
+          "category": "Betroffene Person",
+          "allowed_disclosures": [
+            "Eigene Rolle und Zeitpunkte ohne Kennungen anderer beteiligter Personen"
+          ]
+        },
+        {
+          "category": "Ausdrücklich berechtigte Prüfrolle",
+          "allowed_disclosures": [
+            "Für Sicherheitsprüfung und Audit erforderliche Freigabenachweise"
+          ],
+          "conditions": [
+            "Serverseitige fachliche Berechtigungsprüfung"
+          ]
+        }
+      ],
+      "data_sources": [
+        "App-lokaler Freigabevorgang durch Datenschutzbeauftragte im Filzmann Assistenzplanung",
+        "App-eigene Tabelle flz_planer_admin_access"
+      ],
+      "legal_basis": {
+        "status": "PRIVACY-DECISION-REQUIRED",
+        "affected_data": "Personenbezogene Adminfreigabehistorie",
+        "planned_processing": "Sicherheitsprüfung und Audit des fachlichen Vollzugriffs",
+        "missing_decision": "Anwendbare Rechtsgrundlage",
+        "reason": "Die Rechtsgrundlage ist fachlich und rechtlich zu entscheiden.",
+        "technical_impact": "Der Katalog kann keine freigegebene Rechtsgrundlage ausweisen.",
+        "privacy_preserving_alternative": "Nur minimale UIDs und Zeitpunkte speichern und subjectgebunden ausgeben.",
+        "responsible_party": "ungeklärt",
+        "blocking": false
+      },
+      "retention": {
+        "policy_id": "temporary_admin_access_history_default_six_months",
+        "trigger": "Tatsächliches Ende der zeitlich begrenzten app-lokalen Adminfreigabe",
+        "duration_or_deadline": "P6M als Standardwert",
+        "action": "delete",
+        "conditions_or_holds": [
+          "Vollständige Löschung ohne anonymisierten oder statistischen Restbestand.",
+          "Aktive rechtliche oder datenschutzrechtliche Sperren gelten nur zweckgebunden mit Prüftermin und werden ausschließlich durch Datenschutzbeauftragte begründet und auditiert gesetzt oder aufgehoben.",
+          "Nach Restore wird der ursprüngliche Trigger neu bewertet; eine Freigabe wird niemals reaktiviert.",
+          "Keine automatische Ausführung vor dem freigegebenen und getesteten app-lokalen Ausführungs-, Restore- und Backupvertrag."
+        ]
+      },
+      "logging": {
+        "audit_requirements": [
+          "Beginn, geplantes Ende und Widerruf der app-lokalen Freigabe bleiben nachvollziehbar"
+        ],
+        "personal_data_policy": "Keine vollständigen Requests oder Kennungen unbeteiligter Personen in Standardlogs übernehmen."
+      },
+      "backup": {
+        "relevance": {
+          "status": "PRIVACY-DECISION-REQUIRED",
+          "affected_data": "Persistierte Adminfreigabehistorie",
+          "planned_processing": "Einbeziehung in Sicherung und Wiederherstellung der Nextcloud-Datenbank",
+          "missing_decision": "Backup-Relevanz und Aufbewahrungsdauer",
+          "reason": "Der App-Code kennt den betrieblichen Backupzyklus nicht.",
+          "technical_impact": "Die App kann keinen Entfall aus Sicherungen behaupten.",
+          "privacy_preserving_alternative": "Keine separate app-eigene Backupkopie anlegen.",
+          "responsible_party": "ungeklärt",
+          "blocking": false
+        },
+        "restore_handling": {
+          "status": "PRIVACY-DECISION-REQUIRED",
+          "affected_data": "Nach Restore wieder vorhandene Freigabehistorie",
+          "planned_processing": "Erneute Anwendung der beschlossenen Retention-Regel",
+          "missing_decision": "Sichere Restore-Ausführung und Wiederanlauf für bereits abgelaufene Nachweise",
+          "reason": "Frist, Maßnahme und Nichtreaktivierung sind entschieden; die sichere technische Restore-Ausführung fehlt.",
+          "technical_impact": "Keine automatische Löschung oder Anonymisierung nach Restore.",
+          "privacy_preserving_alternative": "Freigaben anhand ihres Endzeitpunkts technisch als inaktiv behandeln.",
+          "responsible_party": "Datenschutzbeauftragte und technische App-Verantwortung",
+          "blocking": true
+        }
+      },
+      "exports_and_reports": {
+        "article_15_relevance": "Eigene Rollen und Zeitpunkte werden subjectgebunden ausgegeben.",
+        "other_outputs": [
+          "Autorisierte administrative Prüfung der Freigabehistorie"
+        ],
+        "minimization": "In der Selbstauskunft Kennungen anderer beteiligter Administrationskonten neutralisieren."
+      },
+      "data_subject_rights": {
+        "article_15": "Subjectgebundene Projektion der eigenen Beteiligung ist implementiert.",
+        "rectification": {
+          "status": "PRIVACY-DECISION-REQUIRED",
+          "affected_data": "Historische Freigabenachweise",
+          "planned_processing": "Berichtigung ohne Verlust der Auditnachvollziehbarkeit",
+          "missing_decision": "Zulässiger Korrekturweg",
+          "reason": "Eine Überschreibung könnte den Beweiswert zerstören.",
+          "technical_impact": "Kein generischer Berichtigungsbefehl wird angeboten.",
+          "privacy_preserving_alternative": "Fehler manuell prüfen und Originalwerte nicht ungeprüft verändern.",
+          "responsible_party": "ungeklärt",
+          "blocking": true
+        },
+        "restriction": {
+          "status": "PRIVACY-DECISION-REQUIRED",
+          "affected_data": "Historische Freigabenachweise",
+          "planned_processing": "Einschränkung der weiteren Verarbeitung",
+          "missing_decision": "Sperrgründe und technische Wirkung",
+          "reason": "Sperrgründe und Auditfolgen sind nicht technisch ableitbar.",
+          "technical_impact": "Kein automatischer Einschränkungspfad wird angeboten.",
+          "privacy_preserving_alternative": "Zugriff auf ausdrücklich berechtigte Rollen begrenzen.",
+          "responsible_party": "ungeklärt",
+          "blocking": true
+        },
+        "erasure_or_anonymization": "Vollständige Löschung sechs Monate nach dem tatsächlichen Ende ohne anonymisierten oder statistischen Restbestand; zweckgebundene Holds mit Prüftermin gehen vor. Die automatische Ausführung bleibt bis zum getesteten app-lokalen Vertrag deaktiviert."
+      },
+      "international_transfers": "Assistenz Dienstplanung übermittelt die Freigabehistorie nicht an Drittländer.",
+      "automated_decisions": "Der Server beendet die Freigabe spätestens nach 24 Stunden; es findet keine automatisierte Entscheidung über eine Person statt.",
+      "special_safeguards": [
+        "Nativer Adminstatus und aktive app-lokale Freigabe sind gemeinsam erforderlich",
+        "Ablauf und Fehler führen deny by default zu keinem fachlichen Vollzugriff",
+        "Drittpersonen-UIDs werden in der Selbstauskunft neutralisiert",
+        "Die Laufzeitdurchsetzung der Ziel- und Gruppenbedingungen sowie Allow-, Deny- und Manipulationsprüfungen stehen aus; diese Metadaten aktivieren keine Rechte"
+      ],
+      "systems": [
+        "Nextcloud",
+        "Assistenz Dienstplanung",
+        "App-eigene Tabelle flz_planer_admin_access"
+      ]
+    }
+  ]
+}

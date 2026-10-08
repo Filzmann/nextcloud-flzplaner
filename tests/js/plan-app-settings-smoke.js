@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-global.window = { ADPlaner: {} };
+global.window = { FlzPlaner: {} };
 require('../../js/modules/plan-app.js');
 
 class ChromeFake {
@@ -50,7 +50,7 @@ class SettingsRepositoryFake {
 }
 
 function createApp(repository, errors) {
-    const app = new window.ADPlaner.PlanApp({
+    const app = new window.FlzPlaner.PlanApp({
         repository,
         PlanChrome: ChromeFake,
         PlanPanel: PanelFake,
@@ -59,6 +59,7 @@ function createApp(repository, errors) {
         showNotice() {},
         showError(error, fallback) { errors.push({ message: error.message, fallback }); },
         renderMonth() { return ''; },
+        renderWorkload() { return ''; },
         renderSettings() { return ''; },
         addShiftRow() {},
         removeShiftRow() {},
@@ -117,7 +118,7 @@ const values = {
     await app.saveSettings(values);
     assert.strictEqual(repository.saveCalls, 4, 'Saving must be possible again after the pending request completed.');
 
-    console.log('AdPlaner settings workflow smoke test passed.');
+    console.log('FlzPlaner settings workflow smoke test passed.');
 })().catch(error => {
     console.error(error);
     process.exit(1);

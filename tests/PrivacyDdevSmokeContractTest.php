@@ -13,7 +13,7 @@ foreach (['trap \'cleanup || report_failed_cleanup\' EXIT', 'user:disable', 'ass
         throw new RuntimeException('Dem Datenschutz-DDEV-Smoke fehlt ein Sicherheitsvertrag: ' . $contract);
     }
 }
-foreach (['PARAM_INT_ARRAY', "'adp_shift_candidates'", "'adp_day_notes'", "'adp_shift_slots'", "'adp_month_plans'", "'adp_team_settings'"] as $contract) {
+foreach (['PARAM_INT_ARRAY', "'flz_planer_shift_candidates'", "'flz_planer_fixed_conflicts'", "'flz_planer_day_notes'", "'flz_planer_workload_limits'", "'flz_planer_regular_shifts'", "'flz_planer_shift_slots'", "'flz_planer_month_plans'", "'flz_planer_team_settings'"] as $contract) {
     if (!str_contains($probe, $contract)) {
         throw new RuntimeException('Der Datenbank-Probe fehlt ein Cleanup-Vertrag: ' . $contract);
     }
@@ -22,4 +22,4 @@ if (!str_contains($probe, "preg_match('/^P[0-9]{1,15}$/D'")) {
     throw new RuntimeException('Der Datenbank-Probe begrenzt Löschungen nicht auf synthetische Teamkürzel.');
 }
 
-echo 'AdPlaner privacy DDEV smoke contract test passed' . PHP_EOL;
+echo 'FlzPlaner privacy DDEV smoke contract test passed' . PHP_EOL;
