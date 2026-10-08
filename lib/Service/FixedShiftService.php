@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Service;
+namespace OCA\FlzPlaner\Service;
 
-use OCA\AdPlaner\Model\ShiftCandidate;
-use OCA\AdPlaner\Model\ShiftSlot;
-use OCA\AdPlaner\Model\Team;
-use OCA\AdPlaner\Store\ShiftPlanStore;
+use OCA\FlzPlaner\Model\ShiftCandidate;
+use OCA\FlzPlaner\Model\ShiftSlot;
+use OCA\FlzPlaner\Model\Team;
+use OCA\FlzPlaner\Store\ShiftPlanStore;
 
 final class FixedShiftService {
     public function __construct(private ShiftPlanStore $store, private ShiftConfigService $shiftConfig) {}

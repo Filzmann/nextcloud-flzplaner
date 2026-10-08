@@ -13,10 +13,10 @@
             this.monthInput = this.byId('month-input');
             this.monthPrevious = this.byId('month-prev');
             this.monthNext = this.byId('month-next');
-            this.panel = this.byId('adp-panel');
+            this.panel = this.byId('flz-planer-panel');
             this.currentMonth = '';
-            this.tabs = document.querySelector('.adp-tabs');
-            this.tabButtons = Array.from(document.querySelectorAll('.adp-tab'));
+            this.tabs = document.querySelector('.flz-planer-tabs');
+            this.tabButtons = Array.from(document.querySelectorAll('.flz-planer-tab'));
             this.teamSelect.addEventListener('change', event => this.onTeamChange(event.target.value));
             this.monthInput.addEventListener('change', event => {
                 const value = event.target.value;
@@ -97,6 +97,6 @@
         }
     }
 
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.PlanChrome = PlanChrome;
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.PlanChrome = PlanChrome;
 })();

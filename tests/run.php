@@ -11,5 +11,5 @@ PhpTestRunner::run(
     lintDirectories: ['appinfo', 'lib', 'templates', 'tests'],
     testDirectories: ['tests'],
     testSuffixes: ['Test.php'],
-    successMessage: 'AdPlaner PHP tests passed',
+    successMessage: 'FlzPlaner PHP tests passed',
 );

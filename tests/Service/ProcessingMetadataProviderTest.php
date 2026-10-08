@@ -7,25 +7,25 @@ namespace OCP\EventDispatcher {
     interface IEventListener { public function handle(Event $event): void; }
 }
 
-namespace OCA\AdPlaner\AppInfo {
-    final class Application { public const APP_ID = 'adplaner'; }
+namespace OCA\FlzPlaner\AppInfo {
+    final class Application { public const APP_ID = 'flzplaner'; }
 }
 
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Privacy\PlanerProcessingMetadataProvider;
-    use OCA\AdPlaner\Privacy\PlanerProcessingMetadataProviderListener;
-    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
+    use OCA\FlzPlaner\Privacy\PlanerProcessingMetadataProvider;
+    use OCA\FlzPlaner\Privacy\PlanerProcessingMetadataProviderListener;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
     use OCP\EventDispatcher\Event;
 
     $provider = new PlanerProcessingMetadataProvider();
     $catalog = $provider->catalog();
     $descriptor = $provider->descriptor();
-    if ($descriptor->appId() !== 'adplaner' || $descriptor->displayName() !== 'Assistenz Dienstplanung' || $descriptor->contractVersion() !== '1.0') {
-        throw new RuntimeException('Der Processing-Metadata-Provider beschreibt AD Planer nicht korrekt.');
+    if ($descriptor->appId() !== 'flzplaner' || $descriptor->displayName() !== 'Assistenz Dienstplanung' || $descriptor->contractVersion() !== '1.0') {
+        throw new RuntimeException('Der Processing-Metadata-Provider beschreibt Filzmann Assistenzplanung nicht korrekt.');
     }
-    if ($catalog->appId() !== 'adplaner') {
+    if ($catalog->appId() !== 'flzplaner') {
         throw new RuntimeException('Processing-Metadata-Provider und Katalog verwenden nicht die kanonische App-ID.');
     }
     if ($catalog->processingIds() !== ['shift_planning_management', 'temporary_admin_full_access']) {
@@ -35,7 +35,7 @@ namespace {
         throw new RuntimeException('Der Processing-Katalog enthält personenbezogene Laufzeitdaten.');
     }
     $encodedCatalog = json_encode($catalog->toArray(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    if (!str_contains($encodedCatalog, 'App-lokaler Freigabevorgang durch Datenschutzbeauftragte im AD Planer')
+    if (!str_contains($encodedCatalog, 'App-lokaler Freigabevorgang durch Datenschutzbeauftragte im Filzmann Assistenzplanung')
         || str_contains($encodedCatalog, 'Freigabevorgang im Nextcloud-Adminbereich')) {
         throw new RuntimeException('Der Processing-Katalog projiziert die DPO-Freigabesteuerung nicht korrekt.');
     }
@@ -47,7 +47,7 @@ namespace {
         throw new RuntimeException('Ein fremdes Event registriert den Processing-Metadata-Provider.');
     }
     $listener->handle($registration);
-    if (($registration->providers()['adplaner'] ?? null) !== $provider) {
+    if (($registration->providers()['flzplaner'] ?? null) !== $provider) {
         throw new RuntimeException('Der Processing-Metadata-Provider wird nicht lazy registriert.');
     }
 
@@ -56,5 +56,5 @@ namespace {
         throw new RuntimeException('Der Bootstrap registriert den Processing-Metadata-Provider nicht am öffentlichen V1-Event.');
     }
 
-    echo "AD Planer processing metadata provider test passed\n";
+    echo "Filzmann Assistenzplanung processing metadata provider test passed\n";
 }

@@ -1,4 +1,4 @@
-# Manuelles Abnahmeformular – AdPlaner
+# Manuelles Abnahmeformular – FlzPlaner
 
 Dieses Formular dokumentiert die fachliche und visuelle Abnahme der
 Assistenzplanung auf einem realitätsnahen Staging-System. Pro Prüffall wird
@@ -16,7 +16,7 @@ Testkonten, synthetische Teams, Schichten und Bemerkungen verwenden.
 | Datum und Uhrzeit |  |
 | Prüfer*in |  |
 | Umgebung und URL |  |
-| AdPlaner-Version |  |
+| FlzPlaner-Version |  |
 | Nextcloud-Version |  |
 | Browser und Version |  |
 | Fenstergröße / Zoom |  |
@@ -31,8 +31,8 @@ Begründung verpflichtend.
 
 | ID | Was wird geprüft? | Auszuführende Schritte | Erwartetes Ergebnis | Ergebnis | Warum/Beleg/Abweichung |
 |---|---|---|---|---|---|
-| A1 | Standalone-Einstieg | AdPlaner ohne aktive OrgSuite öffnen. | Ein eigener Nextcloud-Einstieg ist vorhanden und der Monatsplan wird ohne andere Fachapps geladen. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
-| A2 | Suite-Einstieg | AdPlaner mit aktiver OrgSuite über den AD-Einstieg öffnen und zwischen aktivierten AD-Apps wechseln. | Es gibt keinen doppelten Haupteinstieg; AdPlaner ist im gemeinsamen Menü korrekt markiert. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| A1 | Standalone-Einstieg | FlzPlaner ohne aktive OrgSuite öffnen. | Ein eigener Nextcloud-Einstieg ist vorhanden und der Monatsplan wird ohne andere Fachapps geladen. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| A2 | Suite-Einstieg | FlzPlaner mit aktiver OrgSuite über den FLZ-Einstieg öffnen und zwischen aktivierten FLZ-Apps wechseln. | Es gibt keinen doppelten Haupteinstieg; FlzPlaner ist im gemeinsamen Menü korrekt markiert. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | A3 | Team und Monat | Zwischen mindestens zwei synthetischen Teams sowie vorherigem und nächstem Monat wechseln. | Auswahl, Überschrift, Tage, Schichten und Zuweisungen gehören stets zum gewählten Team und Monat. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | A4 | Monatsgrenzen | Februar sowie einen Monats-/Jahreswechsel öffnen. | Kalendertage und gespeicherte Planwerte werden ohne fehlende oder doppelte Tage angezeigt. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | A5 | Tastatur und Fokus | Team-, Monats-, Tab- und Plansteuerung nur mit Tastatur bedienen. | Alle Funktionen sind erreichbar, der Fokus ist sichtbar und die Tabs melden Auswahl und Zielbereich korrekt. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
@@ -64,9 +64,9 @@ Begründung verpflichtend.
 
 | ID | Was wird geprüft? | Auszuführende Schritte | Erwartetes Ergebnis | Ergebnis | Warum/Beleg/Abweichung |
 |---|---|---|---|---|---|
-| D1 | Betrieb ohne AD Urlaub | AD Urlaub deaktiviert lassen und Monatsplan, Einstellungen und Zuweisungen prüfen. | Der Monatsplan bleibt vollständig nutzbar; fehlende Abwesenheitshinweise blockieren keine Aktion. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
-| D2 | Betrieb ohne AD Kalender | AD Kalender deaktiviert lassen und dieselben Kernabläufe wiederholen. | Die Assistenzplanung bleibt nutzbar; der fehlende optionale Provider wird nicht als Planfehler behandelt. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
-| D3 | Optionale Hinweise | Mit aktivem, neutral vorbereitetem Urlaubs- oder Kalenderprovider dessen Hinweise im Monatsplan prüfen. | Hinweise werden read-only dargestellt und verändern weder Teamrechte noch die führenden AdPlaner-Daten. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| D1 | Betrieb ohne Filzmann Urlaubsplanung | Filzmann Urlaubsplanung deaktiviert lassen und Monatsplan, Einstellungen und Zuweisungen prüfen. | Der Monatsplan bleibt vollständig nutzbar; fehlende Abwesenheitshinweise blockieren keine Aktion. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| D2 | Betrieb ohne Filzmann Kalender | Filzmann Kalender deaktiviert lassen und dieselben Kernabläufe wiederholen. | Die Assistenzplanung bleibt nutzbar; der fehlende optionale Provider wird nicht als Planfehler behandelt. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| D3 | Optionale Hinweise | Mit aktivem, neutral vorbereitetem Urlaubs- oder Kalenderprovider dessen Hinweise im Monatsplan prüfen. | Hinweise werden read-only dargestellt und verändern weder Teamrechte noch die führenden FlzPlaner-Daten. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | D4 | Verständliche Validierung | Leere Namen, unvollständige Zeiten und ungültige Eingaben in Einstellungen und Planung versuchen. | Fehler werden am richtigen Kontext verständlich angezeigt; gültige bestehende Daten bleiben erhalten. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | D5 | Datensparsame Abnahme | Formular und Screenshots prüfen. | Es wurden nur synthetische Team-, Dienst- und Kontodaten dokumentiert. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 
@@ -77,7 +77,7 @@ Begründung verpflichtend.
 | Anzahl erfolgreich | 4 |
 | Anzahl nicht erfolgreich | 0 |
 | Anzahl nicht geprüft | 19 |
-| Kritische Abweichungen / Ticketreferenzen | Siehe `ADP-STAGING-FOLLOWUP` in `ROADMAP.md`.<br>Beobachtet wurden fehlende Planstatus/Änderungssperre, fehlende read-only Integrationshinweise, der ausstehende direkte Fremdänderungs-Deny sowie Abweichungen bei Monatsnavigation, Scrollleiste, Kommentar-Speicheraktion und Mitarbeiterauswahl. Zusätzlich erschien unterhalb des Monatsplans eine weitere Schichtdarstellung. |
+| Kritische Abweichungen / Ticketreferenzen | Siehe `FLZP-STAGING-FOLLOWUP` in `ROADMAP.md`.<br>Beobachtet wurden fehlende Planstatus/Änderungssperre, fehlende read-only Integrationshinweise, der ausstehende direkte Fremdänderungs-Deny sowie Abweichungen bei Monatsnavigation, Scrollleiste, Kommentar-Speicheraktion und Mitarbeiterauswahl. Zusätzlich erschien unterhalb des Monatsplans eine weitere Schichtdarstellung. |
 | Erneute Prüfung erforderlich bis | Vor Freigabe einer abnahmefähigen Version; kein konkretes Datum festgelegt |
 | Gesamtentscheidung | [ ] abgenommen [ ] mit Auflagen abgenommen [ ] nicht abgenommen |
 | Begründung der Gesamtentscheidung | Die zentrale Planfreigabe einschließlich Statusverwaltung und Änderungssperre fehlt. Außerdem werden optionale Urlaubs- beziehungsweise Kalenderhinweise nicht wie vorgesehen dargestellt. C3 ist serverseitig noch nicht vollständig geprüft. |

@@ -22,5 +22,5 @@ runJavaScriptSuite({
         'tests/js/ui-smoke.js',
         'tests/js/workload-panel-smoke.js',
     ],
-    successMessage: 'AdPlaner JavaScript tests passed',
+    successMessage: 'FlzPlaner JavaScript tests passed',
 });

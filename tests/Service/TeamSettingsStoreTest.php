@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/bootstrap.php';
 
-use OCA\AdPlaner\Repository\TeamSettingsRepository;
-use OCA\AdPlaner\Service\ShiftConfigService;
-use OCA\AdPlaner\Store\TeamSettingsStore;
-use function OCA\AdPlaner\Tests\assertSameValue;
+use OCA\FlzPlaner\Repository\TeamSettingsRepository;
+use OCA\FlzPlaner\Service\ShiftConfigService;
+use OCA\FlzPlaner\Store\TeamSettingsStore;
+use function OCA\FlzPlaner\Tests\assertSameValue;
 
 final class TeamSettingsRepositoryFake extends TeamSettingsRepository {
     public array $saved = [];
@@ -61,4 +61,4 @@ $repository->row = [
 ];
 assertSameValue('0', $store->forTeam('A1')->displayName, 'The valid display name "0" must survive the persistence roundtrip.');
 
-echo 'AdPlaner team settings store tests passed' . PHP_EOL;
+echo 'FlzPlaner team settings store tests passed' . PHP_EOL;

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/bootstrap.php';
 
-use OCA\AdPlaner\Model\Team;
-use OCA\AdPlaner\Service\WorkloadPreferenceService;
-use OCA\AdPlaner\Store\ShiftPlanStore;
-use function OCA\AdPlaner\Tests\assertDomainException;
-use function OCA\AdPlaner\Tests\assertSameValue;
+use OCA\FlzPlaner\Model\Team;
+use OCA\FlzPlaner\Service\WorkloadPreferenceService;
+use OCA\FlzPlaner\Store\ShiftPlanStore;
+use function OCA\FlzPlaner\Tests\assertDomainException;
+use function OCA\FlzPlaner\Tests\assertSameValue;
 
 final class WorkloadStoreFake extends ShiftPlanStore {
     public array $saved = [];
@@ -28,8 +28,8 @@ $assistants = [
     ['uid'=>'unbounded','displayName'=>'Ohne Grenzen','isEb'=>false,'canReceiveShifts'=>true],
     ['uid'=>'eb','displayName'=>'EB','isEb'=>true,'canReceiveShifts'=>false],
 ];
-$selfTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, false, []);
-$ebTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, []);
+$selfTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, []);
+$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, []);
 $store = new WorkloadStoreFake();
 $service = new WorkloadPreferenceService($store);
 
@@ -66,4 +66,4 @@ assertSameValue('normal', $overview[2]['weeks'][0]['status'] ?? null, '0/0 bedeu
 $ownOverview = $service->overview($selfTeam, '2026-09', 'self');
 assertSameValue(['self'], array_column($ownOverview, 'uid'), 'Assistenzkräfte dürfen nur die eigene Auslastung erhalten.');
 
-echo "AdPlaner workload preference service tests passed\n";
+echo "FlzPlaner workload preference service tests passed\n";

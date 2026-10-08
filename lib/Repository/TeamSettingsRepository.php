@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Repository;
+namespace OCA\FlzPlaner\Repository;
 
 use DateTimeImmutable;
 use OCP\DB\Exception;
@@ -18,7 +18,7 @@ class TeamSettingsRepository {
     public function findByCode(string $teamCode): ?array {
         $qb = $this->db->getQueryBuilder();
         $qb->select('*')
-            ->from('adp_team_settings')
+            ->from('flz_planer_team_settings')
             ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)));
 
         $row = $qb->executeQuery()->fetchAssociative();
@@ -36,7 +36,7 @@ class TeamSettingsRepository {
 
         if ($existing === null) {
             $qb = $this->db->getQueryBuilder();
-            $qb->insert('adp_team_settings')
+            $qb->insert('flz_planer_team_settings')
                 ->values([
                     'team_code' => $qb->createNamedParameter($teamCode),
                     'display_name' => $qb->createNamedParameter($displayName),
@@ -55,7 +55,7 @@ class TeamSettingsRepository {
         }
 
         $qb = $this->db->getQueryBuilder();
-        $qb->update('adp_team_settings')
+        $qb->update('flz_planer_team_settings')
             ->set('display_name', $qb->createNamedParameter($displayName))
             ->set('settings_json', $qb->createNamedParameter($json))
             ->set('updated_at', $qb->createNamedParameter($now, IQueryBuilder::PARAM_DATETIME_IMMUTABLE))

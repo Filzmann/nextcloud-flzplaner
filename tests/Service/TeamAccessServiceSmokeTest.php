@@ -15,13 +15,13 @@ namespace {
 
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Model\TeamSettings;
-    use OCA\AdPlaner\Service\TeamAccessService;
-    use OCA\AdPlaner\Service\TeamSettingsService;
+    use OCA\FlzPlaner\Model\TeamSettings;
+    use OCA\FlzPlaner\Service\TeamAccessService;
+    use OCA\FlzPlaner\Service\TeamSettingsService;
     use OCP\IGroupManager;
     use OCP\IUserSession;
-    use function OCA\AdPlaner\Tests\assertDomainException;
-    use function OCA\AdPlaner\Tests\assertSameValue;
+    use function OCA\FlzPlaner\Tests\assertDomainException;
+    use function OCA\FlzPlaner\Tests\assertSameValue;
 
     $alice = new class('alice', 'Alice Assistenz', 'alice@example.invalid') {
         public function __construct(
@@ -88,7 +88,7 @@ namespace {
     };
     assertSameValue(
         '0',
-        \OCA\AdPlaner\Model\Assistant::fromUser($zeroNameUser, false)->displayName,
+        \OCA\FlzPlaner\Model\Assistant::fromUser($zeroNameUser, false)->displayName,
         'The valid Nextcloud display name "0" must not be replaced with the uid.'
     );
 
@@ -112,7 +112,7 @@ namespace {
 
         public function get($gid): ?object {
             return match ((string)$gid) {
-                'ad-ASN-TeamB' => $this->teamGroup,
+                'flz-ASN-TeamB' => $this->teamGroup,
                 default => null,
             };
         }
@@ -120,13 +120,13 @@ namespace {
         public function getUserGroupIds($user): array {
             $uid = $user->getUID();
             if ($uid === 'bob') {
-                return ['ad-ASN-TeamB', 'ad-EB'];
+                return ['flz-ASN-TeamB', 'flz-EB'];
             }
             if ($uid === 'alice') {
-                return ['ad-ASN-TeamB', 'ad-ASN-Zulu', 'ignored', 'ad-ASN-TeamB'];
+                return ['flz-ASN-TeamB', 'flz-ASN-Zulu', 'ignored', 'flz-ASN-TeamB'];
             }
             if ($uid === 'legacy-eb') {
-                return ['ad-ASN-TeamB', 'ad-EB-Altschema'];
+                return ['flz-ASN-TeamB', 'flz-EB-Altschema'];
             }
 
             return [];
@@ -162,11 +162,11 @@ namespace {
 
     assertSameValue('bob', $service->currentUserId(), 'Current user id should come from the user session.');
     assertSameValue('TeamB', $service->normalizeTeamCode(' TeamB '), 'Team codes should be trimmed.');
-    assertSameValue(true, $service->currentUserIsEbForTeam('TeamB'), 'EB users should be detected through ad-EB groups.');
+    assertSameValue(true, $service->currentUserIsEbForTeam('TeamB'), 'EB users should be detected through flz-EB groups.');
 
     $team = $service->assertTeamAccess('TeamB');
     assertSameValue('Team B', $team->displayName, 'Team display name should come from team settings.');
-    assertSameValue('ad-ASN-TeamB', $team->groupName, 'Team group name should follow the AD schema.');
+    assertSameValue('flz-ASN-TeamB', $team->groupName, 'Team group name should follow the FLZ schema.');
     assertSameValue(['Alice Assistenz', 'Bob EB'], array_map(static fn($assistant): string => $assistant->displayName, $team->assistants()), 'Assistants should be sorted by display name.');
     assertSameValue(null, $team->assistantByUid('disabled-assistant'), 'Disabled Nextcloud users must not be exposed as current shift-capable team members.');
     assertSameValue(false, $team->assistantByUid('bob')->canReceiveShifts, 'EB users should not receive shifts.');
@@ -183,10 +183,10 @@ namespace {
     );
     assertSameValue(
         [
-            'teamGroupPrefix' => 'ad-ASN-',
+            'teamGroupPrefix' => 'flz-ASN-',
             'teamLabelPrefix' => 'Assistenzteam',
             'teamCodeMaxLength' => 16,
-            'coordinatorGroupId' => 'ad-EB',
+            'coordinatorGroupId' => 'flz-EB',
             'coordinatorLabel' => 'Einsatzbegleitung',
         ],
         $service->organizationContract(),
@@ -213,7 +213,7 @@ namespace {
     );
 
     $session->setUser($legacyEb);
-    assertSameValue(false, $service->currentUserIsEbForTeam('TeamB'), 'Legacy ad-EB-* groups must not grant EB rights.');
+    assertSameValue(false, $service->currentUserIsEbForTeam('TeamB'), 'Legacy flz-EB-* groups must not grant EB rights.');
 
     $session->setUser(null);
     assertSameValue([], $service->teamsForCurrentUser(), 'Anonymous sessions should not expose teams.');

@@ -22,9 +22,9 @@ namespace Psr\Log {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
-    use OCA\AdPlaner\Service\TemporaryAdminAccessDeniedException;
-    use OCA\AdPlaner\Service\TemporaryAdminAccessService;
+    use OCA\FlzPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
+    use OCA\FlzPlaner\Service\TemporaryAdminAccessDeniedException;
+    use OCA\FlzPlaner\Service\TemporaryAdminAccessService;
 
     $session = new class implements OCP\IUserSession {
         public ?OCP\IUser $user;
@@ -112,5 +112,5 @@ namespace {
     $groups->memberships['native-admin'] = ['Datenschutzbeauftragte'];
     if (!$service->canManageGrants()) throw new RuntimeException('Admin mit Datenschutzrolle erhält keinen Direktlinkzustand.');
 
-    echo "AdPlaner temporary admin access service tests passed\n";
+    echo "FlzPlaner temporary admin access service tests passed\n";
 }

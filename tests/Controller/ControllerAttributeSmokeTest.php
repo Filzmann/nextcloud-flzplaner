@@ -38,10 +38,10 @@ namespace OCP\AppFramework\Http\Attribute {
 namespace {
 }
 
-namespace OCA\AdPlaner\AppInfo {
+namespace OCA\FlzPlaner\AppInfo {
     if (!class_exists(Application::class)) {
         final class Application {
-            public const APP_ID = 'adplaner';
+            public const APP_ID = 'flzplaner';
         }
     }
 }
@@ -49,9 +49,9 @@ namespace OCA\AdPlaner\AppInfo {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Controller\ApiController;
-    use OCA\AdPlaner\Controller\PageController;
-    use OCA\AdPlaner\Controller\TemporaryAdminAccessController;
+    use OCA\FlzPlaner\Controller\ApiController;
+    use OCA\FlzPlaner\Controller\PageController;
+    use OCA\FlzPlaner\Controller\TemporaryAdminAccessController;
     use OCP\AppFramework\Http\Attribute\NoAdminRequired;
     use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 
@@ -114,5 +114,5 @@ namespace {
         }
     }
 
-    echo 'AdPlaner controller attribute smoke tests passed' . PHP_EOL;
+    echo 'FlzPlaner controller attribute smoke tests passed' . PHP_EOL;
 }

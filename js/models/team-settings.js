@@ -1,7 +1,7 @@
 (function() {
     const { Model } = window.LocalBase.models;
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.models = window.ADPlaner.models || {};
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.models = window.FlzPlaner.models || {};
 
     class TeamSettings extends Model {
         constructor(data = {}) {
@@ -20,5 +20,5 @@
         }
     }
 
-    window.ADPlaner.models.TeamSettings = TeamSettings;
+    window.FlzPlaner.models.TeamSettings = TeamSettings;
 })();

@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Store;
+namespace OCA\FlzPlaner\Store;
 
-use OCA\AdPlaner\Model\TeamSettings;
-use OCA\AdPlaner\Repository\TeamSettingsRepository;
-use OCA\AdPlaner\Service\ShiftConfigService;
-use OCA\LocalBase\Organization\AdOrganizationDefinition;
-use OCA\LocalBase\Organization\AdOrganizationSettingsService;
+use OCA\FlzPlaner\Model\TeamSettings;
+use OCA\FlzPlaner\Repository\TeamSettingsRepository;
+use OCA\FlzPlaner\Service\ShiftConfigService;
+use OCA\LocalBase\Organization\FlzOrganizationDefinition;
+use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
 
 class TeamSettingsStore {
     public function __construct(
         private TeamSettingsRepository $repository,
         private ShiftConfigService $shiftConfig,
-        private ?AdOrganizationSettingsService $organization = null,
+        private ?FlzOrganizationSettingsService $organization = null,
     ) {
     }
 
@@ -60,7 +60,7 @@ class TeamSettingsStore {
     }
 
     private function defaultDisplayName(string $teamCode): string {
-        $definition = $this->organization?->definition() ?? AdOrganizationDefinition::defaults();
+        $definition = $this->organization?->definition() ?? FlzOrganizationDefinition::defaults();
         return $definition->teamLabelPrefix() . ' ' . $teamCode;
     }
 }

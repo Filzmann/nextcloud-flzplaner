@@ -27,7 +27,7 @@ require('../../js/models/team.js');
 require('../../js/models/day-note.js');
 require('../../../localbase/js/repositories/repository.js');
 
-window.ADPlaner.api = {
+window.FlzPlaner.api = {
     request(path, options = {}) {
         calls.push({ path, options });
 
@@ -40,8 +40,8 @@ window.ADPlaner.api = {
 require('../../js/repositories/plan-repository.js');
 
 (async () => {
-    const { PlanRepository } = window.ADPlaner.repositories;
-    const repository = new PlanRepository(window.ADPlaner.api);
+    const { PlanRepository } = window.FlzPlaner.repositories;
+    const repository = new PlanRepository(window.FlzPlaner.api);
 
     const state = await repository.state();
     const monthPlan = await repository.monthPlan('TeamA', '2026-07');
@@ -55,10 +55,10 @@ require('../../js/repositories/plan-repository.js');
     await repository.reportFixedConflict('TeamA','2026-07',1);
     await repository.resolveFixedConflict('TeamA','2026-07',1,'anna');
 
-    assert.strictEqual(state.teams[0] instanceof window.ADPlaner.models.Team, true);
-    assert.strictEqual(monthPlan.team instanceof window.ADPlaner.models.Team, true);
-    assert.strictEqual(monthPlan.segments[0] instanceof window.ADPlaner.models.ShiftDefinition, true);
-    assert.strictEqual(monthPlan.days[0].slots[0] instanceof window.ADPlaner.models.ShiftSlot, true);
+    assert.strictEqual(state.teams[0] instanceof window.FlzPlaner.models.Team, true);
+    assert.strictEqual(monthPlan.team instanceof window.FlzPlaner.models.Team, true);
+    assert.strictEqual(monthPlan.segments[0] instanceof window.FlzPlaner.models.ShiftDefinition, true);
+    assert.strictEqual(monthPlan.days[0].slots[0] instanceof window.FlzPlaner.models.ShiftSlot, true);
     assert.deepStrictEqual(calls.map(call => call.path), [
         '/api/state',
         '/api/teams/TeamA/months/2026-07',
@@ -79,5 +79,5 @@ require('../../js/repositories/plan-repository.js');
     assert.strictEqual(calls[8].options.body, '{"regularShiftsJson":"[{\\"weekday\\":1,\\"segmentKey\\":\\"day\\"}]"}');
     assert.strictEqual(calls[10].options.body, '{"keptUid":"anna"}');
 
-    console.log('AdPlaner plan repository smoke test passed.');
+    console.log('FlzPlaner plan repository smoke test passed.');
 })();

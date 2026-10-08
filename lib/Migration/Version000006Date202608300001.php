@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Migration;
+namespace OCA\FlzPlaner\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
@@ -15,8 +15,8 @@ final class Version000006Date202608300001 extends SimpleMigrationStep {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
-        if ($schema->hasTable('adp_shift_candidates')) {
-            $candidates = $schema->getTable('adp_shift_candidates');
+        if ($schema->hasTable('flz_planer_shift_candidates')) {
+            $candidates = $schema->getTable('flz_planer_shift_candidates');
             if (!$candidates->hasColumn('preference')) {
                 $candidates->addColumn('preference', Types::STRING, ['length' => 16, 'notnull' => true, 'default' => 'neutral']);
             }
@@ -28,8 +28,8 @@ final class Version000006Date202608300001 extends SimpleMigrationStep {
             }
         }
 
-        if (!$schema->hasTable('adp_workload_limits')) {
-            $limits = $schema->createTable('adp_workload_limits');
+        if (!$schema->hasTable('flz_planer_workload_limits')) {
+            $limits = $schema->createTable('flz_planer_workload_limits');
             $limits->addColumn('id', Types::BIGINT, ['autoincrement' => true, 'notnull' => true]);
             $limits->addColumn('team_code', Types::STRING, ['length' => 16, 'notnull' => true]);
             $limits->addColumn('user_uid', Types::STRING, ['length' => 64, 'notnull' => true]);
@@ -39,8 +39,8 @@ final class Version000006Date202608300001 extends SimpleMigrationStep {
             $limits->addColumn('monthly_max', Types::INTEGER, ['notnull' => false]);
             $limits->addColumn('updated_at', Types::DATETIME, ['notnull' => true]);
             $limits->setPrimaryKey(['id']);
-            $limits->addUniqueIndex(['team_code', 'user_uid'], 'adp_workload_user_unique');
-            $limits->addIndex(['user_uid'], 'adp_workload_user');
+            $limits->addUniqueIndex(['team_code', 'user_uid'], 'flz_planer_workload_user_unique');
+            $limits->addIndex(['user_uid'], 'flz_planer_workload_user');
         }
 
         return $schema;

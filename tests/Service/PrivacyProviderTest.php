@@ -7,9 +7,9 @@ namespace OCP\EventDispatcher {
     interface IEventListener { public function handle(Event $event): void; }
 }
 
-namespace OCA\AdPlaner\AppInfo { final class Application { public const APP_ID = 'adplaner'; } }
+namespace OCA\FlzPlaner\AppInfo { final class Application { public const APP_ID = 'flzplaner'; } }
 
-namespace OCA\AdPlaner\Repository {
+namespace OCA\FlzPlaner\Repository {
     class ShiftPlanRepository {
         public function personalDataForUid(string $uid, int $limit): array {
             if ($uid !== 'self') return ['candidates' => [], 'dayNotes' => [], 'monthPlans' => [], 'workloadLimits' => []];
@@ -41,13 +41,13 @@ namespace OCA\AdPlaner\Repository {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Privacy\PlanerPersonalDataProvider;
-    use OCA\AdPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
-    use OCA\AdPlaner\Privacy\PlanerPrivacyProviderListener;
-    use OCA\AdPlaner\Repository\ShiftPlanRepository;
-    use OCA\FilzmannDataProtection\PublicApi\V1\DataSubjectRef;
-    use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
-    use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
+    use OCA\FlzPlaner\Privacy\PlanerPersonalDataProvider;
+    use OCA\FlzPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
+    use OCA\FlzPlaner\Privacy\PlanerPrivacyProviderListener;
+    use OCA\FlzPlaner\Repository\ShiftPlanRepository;
+    use OCA\FlzDataProtection\PublicApi\V1\DataSubjectRef;
+    use OCA\FlzDataProtection\PublicApi\V1\PersonalDataRequest;
+    use OCA\FlzDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
 
     $adminAccess = new class implements TemporaryAdminAccessRepositoryInterface {
         public function replaceActive(string $targetUid,string $grantedBy,\DateTimeImmutable $startsAt,\DateTimeImmutable $endsAt):array{return [];}
@@ -58,7 +58,7 @@ namespace {
     };
     $provider = new PlanerPersonalDataProvider(new ShiftPlanRepository(),$adminAccess);
     $descriptor = $provider->descriptor();
-    if ($descriptor->appId() !== 'adplaner' || $descriptor->contractVersion() !== '1.0' || !$descriptor->supportsSubjectType('nextcloud-user')) throw new RuntimeException('AD Planer beschreibt den Standalone-V1-Vertrag nicht korrekt.');
+    if ($descriptor->appId() !== 'flzplaner' || $descriptor->contractVersion() !== '1.0' || !$descriptor->supportsSubjectType('nextcloud-user')) throw new RuntimeException('Filzmann Assistenzplanung beschreibt den Standalone-V1-Vertrag nicht korrekt.');
     $subject = new DataSubjectRef('nextcloud-user', 'self');
     $report = $provider->collect(new PersonalDataRequest($subject, 'de', 'access-report', 50, []));
     $items = array_map(static fn($item): array => [
@@ -68,9 +68,9 @@ namespace {
         'thirdCountryTransfer'=>$item->thirdCountryTransfer(),'automatedDecision'=>$item->automatedDecision(),
         'thirdPartyContentNotice'=>$item->thirdPartyContentNotice(),'attributes'=>$item->attributes(),
     ], $report->entries());
-    if (array_column($items, 'categoryLabel') !== ['Zeitlich begrenzter Admin-Vollzugriff', 'Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan', 'Persönliche Schichtgrenzen', 'Regelmäßige feste Schicht', 'Festschichtkonflikt']) throw new RuntimeException('AD Planer weist nicht alle personenbezogenen Datenklassen getrennt aus.');
+    if (array_column($items, 'categoryLabel') !== ['Zeitlich begrenzter Admin-Vollzugriff', 'Schichtwunsch oder Schichtzuweisung', 'Planungsaktivität', 'Bearbeitete Tagesnotiz', 'Bearbeiteter Monatsplan', 'Persönliche Schichtgrenzen', 'Regelmäßige feste Schicht', 'Festschichtkonflikt']) throw new RuntimeException('Filzmann Assistenzplanung weist nicht alle personenbezogenen Datenklassen getrennt aus.');
     $encoded = json_encode($items, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    foreach (['Admin-Vollzugriff','Ziel der Vollzugriffsfreigabe','Freigebendes Mitglied von Datenschutzbeauftragte','App-lokale Freigabesteuerung im AD Planer','Datenschutz-Prüfrolle','12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','Lieblingsschicht','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr','Persönliche Schichtgrenzen','Minimum pro Woche','05.08.26, 12:30 Uhr','Regelmäßige feste Schicht','Montag','Festschichtkonflikt','resolved'] as $expected) {
+    foreach (['Admin-Vollzugriff','Ziel der Vollzugriffsfreigabe','Freigebendes Mitglied von Datenschutzbeauftragte','App-lokale Freigabesteuerung im Filzmann Assistenzplanung','Datenschutz-Prüfrolle','12.08.26','08:00 Uhr','14:00 Uhr','Von einer berechtigten Person eingetragen','Lieblingsschicht','13.08.26','02.08.26, 09:45 Uhr','14.08.26','03.08.26, 10:15 Uhr','08.26','Genehmigt','04.08.26, 11:20 Uhr','Persönliche Schichtgrenzen','Minimum pro Woche','05.08.26, 12:30 Uhr','Regelmäßige feste Schicht','Montag','Festschichtkonflikt','resolved'] as $expected) {
         if (!str_contains($encoded, $expected)) throw new RuntimeException('Menschenlesbare Planerauskunft fehlt: ' . $expected);
     }
     foreach (['foreign-user','planner','other-admin','Enthält den Namen einer anderen Person','Enthält eine andere Person','assistant_uid','created_by_uid','Art'] as $forbidden) {
@@ -85,15 +85,15 @@ namespace {
     if ($unsupported->status() !== 'not_applicable' || $unsupported->entries() !== []) throw new RuntimeException('Ein nicht unterstützter Subject-Typ erhält Planungsdaten.');
     if ($provider->collect(new PersonalDataRequest($subject, 'de', 'access-report', 1, []))->status() !== 'partial') throw new RuntimeException('Ein begrenzter Planungsbericht behauptet Vollständigkeit.');
     try {
-        $provider->collect((new PersonalDataRequest($subject, 'de', 'access-report', 50, ['adplaner'=>'opaque']))->forProvider('adplaner', 50));
+        $provider->collect((new PersonalDataRequest($subject, 'de', 'access-report', 50, ['flzplaner'=>'opaque']))->forProvider('flzplaner', 50));
         throw new RuntimeException('Ein unbekannter Provider-Cursor wurde akzeptiert.');
     } catch (InvalidArgumentException) {}
 
     $registry = new RegisterPersonalDataProvidersEvent();
     (new PlanerPrivacyProviderListener($provider))->handle($registry);
-    if (array_keys($registry->providers()) !== ['adplaner']) throw new RuntimeException('AD Planer registriert seinen Datenschutzprovider nicht.');
+    if (array_keys($registry->providers()) !== ['flzplaner']) throw new RuntimeException('Filzmann Assistenzplanung registriert seinen Datenschutzprovider nicht.');
     $application = (string)file_get_contents(dirname(__DIR__, 2) . '/lib/AppInfo/Application.php');
-    if (!str_contains($application, 'registerEventListener(RegisterPersonalDataProvidersEvent::class, PlanerPrivacyProviderListener::class)') || str_contains($application, 'PersonalDataProviderRegistryEvent')) throw new RuntimeException('AD Planer registriert den Provider nicht ausschließlich am Standalone-V1-Event.');
+    if (!str_contains($application, 'registerEventListener(RegisterPersonalDataProvidersEvent::class, PlanerPrivacyProviderListener::class)') || str_contains($application, 'PersonalDataProviderRegistryEvent')) throw new RuntimeException('Filzmann Assistenzplanung registriert den Provider nicht ausschließlich am Standalone-V1-Event.');
 
-    echo "AD Planer privacy provider test passed\n";
+    echo "Filzmann Assistenzplanung privacy provider test passed\n";
 }

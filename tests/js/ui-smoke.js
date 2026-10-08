@@ -1,7 +1,7 @@
 const assert = require('assert');
 
 const elements = new Map([
-    ['adp-notice', { textContent: '', hidden: true, className: '' }]
+    ['flz-planer-notice', { textContent: '', hidden: true, className: '' }]
 ]);
 
 global.window = {};
@@ -14,8 +14,8 @@ global.document = {
 require('../../../localbase/js/ui/ui.js');
 require('../../js/modules/ui.js');
 
-const { dateShort, dayHeader, monthHeader, statusLabel, showError, showNotice } = window.ADPlaner.ui;
-const notice = elements.get('adp-notice');
+const { dateShort, dayHeader, monthHeader, statusLabel, showError, showNotice } = window.FlzPlaner.ui;
+const notice = elements.get('flz-planer-notice');
 
 assert.strictEqual(dateShort('2026-07-04'), '04.07.');
 assert.strictEqual(statusLabel('approved'), 'genehmigt');
@@ -33,4 +33,4 @@ assert.strictEqual(notice.textContent, 'API kaputt');
 showError(null, 'Fallback');
 assert.strictEqual(notice.textContent, 'Fallback');
 
-console.log('AdPlaner UI smoke test passed.');
+console.log('FlzPlaner UI smoke test passed.');

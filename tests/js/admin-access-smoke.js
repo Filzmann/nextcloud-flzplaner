@@ -25,7 +25,7 @@ global.FormData = class {
     get(name) { return { enabled: 'on', targetUid: ' admin-target ', durationMinutes: '60' }[name] ?? null; }
 };
 global.document = {
-    getElementById(id) { return { 'adp-full-access-form': form, 'adp-full-access-history': history, 'adp-full-access-status': status }[id] || null; },
+    getElementById(id) { return { 'flz-planer-full-access-form': form, 'flz-planer-full-access-history': history, 'flz-planer-full-access-status': status }[id] || null; },
     createElement() { return element(); },
 };
 global.window = {
@@ -52,5 +52,5 @@ async function flush() { for (let i = 0; i < 8; i++) await Promise.resolve(); }
         { path: '/api/admin/full-access', options: {} },
     ]);
     assert.strictEqual(status.textContent, 'Der Vollzugriff wurde widerrufen.');
-    console.log('AdPlaner admin access smoke test passed.');
+    console.log('FlzPlaner admin access smoke test passed.');
 })().catch(error => { console.error(error); process.exit(1); });

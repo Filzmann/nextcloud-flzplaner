@@ -1,17 +1,17 @@
-# Architektur – AdPlaner
+# Architektur – FlzPlaner
 
 ## Verantwortung
 
-AdPlaner ist die kanonische Quelle für teambezogene Wunschdienstplanung,
-Schichtdefinitionen, Monatspläne, Zuweisungen und Planungsstatus. AD Urlaub
-bleibt die einzige schreibende Urlaubsquelle; AD Kalender und weitere Apps
+FlzPlaner ist die kanonische Quelle für teambezogene Wunschdienstplanung,
+Schichtdefinitionen, Monatspläne, Zuweisungen und Planungsstatus. Filzmann Urlaubsplanung
+bleibt die einzige schreibende Urlaubsquelle; Filzmann Kalender und weitere Apps
 werden ausschließlich über optionale read-only Verträge angebunden.
 Die zuständige Einsatzbegleitung ist fachlicher Owner der Planung im
 jeweiligen Assistenzteam; `Datenschutzbeauftragte` verantwortet davon
 getrennt Retention-Policies, zweckgebundene Sperren und die
 Adminfreigabehistorie.
 
-AdPlaner stellt belegte Schichten über den versionierten
+FlzPlaner stellt belegte Schichten über den versionierten
 `ScheduleConflictQueryEvent` als `Assistenz` bereit und konsumiert
 Kalenderdienste derselben API als `Dienst/Büro`. Requester- und Source-App-ID
 verhindern Eigenmeldungen. Halboffene Intervalle erlauben direkte Übergaben,
@@ -23,7 +23,7 @@ bei schreibenden Prüfungen nicht als Konfliktfreiheit behauptet.
 
 - Assistenzteams, EB-Rolle und Organisationsschlüssel stammen aus der
   gemeinsamen LocalBase-Organisationsdefinition.
-- Teambezogene Schichtkonfiguration ist ein AdPlaner-Fachvertrag und wird
+- Teambezogene Schichtkonfiguration ist ein FlzPlaner-Fachvertrag und wird
   durch die zuständige EB gepflegt.
 - Eigene Wünsche und fremde Zuweisungen besitzen getrennte serverseitige
   Rechte; EB-Konten sind nicht selbst schichtfähig.

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Store;
+namespace OCA\FlzPlaner\Store;
 
-use OCA\AdPlaner\Model\DayNote;
-use OCA\AdPlaner\Model\ShiftCandidate;
-use OCA\AdPlaner\Model\ShiftSlot;
-use OCA\AdPlaner\Repository\ShiftPlanRepository;
+use OCA\FlzPlaner\Model\DayNote;
+use OCA\FlzPlaner\Model\ShiftCandidate;
+use OCA\FlzPlaner\Model\ShiftSlot;
+use OCA\FlzPlaner\Repository\ShiftPlanRepository;
 
 class ShiftPlanStore {
     public function __construct(

@@ -24,9 +24,9 @@ const pendingResponse = new Promise(resolve => { resolveRequest = resolve; });
 global.document = {
     getElementById(id) {
         return {
-            'adp-demo-confirm': confirmation,
-            'adp-demo-install': button,
-            'adp-demo-notice': notice,
+            'flz-planer-demo-confirm': confirmation,
+            'flz-planer-demo-install': button,
+            'flz-planer-demo-notice': notice,
         }[id] || null;
     }
 };
@@ -59,7 +59,7 @@ require('../../js/admin.js');
     await Promise.all([firstClick, secondClick]);
     assert.strictEqual(confirmation.checked, false);
     assert.strictEqual(button.disabled, true);
-    console.log('AdPlaner admin smoke test passed.');
+    console.log('FlzPlaner admin smoke test passed.');
 })().catch(error => {
     console.error(error);
     process.exit(1);

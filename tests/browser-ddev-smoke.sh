@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_url="${ADP_BASE_URL:-https://nextcloud-dev.ddev.site}"
-ddev_project="${ADP_DDEV_PROJECT:-$(cd "$(dirname "$0")/../../nextcloud-dev" && pwd)}"
+base_url="${FLZP_BASE_URL:-https://nextcloud-dev.ddev.site}"
+ddev_project="${FLZP_DDEV_PROJECT:-$(cd "$(dirname "$0")/../../nextcloud-dev" && pwd)}"
 suffix="$(date +%s)$$"
 team_code="P${suffix: -15}"
-team_group="ad-ASN-$team_code"
+team_group="flz-ASN-$team_code"
 month='2098-11'
-actor="adp-browser-$suffix-eb"
-assistant="adp-browser-$suffix-assistant"
-member="adp-browser-$suffix-member"
+actor="flz-planer-browser-$suffix-eb"
+assistant="flz-planer-browser-$suffix-assistant"
+member="flz-planer-browser-$suffix-member"
 created_users=()
 workdir="$(mktemp -d)"
 chrome_profile="$workdir/chrome-profile"
 chrome_log="$workdir/chrome.log"
-screenshot="$workdir/adplaner-approved.png"
+screenshot="$workdir/flzplaner-approved.png"
 chrome_pid=''
-probe='/var/www/html/html/custom_apps/adplaner/tests/integration/PrivacyRuntimeProbe.php'
+probe='/var/www/html/html/custom_apps/flzplaner/tests/integration/PrivacyRuntimeProbe.php'
 
 occ() {
     (cd "$ddev_project" && ddev exec -d /var/www/html/html php occ "$@")
@@ -56,8 +56,8 @@ create_user() {
     occ group:adduser "$team_group" "$uid" >/dev/null
 }
 
-if ! occ group:info ad-EB >/dev/null 2>&1; then
-    echo 'Die bestehende EB-Rollengruppe ad-EB fehlt; der Smoke verändert die Organisationskonfiguration nicht.' >&2
+if ! occ group:info flz-EB >/dev/null 2>&1; then
+    echo 'Die bestehende EB-Rollengruppe flz-EB fehlt; der Smoke verändert die Organisationskonfiguration nicht.' >&2
     exit 1
 fi
 
@@ -65,7 +65,7 @@ occ group:add "$team_group" >/dev/null
 create_user "$actor"
 create_user "$assistant"
 create_user "$member"
-occ group:adduser ad-EB "$actor" >/dev/null
+occ group:adduser flz-EB "$actor" >/dev/null
 
 mkdir -p "$chrome_profile"
 google-chrome \
@@ -93,14 +93,14 @@ if [[ ! -s "$chrome_profile/DevToolsActivePort" ]]; then
 fi
 cdp_port="$(sed -n '1p' "$chrome_profile/DevToolsActivePort")"
 
-ADP_CDP_PORT="$cdp_port" \
-ADP_BASE_URL="$base_url" \
-ADP_BROWSER_EB="$actor" \
-ADP_BROWSER_ASSISTANT="$assistant" \
-ADP_BROWSER_MEMBER="$member" \
-ADP_BROWSER_TEAM="$team_code" \
-ADP_BROWSER_MONTH="$month" \
-ADP_BROWSER_SCREENSHOT="$screenshot" \
+FLZP_CDP_PORT="$cdp_port" \
+FLZP_BASE_URL="$base_url" \
+FLZP_BROWSER_EB="$actor" \
+FLZP_BROWSER_ASSISTANT="$assistant" \
+FLZP_BROWSER_MEMBER="$member" \
+FLZP_BROWSER_TEAM="$team_code" \
+FLZP_BROWSER_MONTH="$month" \
+FLZP_BROWSER_SCREENSHOT="$screenshot" \
 node "$(dirname "$0")/js/browser-ddev-smoke.mjs"
 
 if [[ ! -s "$screenshot" ]]; then
@@ -122,4 +122,4 @@ if occ group:info "$team_group" >/dev/null 2>&1; then
     exit 1
 fi
 
-echo 'AdPlaner selbstbereinigende Browser-Abnahme: OK'
+echo 'FlzPlaner selbstbereinigende Browser-Abnahme: OK'

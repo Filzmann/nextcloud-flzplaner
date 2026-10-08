@@ -1,8 +1,8 @@
 (function() {
     const { Model } = window.LocalBase.models;
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.models = window.ADPlaner.models || {};
-    const { Assistant } = window.ADPlaner.models;
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.models = window.FlzPlaner.models || {};
+    const { Assistant } = window.FlzPlaner.models;
 
     class Team extends Model {
         constructor(data = {}) {
@@ -37,5 +37,5 @@
         }
     }
 
-    window.ADPlaner.models.Team = Team;
+    window.FlzPlaner.models.Team = Team;
 })();

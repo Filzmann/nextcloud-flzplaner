@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Privacy;
+namespace OCA\FlzPlaner\Privacy;
 
 use DomainException;
 use InvalidArgumentException;
 use JsonException;
-use OCA\AdPlaner\AppInfo\Application;
-use OCA\FilzmannDataProtection\PublicApi\V1\ProcessingMetadataCatalog;
-use OCA\FilzmannDataProtection\PublicApi\V1\ProcessingMetadataProvider;
-use OCA\FilzmannDataProtection\PublicApi\V1\ProcessingMetadataProviderDescriptor;
+use OCA\FlzPlaner\AppInfo\Application;
+use OCA\FlzDataProtection\PublicApi\V1\ProcessingMetadataCatalog;
+use OCA\FlzDataProtection\PublicApi\V1\ProcessingMetadataProvider;
+use OCA\FlzDataProtection\PublicApi\V1\ProcessingMetadataProviderDescriptor;
 
 final class PlanerProcessingMetadataProvider implements ProcessingMetadataProvider {
     public function descriptor(): ProcessingMetadataProviderDescriptor {

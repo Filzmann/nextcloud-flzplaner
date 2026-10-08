@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "app_id": "adplaner",
+  "app_id": "flzplaner",
   "processings": [
     {
       "processing_id": "shift_planning_management",
@@ -67,7 +67,7 @@
       "data_sources": [
         "Nextcloud-Gruppen und serverseitig gebundene Session-UID",
         "Eingaben der Assistenz und berechtigter Einsatzbegleitungen",
-        "App-eigene Tabellen adp_shift_candidates, adp_day_notes, adp_month_plans, adp_workload_limits, adp_regular_shifts und adp_fixed_conflicts"
+        "App-eigene Tabellen flz_planer_shift_candidates, flz_planer_day_notes, flz_planer_month_plans, flz_planer_workload_limits, flz_planer_regular_shifts und flz_planer_fixed_conflicts"
       ],
       "legal_basis": {
         "status": "PRIVACY-DECISION-REQUIRED",
@@ -159,7 +159,7 @@
       "systems": [
         "Nextcloud",
         "Assistenz Dienstplanung",
-        "App-eigene adp_-Tabellen"
+        "App-eigene flz_planer_-Tabellen"
       ]
     },
     {
@@ -204,8 +204,8 @@
         }
       ],
       "data_sources": [
-        "App-lokaler Freigabevorgang durch Datenschutzbeauftragte im AD Planer",
-        "App-eigene Tabelle adp_admin_access"
+        "App-lokaler Freigabevorgang durch Datenschutzbeauftragte im Filzmann Assistenzplanung",
+        "App-eigene Tabelle flz_planer_admin_access"
       ],
       "legal_basis": {
         "status": "PRIVACY-DECISION-REQUIRED",
@@ -304,7 +304,7 @@
       "systems": [
         "Nextcloud",
         "Assistenz Dienstplanung",
-        "App-eigene Tabelle adp_admin_access"
+        "App-eigene Tabelle flz_planer_admin_access"
       ]
     }
   ]

@@ -1,12 +1,12 @@
 (function() {
     'use strict';
 
-    const form = document.getElementById('adp-full-access-form');
-    const history = document.getElementById('adp-full-access-history');
-    const status = document.getElementById('adp-full-access-status');
+    const form = document.getElementById('flz-planer-full-access-form');
+    const history = document.getElementById('flz-planer-full-access-history');
+    const status = document.getElementById('flz-planer-full-access-status');
     if (!form || !history || !status) return;
 
-    const client = new window.LocalBase.api.ApiClient({ appId: 'adplaner' });
+    const client = new window.LocalBase.api.ApiClient({ appId: 'flzplaner' });
 
     const setStatus = (message, isError = false) => {
         status.textContent = message;

@@ -10,8 +10,8 @@ const elements = createElementMap([
     'month-input',
     'month-prev',
     'month-next',
-    'adp-panel',
-    'adp-workload-overlay',
+    'flz-planer-panel',
+    'flz-planer-workload-overlay',
 ]);
 const tabs = new FakeElement('tabs');
 const tabMonth = new FakeButton({ view: 'month' }, 'tab-month');
@@ -36,7 +36,7 @@ function esc(value) {
 global.Element = FakeElement;
 global.CSS = { escape: String };
 global.window = {
-    ADPlaner: {
+    FlzPlaner: {
         api: {},
         ui: {
             byId(id) {
@@ -85,10 +85,10 @@ global.window = {
 };
 global.document = {
     querySelector(selector) {
-        return selector === '.adp-tabs' ? tabs : null;
+        return selector === '.flz-planer-tabs' ? tabs : null;
     },
     querySelectorAll(selector) {
-        return selector === '.adp-tab' ? [tabMonth, tabWorkload, tabSettings] : [];
+        return selector === '.flz-planer-tab' ? [tabMonth, tabWorkload, tabSettings] : [];
     }
 };
 
@@ -153,7 +153,7 @@ class FakePlanRepository {
 
 }
 
-window.ADPlaner.repositories = { PlanRepository: FakePlanRepository };
+window.FlzPlaner.repositories = { PlanRepository: FakePlanRepository };
 
 require('../../js/components/plan-chrome.js');
 require('../../js/components/plan-panel.js');
@@ -216,8 +216,8 @@ async function flush() {
     assert.strictEqual(tabWorkload.getAttribute('aria-selected'), 'false');
     assert.strictEqual(tabMonth.getAttribute('aria-selected'), 'true');
     assert.strictEqual(tabSettings.getAttribute('aria-selected'), 'false');
-    assert.strictEqual(elements.get('adp-panel').getAttribute('aria-labelledby'), 'tab-month');
-    assert(elements.get('adp-panel').innerHTML.includes('TeamA:2026-07'));
+    assert.strictEqual(elements.get('flz-planer-panel').getAttribute('aria-labelledby'), 'tab-month');
+    assert(elements.get('flz-planer-panel').innerHTML.includes('TeamA:2026-07'));
 
     let prevented = false;
     await tabs.listeners.keydown({
@@ -228,10 +228,10 @@ async function flush() {
     assert.strictEqual(prevented, true);
     assert.strictEqual(tabWorkload.focused, true);
     assert.strictEqual(tabWorkload.getAttribute('aria-selected'), 'true');
-    assert.strictEqual(elements.get('adp-panel').getAttribute('aria-labelledby'), 'tab-month');
-    assert(elements.get('adp-panel').innerHTML.includes('data-view="month"'), 'Der Monatsplan muss unter dem Auslastungs-Overlay sichtbar bleiben.');
-    assert(elements.get('adp-workload-overlay').innerHTML.includes('data-view="workload"'));
-    assert.strictEqual(elements.get('adp-workload-overlay').hidden, false, 'Auslastung muss als am Tab verankertes Overlay öffnen.');
+    assert.strictEqual(elements.get('flz-planer-panel').getAttribute('aria-labelledby'), 'tab-month');
+    assert(elements.get('flz-planer-panel').innerHTML.includes('data-view="month"'), 'Der Monatsplan muss unter dem Auslastungs-Overlay sichtbar bleiben.');
+    assert(elements.get('flz-planer-workload-overlay').innerHTML.includes('data-view="workload"'));
+    assert.strictEqual(elements.get('flz-planer-workload-overlay').hidden, false, 'Auslastung muss als am Tab verankertes Overlay öffnen.');
     assert.deepStrictEqual(repositoryCalls.at(-1), ['monthPlan', 'TeamA', '2026-07']);
 
     await tabs.listeners.keydown({
@@ -241,19 +241,19 @@ async function flush() {
     });
     assert.strictEqual(tabSettings.focused, true);
     assert.strictEqual(tabSettings.getAttribute('aria-selected'), 'true');
-    assert.strictEqual(elements.get('adp-panel').getAttribute('aria-labelledby'), 'tab-settings');
-    assert(elements.get('adp-panel').innerHTML.includes('settings-form'));
+    assert.strictEqual(elements.get('flz-planer-panel').getAttribute('aria-labelledby'), 'tab-settings');
+    assert(elements.get('flz-planer-panel').innerHTML.includes('settings-form'));
 
     await tabs.listeners.click({ target: tabMonth });
     assert.strictEqual(tabMonth.getAttribute('aria-selected'), 'true');
 
     await elements.get('team-select').listeners.change({ target: { value: 'TeamB' } });
     assert.deepStrictEqual(repositoryCalls.at(-1), ['monthPlan', 'TeamB', '2026-07']);
-    assert(elements.get('adp-panel').innerHTML.includes('TeamB:2026-07'));
+    assert(elements.get('flz-planer-panel').innerHTML.includes('TeamB:2026-07'));
     assert.strictEqual(tabWorkload.hidden, true, 'Assistenzkräfte benötigen keinen Auslastungstab.');
     await tabs.listeners.click({ target: tabWorkload });
     assert.strictEqual(tabMonth.getAttribute('aria-selected'), 'true', 'Ein programmgesteuerter Auslastungsaufruf muss für Assistenzkräfte beim Monatsplan bleiben.');
-    assert.strictEqual(elements.get('adp-workload-overlay').hidden, true, 'Für Assistenzkräfte darf kein Auslastungs-Overlay erscheinen.');
+    assert.strictEqual(elements.get('flz-planer-workload-overlay').hidden, true, 'Für Assistenzkräfte darf kein Auslastungs-Overlay erscheinen.');
 
     await tabs.listeners.keydown({
         target: tabMonth,
@@ -263,7 +263,7 @@ async function flush() {
     assert.strictEqual(tabSettings.focused, true, 'Die Tastaturnavigation muss den ausgeblendeten Auslastungstab überspringen.');
     await tabs.listeners.click({ target: tabMonth });
 
-    await elements.get('adp-panel').listeners.click({
+    await elements.get('flz-planer-panel').listeners.click({
         target: new FakeButton({
             action: 'add-self',
             slotId: '7'
@@ -275,7 +275,7 @@ async function flush() {
     ]);
     assert.deepStrictEqual(errors, []);
 
-    await elements.get('adp-panel').listeners.click({
+    await elements.get('flz-planer-panel').listeners.click({
         target: new FakeButton({
             action: 'add-selected',
             slotId: '8',
@@ -287,7 +287,7 @@ async function flush() {
         ['monthPlan', 'TeamB', '2026-07']
     ]);
 
-    await elements.get('adp-panel').listeners.click({
+    await elements.get('flz-planer-panel').listeners.click({
         target: new FakeButton({
             action: 'transition-status',
             targetStatus: 'planned'
@@ -303,10 +303,10 @@ async function flush() {
         action: 'add-self',
         slotId: '42'
     });
-    const firstGuardedAction = elements.get('adp-panel').listeners.click({ target: guardedButton });
+    const firstGuardedAction = elements.get('flz-planer-panel').listeners.click({ target: guardedButton });
     await flush();
     assert.strictEqual(guardedButton.disabled, true);
-    const secondGuardedAction = elements.get('adp-panel').listeners.click({ target: guardedButton });
+    const secondGuardedAction = elements.get('flz-planer-panel').listeners.click({ target: guardedButton });
     await flush();
     assert.strictEqual(
         repositoryCalls.filter(call => call[0] === 'addSelf' && call[3] === '42').length,
@@ -322,13 +322,13 @@ async function flush() {
     await elements.get('month-input').listeners.change({ target: { value: '2026-08' } });
     assert.deepStrictEqual(repositoryCalls.at(-1), ['monthPlan', 'TeamB', '2026-08']);
     assert.strictEqual(errors.at(-1).message, 'Monat nicht verfügbar');
-    assert(!elements.get('adp-panel').innerHTML.includes('TeamB:2026-07'));
+    assert(!elements.get('flz-planer-panel').innerHTML.includes('TeamB:2026-07'));
 
     lastRepository.failMonth = '';
     await elements.get('month-input').listeners.change({ target: { value: '2026-07' } });
-    assert(elements.get('adp-panel').innerHTML.includes('TeamB:2026-07'));
+    assert(elements.get('flz-planer-panel').innerHTML.includes('TeamB:2026-07'));
     lastRepository.failMonth = '2026-07';
-    await elements.get('adp-panel').listeners.click({
+    await elements.get('flz-planer-panel').listeners.click({
         target: new FakeButton({
             action: 'add-self',
             slotId: '9'
@@ -339,7 +339,7 @@ async function flush() {
         ['monthPlan', 'TeamB', '2026-07']
     ]);
     assert.strictEqual(errors.at(-1).fallback, 'Die Änderung wurde gespeichert, aber der Monatsplan konnte nicht neu geladen werden.');
-    assert(!elements.get('adp-panel').innerHTML.includes('TeamB:2026-07'));
+    assert(!elements.get('flz-planer-panel').innerHTML.includes('TeamB:2026-07'));
 
     lastRepository.failMonth = '';
     const resolveAugust = lastRepository.deferMonth('2026-08');
@@ -348,13 +348,13 @@ async function flush() {
     const septemberLoad = elements.get('month-input').listeners.change({ target: { value: '2026-09' } });
     resolveSeptember({ month: '2026-09', team: { code: 'TeamB', displayName: 'Team B' } });
     await septemberLoad;
-    assert(elements.get('adp-panel').innerHTML.includes('TeamB:2026-09'));
+    assert(elements.get('flz-planer-panel').innerHTML.includes('TeamB:2026-09'));
     resolveAugust({ month: '2026-08', team: { code: 'TeamB', displayName: 'Team B' } });
     await augustLoad;
-    assert(elements.get('adp-panel').innerHTML.includes('TeamB:2026-09'));
-    assert(!elements.get('adp-panel').innerHTML.includes('TeamB:2026-08'));
+    assert(elements.get('flz-planer-panel').innerHTML.includes('TeamB:2026-09'));
+    assert(!elements.get('flz-planer-panel').innerHTML.includes('TeamB:2026-08'));
 
-    console.log('AdPlaner main workflow smoke test passed.');
+    console.log('FlzPlaner main workflow smoke test passed.');
 })().catch((error) => {
     console.error(error);
     process.exit(1);

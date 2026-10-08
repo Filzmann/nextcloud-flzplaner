@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${ADP_BASE_URL:?ADP_BASE_URL fehlt}"
-: "${ADP_USER:?ADP_USER fehlt}"
-: "${ADP_PASSWORD:?ADP_PASSWORD fehlt}"
-: "${ADP_TEAM_CODE:?ADP_TEAM_CODE fehlt}"
-: "${ADP_FOREIGN_UID:?ADP_FOREIGN_UID fehlt}"
+: "${FLZP_BASE_URL:?FLZP_BASE_URL fehlt}"
+: "${FLZP_USER:?FLZP_USER fehlt}"
+: "${FLZP_PASSWORD:?FLZP_PASSWORD fehlt}"
+: "${FLZP_TEAM_CODE:?FLZP_TEAM_CODE fehlt}"
+: "${FLZP_FOREIGN_UID:?FLZP_FOREIGN_UID fehlt}"
 
 workdir="$(mktemp -d)"
 page="$workdir/page.html"
@@ -15,8 +15,8 @@ error="$workdir/error.json"
 plan_after="$workdir/plan-after.json"
 trap 'rm -rf "$workdir"' EXIT
 
-curl --fail --silent --show-error --insecure --user "$ADP_USER:$ADP_PASSWORD" \
-    --cookie-jar "$cookies" "$ADP_BASE_URL/index.php/apps/adplaner/" --output "$page"
+curl --fail --silent --show-error --insecure --user "$FLZP_USER:$FLZP_PASSWORD" \
+    --cookie-jar "$cookies" "$FLZP_BASE_URL/index.php/apps/flzplaner/" --output "$page"
 
 token="$(sed -n 's/.*data-requesttoken="\([^"]*\)".*/\1/p' "$page" | head -n 1)"
 if [[ -z "$token" ]]; then
@@ -25,8 +25,8 @@ if [[ -z "$token" ]]; then
 fi
 
 month="$(date -u +%Y-%m)"
-plan_endpoint="$ADP_BASE_URL/index.php/apps/adplaner/api/teams/$ADP_TEAM_CODE/months/$month"
-curl --fail --silent --show-error --insecure --user "$ADP_USER:$ADP_PASSWORD" \
+plan_endpoint="$FLZP_BASE_URL/index.php/apps/flzplaner/api/teams/$FLZP_TEAM_CODE/months/$month"
+curl --fail --silent --show-error --insecure --user "$FLZP_USER:$FLZP_PASSWORD" \
     --cookie "$cookies" --cookie-jar "$cookies" -H "requesttoken: $token" \
     "$plan_endpoint" --output "$plan"
 
@@ -44,9 +44,9 @@ exit(1);
 ' "$plan")"
 
 candidate_endpoint="$plan_endpoint/slots/$slot_id/candidates"
-status="$(curl --silent --show-error --insecure --user "$ADP_USER:$ADP_PASSWORD" \
+status="$(curl --silent --show-error --insecure --user "$FLZP_USER:$FLZP_PASSWORD" \
     --cookie "$cookies" --cookie-jar "$cookies" -H "requesttoken: $token" -H 'Content-Type: application/json' \
-    -X POST --data "{\"targetUid\":\"$ADP_FOREIGN_UID\"}" --write-out '%{http_code}' \
+    -X POST --data "{\"targetUid\":\"$FLZP_FOREIGN_UID\"}" --write-out '%{http_code}' \
     --output "$error" "$candidate_endpoint")"
 if [[ "$status" != '403' ]] || ! php -r '
 $data = json_decode(file_get_contents($argv[1]), true, flags: JSON_THROW_ON_ERROR);
@@ -56,7 +56,7 @@ exit(($data["ok"] ?? true) === false ? 0 : 1);
     exit 1
 fi
 
-curl --fail --silent --show-error --insecure --user "$ADP_USER:$ADP_PASSWORD" \
+curl --fail --silent --show-error --insecure --user "$FLZP_USER:$FLZP_PASSWORD" \
     --cookie "$cookies" --cookie-jar "$cookies" -H "requesttoken: $token" \
     "$plan_endpoint" --output "$plan_after"
 php -r '
@@ -84,4 +84,4 @@ if ($beforeCandidateUids !== $afterCandidateUids) {
 }
 ' "$plan" "$plan_after" "$slot_id"
 
-echo "AdPlaner C3 API access smoke: OK ($ADP_USER)"
+echo "FlzPlaner C3 API access smoke: OK ($FLZP_USER)"

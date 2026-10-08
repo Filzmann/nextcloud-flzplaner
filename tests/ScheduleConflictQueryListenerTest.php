@@ -14,10 +14,10 @@ namespace OCP {
 namespace {
     require_once __DIR__ . '/bootstrap.php';
 
-    use OCA\AdPlaner\Listener\ScheduleConflictQueryListener;
-    use OCA\AdPlaner\Repository\ShiftPlanRepository;
+    use OCA\FlzPlaner\Listener\ScheduleConflictQueryListener;
+    use OCA\FlzPlaner\Repository\ShiftPlanRepository;
     use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
-    use function OCA\AdPlaner\Tests\assertSameValue;
+    use function OCA\FlzPlaner\Tests\assertSameValue;
 
     final class ConflictShiftPlanRepositoryFake extends ShiftPlanRepository {
         public function __construct() {}
@@ -35,15 +35,15 @@ namespace {
     $start = new \DateTimeImmutable('2026-09-07T07:00:00+00:00');
     $end = new \DateTimeImmutable('2026-09-07T16:00:00+00:00');
     $listener = new ScheduleConflictQueryListener(new ConflictShiftPlanRepositoryFake());
-    $event = new ScheduleConflictQueryEvent('assistant-a', $start, $end, 'adcalendar');
+    $event = new ScheduleConflictQueryEvent('assistant-a', $start, $end, 'flzcalendar');
     $listener->handle($event);
     $conflicts = array_map(static fn($conflict): array => $conflict->toArray(), $event->conflicts());
 
     assertSameValue(2, count($conflicts), 'Tages- und übernächtige Assistenzschichten müssen als echte Überschneidungen gemeldet werden; gelöschte und nur angrenzende nicht.');
     assertSameValue(['Assistenz', 'Assistenz'], array_column($conflicts, 'label'), 'Calendar erhält ausschließlich die knappe, nicht vertrauliche Bezeichnung Assistenz.');
-    assertSameValue(['adplaner', 'adplaner'], array_column($conflicts, 'sourceAppId'), 'Jeder Konflikt muss seinen öffentlichen Provider ausweisen.');
+    assertSameValue(['flzplaner', 'flzplaner'], array_column($conflicts, 'sourceAppId'), 'Jeder Konflikt muss seinen öffentlichen Provider ausweisen.');
 
-    $selfQuery = new ScheduleConflictQueryEvent('assistant-a', $start, $end, 'adplaner');
+    $selfQuery = new ScheduleConflictQueryEvent('assistant-a', $start, $end, 'flzplaner');
     $listener->handle($selfQuery);
     assertSameValue([], $selfQuery->conflicts(), 'Die öffentliche API muss Eigenmeldungen des Planers zentral ausfiltern.');
 
@@ -52,5 +52,5 @@ namespace {
         throw new \RuntimeException('Der Planer-Provider ist nicht am öffentlichen Konflikt-Event registriert.');
     }
 
-    echo "AD Planer schedule conflict provider tests passed\n";
+    echo "Filzmann Assistenzplanung schedule conflict provider tests passed\n";
 }

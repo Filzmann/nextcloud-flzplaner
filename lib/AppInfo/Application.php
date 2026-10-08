@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\AppInfo;
+namespace OCA\FlzPlaner\AppInfo;
 
-use OCA\AdPlaner\Listener\IntegrationCapabilityQueryListener;
-use OCA\AdPlaner\Listener\ScheduleConflictQueryListener;
-use OCA\AdPlaner\Listener\StandaloneNavigationListener;
-use OCA\AdPlaner\Privacy\PlanerProcessingMetadataProviderListener;
-use OCA\AdPlaner\Privacy\PlanerPrivacyProviderListener;
-use OCA\AdPlaner\Permission\PlanerPermissionProviderListener;
-use OCA\AdPlaner\Permission\PlanerPermissionSourceInterface;
-use OCA\AdPlaner\Permission\NextcloudPlanerPermissionSource;
-use OCA\AdPlaner\Repository\TemporaryAdminAccessRepository;
-use OCA\AdPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
-use OCA\AdPlaner\Service\TemporaryAdminAccessChecker;
-use OCA\AdPlaner\Service\TemporaryAdminAccessService;
-use OCA\FilzmannDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
-use OCA\FilzmannDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
-use OCA\FilzmannPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
+use OCA\FlzPlaner\Listener\IntegrationCapabilityQueryListener;
+use OCA\FlzPlaner\Listener\ScheduleConflictQueryListener;
+use OCA\FlzPlaner\Listener\StandaloneNavigationListener;
+use OCA\FlzPlaner\Privacy\PlanerProcessingMetadataProviderListener;
+use OCA\FlzPlaner\Privacy\PlanerPrivacyProviderListener;
+use OCA\FlzPlaner\Permission\PlanerPermissionProviderListener;
+use OCA\FlzPlaner\Permission\PlanerPermissionSourceInterface;
+use OCA\FlzPlaner\Permission\NextcloudPlanerPermissionSource;
+use OCA\FlzPlaner\Repository\TemporaryAdminAccessRepository;
+use OCA\FlzPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
+use OCA\FlzPlaner\Service\TemporaryAdminAccessChecker;
+use OCA\FlzPlaner\Service\TemporaryAdminAccessService;
+use OCA\FlzDataProtection\PublicApi\V1\RegisterPersonalDataProvidersEvent;
+use OCA\FlzDataProtection\PublicApi\V1\RegisterProcessingMetadataProvidersEvent;
+use OCA\FlzPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
 use OCA\LocalBase\Integration\IntegrationCapabilityQueryEvent;
 use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
 use OCP\AppFramework\App;
@@ -29,7 +29,7 @@ use OCP\Navigation\Events\LoadAdditionalEntriesEvent;
 
 /** Zweck: Registriert Assistenzplanfähigkeit und Standalone-Navigation im Nextcloud-Bootstrap. */
 class Application extends App implements IBootstrap {
-    public const APP_ID = 'adplaner';
+    public const APP_ID = 'flzplaner';
 
     public function __construct(array $urlParams = []) {
         parent::__construct(self::APP_ID, $urlParams);

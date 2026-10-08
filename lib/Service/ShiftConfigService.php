@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Service;
+namespace OCA\FlzPlaner\Service;
 
-use OCA\AdPlaner\Model\ShiftDefinition;
+use OCA\FlzPlaner\Model\ShiftDefinition;
 
 class ShiftConfigService {
     public function defaults(): array {

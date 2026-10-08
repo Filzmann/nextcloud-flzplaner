@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Controller;
+namespace OCA\FlzPlaner\Controller;
 
-use OCA\AdPlaner\AppInfo\Application;
-use OCA\AdPlaner\Service\AdPlanerLogger;
-use OCA\AdPlaner\Service\ScheduleService;
-use OCA\AdPlaner\Service\TeamAccessService;
-use OCA\AdPlaner\Service\TeamSettingsService;
-use OCA\AdPlaner\Service\WorkloadPreferenceService;
-use OCA\AdPlaner\Service\FixedShiftService;
+use OCA\FlzPlaner\AppInfo\Application;
+use OCA\FlzPlaner\Service\FlzPlanerLogger;
+use OCA\FlzPlaner\Service\ScheduleService;
+use OCA\FlzPlaner\Service\TeamAccessService;
+use OCA\FlzPlaner\Service\TeamSettingsService;
+use OCA\FlzPlaner\Service\WorkloadPreferenceService;
+use OCA\FlzPlaner\Service\FixedShiftService;
 use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -24,7 +24,7 @@ class ApiController extends Controller {
         private TeamAccessService $teamAccess,
         private TeamSettingsService $teamSettings,
         private ScheduleService $scheduleService,
-        private AdPlanerLogger $logger,
+        private FlzPlanerLogger $logger,
         private ApiResponder $responder,
         private WorkloadPreferenceService $workloadPreferences,
         private FixedShiftService $fixedShifts
@@ -52,7 +52,7 @@ class ApiController extends Controller {
                 'organization' => $this->teamAccess->organizationContract(),
                 'defaultMonth' => date('Y-m'),
                 'defaultYear' => (int)date('Y'),
-                'notice' => 'Assistenzteams und Koordinationsrechte folgen den gemeinsamen AD-Organisationseinstellungen.',
+                'notice' => 'Assistenzteams und Koordinationsrechte folgen den gemeinsamen Filzmann-Organisationseinstellungen.',
             ];
         }, [$this->logger, 'error'], 'state');
     }

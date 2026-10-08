@@ -20,7 +20,7 @@ const {
     ShiftSlot,
     Team,
     TeamSettings
-} = window.ADPlaner.models;
+} = window.FlzPlaner.models;
 
 const assistant = Assistant.get({
     uid: 'anna',
@@ -77,7 +77,7 @@ assert.strictEqual(slot.candidates.length, 1);
 
 const team = Team.get({
     code: 'TeamA',
-    group_name: 'ad-ASN-TeamA',
+    group_name: 'flz-ASN-TeamA',
     assistants: [assistant.toArray()]
 });
 
@@ -87,4 +87,4 @@ assert.strictEqual(team.assistants.length, 1);
 assert(TeamSettings.get({ team_code: 'TeamA' }) instanceof TeamSettings);
 assert(DayNote.get({ team_code: 'TeamA', note: 'Hinweis' }) instanceof DayNote);
 
-console.log('AdPlaner model smoke test passed.');
+console.log('FlzPlaner model smoke test passed.');

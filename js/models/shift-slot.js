@@ -1,8 +1,8 @@
 (function() {
     const { Model } = window.LocalBase.models;
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.models = window.ADPlaner.models || {};
-    const { ShiftCandidate } = window.ADPlaner.models;
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.models = window.FlzPlaner.models || {};
+    const { ShiftCandidate } = window.FlzPlaner.models;
 
     class ShiftSlot extends Model {
         constructor(data = {}) {
@@ -39,5 +39,5 @@
         }
     }
 
-    window.ADPlaner.models.ShiftSlot = ShiftSlot;
+    window.FlzPlaner.models.ShiftSlot = ShiftSlot;
 })();

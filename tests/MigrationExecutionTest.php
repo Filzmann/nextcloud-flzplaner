@@ -27,14 +27,14 @@ namespace OCP\DB {
 namespace {
     require_once __DIR__ . '/bootstrap.php';
 
-    use OCA\AdPlaner\Migration\Version000003Date202608080001;
-    use OCA\AdPlaner\Migration\Version000004Date202608090001;
-    use OCA\AdPlaner\Migration\Version000006Date202608300001;
-    use OCA\AdPlaner\Migration\Version000007Date202608300002;
-    use OCA\AdPlaner\Migration\Version000008Date202608300003;
+    use OCA\FlzPlaner\Migration\Version000003Date202608080001;
+    use OCA\FlzPlaner\Migration\Version000004Date202608090001;
+    use OCA\FlzPlaner\Migration\Version000006Date202608300001;
+    use OCA\FlzPlaner\Migration\Version000007Date202608300002;
+    use OCA\FlzPlaner\Migration\Version000008Date202608300003;
     use OCP\DB\ISchemaWrapper;
     use OCP\Migration\IOutput;
-    use function OCA\AdPlaner\Tests\assertSameValue;
+    use function OCA\FlzPlaner\Tests\assertSameValue;
 
     final class MigrationOutputFake implements IOutput {
     }
@@ -102,26 +102,26 @@ namespace {
     };
 
     $freshSchema = new MigrationSchemaFake();
-    $freshSchema->createTable('adp_shift_candidates');
+    $freshSchema->createTable('flz_planer_shift_candidates');
     $run(new Version000003Date202608080001(), $freshSchema);
     $run(new Version000004Date202608090001(), $freshSchema);
     $run(new Version000006Date202608300001(), $freshSchema);
     $run(new Version000007Date202608300002(), $freshSchema);
     $run(new Version000008Date202608300003(), $freshSchema);
-    $freshTable = $freshSchema->getTable('adp_month_plans');
+    $freshTable = $freshSchema->getTable('flz_planer_month_plans');
     assertSameValue(true, $freshTable->hasColumn('status'), 'A fresh migration sequence should create the month status column.');
     assertSameValue(true, $freshTable->hasColumn('revision'), 'A fresh migration sequence should create the revision column.');
     assertSameValue(0, $freshTable->columns['revision']['options']['default'] ?? null, 'A fresh revision column should default to zero.');
-    assertSameValue(['team_code', 'plan_month'], $freshTable->uniqueIndexes['adp_month_plan_unique'] ?? null, 'A fresh schema should enforce one status per team and month.');
-    assertSameValue('neutral', $freshSchema->getTable('adp_shift_candidates')->columns['preference']['options']['default'] ?? null, 'Fresh candidate metadata should start neutral.');
-    assertSameValue(['team_code', 'user_uid'], $freshSchema->getTable('adp_workload_limits')->uniqueIndexes['adp_workload_user_unique'] ?? null, 'Fresh limits must be unique per team and user.');
-    assertSameValue('manual',$freshSchema->getTable('adp_shift_candidates')->columns['assignment_source']['options']['default'] ?? null,'Fresh and existing candidates must default to manual.');
-    assertSameValue(['team_code','user_uid','weekday','segment_key'],$freshSchema->getTable('adp_regular_shifts')->uniqueIndexes['adp_regular_shift_unique'] ?? null,'Regular rules must be unique per team, person, weekday and segment.');
-    assertSameValue(['slot_id'],$freshSchema->getTable('adp_fixed_conflicts')->uniqueIndexes['adp_fixed_conflict_slot_unique'] ?? null,'Only one escalation state may exist per slot.');
-    assertSameValue(false,$freshSchema->getTable('adp_shift_candidates')->columns['fixed_modified']['options']['default'] ?? null,'Fresh candidates must not start as individually resolved occurrences.');
+    assertSameValue(['team_code', 'plan_month'], $freshTable->uniqueIndexes['flz_planer_month_plan_unique'] ?? null, 'A fresh schema should enforce one status per team and month.');
+    assertSameValue('neutral', $freshSchema->getTable('flz_planer_shift_candidates')->columns['preference']['options']['default'] ?? null, 'Fresh candidate metadata should start neutral.');
+    assertSameValue(['team_code', 'user_uid'], $freshSchema->getTable('flz_planer_workload_limits')->uniqueIndexes['flz_planer_workload_user_unique'] ?? null, 'Fresh limits must be unique per team and user.');
+    assertSameValue('manual',$freshSchema->getTable('flz_planer_shift_candidates')->columns['assignment_source']['options']['default'] ?? null,'Fresh and existing candidates must default to manual.');
+    assertSameValue(['team_code','user_uid','weekday','segment_key'],$freshSchema->getTable('flz_planer_regular_shifts')->uniqueIndexes['flz_planer_regular_shift_unique'] ?? null,'Regular rules must be unique per team, person, weekday and segment.');
+    assertSameValue(['slot_id'],$freshSchema->getTable('flz_planer_fixed_conflicts')->uniqueIndexes['flz_planer_fixed_conflict_slot_unique'] ?? null,'Only one escalation state may exist per slot.');
+    assertSameValue(false,$freshSchema->getTable('flz_planer_shift_candidates')->columns['fixed_modified']['options']['default'] ?? null,'Fresh candidates must not start as individually resolved occurrences.');
 
     $preferenceUpgrade = new MigrationSchemaFake();
-    $candidateTable = $preferenceUpgrade->createTable('adp_shift_candidates');
+    $candidateTable = $preferenceUpgrade->createTable('flz_planer_shift_candidates');
     $candidateTable->rows = [['id'=>1], ['id'=>2]];
     $run(new Version000006Date202608300001(), $preferenceUpgrade);
     assertSameValue([['id'=>1,'preference'=>'neutral'], ['id'=>2,'preference'=>'neutral']], $candidateTable->rows, 'Existing shift wishes must remain neutral during upgrade.');
@@ -137,7 +137,7 @@ namespace {
     assertSameValue($columnCount,count($candidateTable->columns),'Repeating the fixed shift migration must be idempotent.');
 
     $upgradeSchema = new MigrationSchemaFake();
-    $upgradeTable = $upgradeSchema->createTable('adp_month_plans');
+    $upgradeTable = $upgradeSchema->createTable('flz_planer_month_plans');
     $upgradeTable->addColumn('status', 'string', ['notnull' => true, 'default' => 'draft']);
     $upgradeTable->rows = [
         ['status' => 'planned'],
@@ -158,7 +158,7 @@ namespace {
 
     $missingBaseSchema = new MigrationSchemaFake();
     $run(new Version000004Date202608090001(), $missingBaseSchema);
-    assertSameValue(false, $missingBaseSchema->hasTable('adp_month_plans'), 'The revision migration must not invent a missing base table out of sequence.');
+    assertSameValue(false, $missingBaseSchema->hasTable('flz_planer_month_plans'), 'The revision migration must not invent a missing base table out of sequence.');
 
-    echo 'AdPlaner migration execution tests passed' . PHP_EOL;
+    echo 'FlzPlaner migration execution tests passed' . PHP_EOL;
 }

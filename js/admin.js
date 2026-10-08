@@ -1,16 +1,16 @@
 (function() {
     'use strict';
-    const confirmation = document.getElementById('adp-demo-confirm');
-    const button = document.getElementById('adp-demo-install');
-    const notice = document.getElementById('adp-demo-notice');
+    const confirmation = document.getElementById('flz-planer-demo-confirm');
+    const button = document.getElementById('flz-planer-demo-install');
+    const notice = document.getElementById('flz-planer-demo-notice');
     if (!confirmation || !button || !notice) return;
-    const client = new window.LocalBase.api.ApiClient({ appId: 'adplaner' });
+    const client = new window.LocalBase.api.ApiClient({ appId: 'flzplaner' });
     confirmation.addEventListener('change', () => { button.disabled = !confirmation.checked; });
     button.addEventListener('click', async () => {
         if (!confirmation.checked || button.disabled) return;
         button.disabled = true;
         notice.hidden = false;
-        notice.className = 'adp-admin-notice';
+        notice.className = 'flz-planer-admin-notice';
         notice.textContent = 'Demo-Pack wird geprüft und installiert …';
         try {
             const response = await client.request('/api/admin/demo-pack/install', { method: 'POST', body: '{"confirmed":true}' });

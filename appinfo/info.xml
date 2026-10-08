@@ -1,27 +1,27 @@
 <?xml version="1.0"?>
 <info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
-    <id>adplaner</id>
-    <name>Assistenz Dienstplanung</name>
+    <id>flzplaner</id>
+    <name>Filzmann Assistenzplanung</name>
     <summary>Wunschdienstplanung für Assistenzteams.</summary>
     <description>Verwaltet monatliche Wunschdienstpläne für Assistenzteams auf Basis dynamischer Nextcloud-Gruppen.</description>
     <version>0.7.0-rc.2</version>
     <licence>agpl</licence>
-    <author>Simon</author>
-    <namespace>AdPlaner</namespace>
+    <author>Filzmann Software</author>
+    <namespace>FlzPlaner</namespace>
     <category>organization</category>
-    <website>https://github.com/Filzmann/ad-suite</website>
-    <bugs>https://github.com/Filzmann/nextcloud-adplaner/issues</bugs>
-    <repository type="git">https://github.com/Filzmann/nextcloud-adplaner</repository>
+    <website>https://github.com/Filzmann/flz-full-suite</website>
+    <bugs>https://github.com/Filzmann/nextcloud-flzplaner/issues</bugs>
+    <repository type="git">https://github.com/Filzmann/nextcloud-flzplaner</repository>
     <dependencies>
         <php min-version="8.3"/>
         <nextcloud min-version="33" max-version="34"/>
     </dependencies>
     <commands>
-        <command>OCA\AdPlaner\Command\SeedDemoCommand</command>
+        <command>OCA\FlzPlaner\Command\SeedDemoCommand</command>
     </commands>
     <settings>
-        <admin>OCA\AdPlaner\Settings\Admin</admin>
-        <admin-section>OCA\AdPlaner\Settings\AdminSection</admin-section>
+        <admin>OCA\FlzPlaner\Settings\Admin</admin>
+        <admin-section>OCA\FlzPlaner\Settings\AdminSection</admin-section>
     </settings>
 </info>

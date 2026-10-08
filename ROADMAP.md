@@ -1,4 +1,4 @@
-# Roadmap – AdPlaner
+# Roadmap – FlzPlaner
 
 Diese Datei enthält ausschließlich offene Arbeit, zurückgestellte Vorhaben
 und Freigabegates. Der aktuelle Funktionsumfang steht in `README.md`,
@@ -17,7 +17,7 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
   mit langen Beschriftungen, Tastatur/Fokus, 200-Prozent-Zoom, Touchzielen
   und vertikalem Scrollen abnehmen.
 
-### ADP-STAGING-FOLLOWUP – Abweichungen der laufenden Abnahme schließen
+### FLZP-STAGING-FOLLOWUP – Abweichungen der laufenden Abnahme schließen
 
 - Die Planstatus `planned` und `approved` einschließlich der fachlichen
   Änderungssperre vollständig in Oberfläche und serverseitigem Vertrag
@@ -45,7 +45,7 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 ## Bewusst zurückgestellt – niedrigste Priorität
 
-### ADP-L10N – app-lokaler Umsetzungsschnitt
+### FLZP-L10N – app-lokaler Umsetzungsschnitt
 
 Status seit 17. September 2026: Die Umsetzung beginnt erst nach allen höher
 priorisierten Roadmap-Aufgaben und einer erneuten ausdrücklichen Freigabe des

@@ -16,17 +16,17 @@ namespace OCP\EventDispatcher {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Service\PlanningHintService;
-    use OCA\AdPlaner\Service\AdPlanerLogger;
-    use OCA\AdPlaner\Model\ShiftSlot;
+    use OCA\FlzPlaner\Service\PlanningHintService;
+    use OCA\FlzPlaner\Service\FlzPlanerLogger;
+    use OCA\FlzPlaner\Model\ShiftSlot;
     use OCA\LocalBase\Calendar\AbsenceInterval;
     use OCA\LocalBase\Calendar\AbsenceQueryEvent;
     use OCA\LocalBase\Calendar\ScheduleConflict;
     use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
     use OCP\EventDispatcher\Event;
     use OCP\EventDispatcher\IEventDispatcher;
-    use function OCA\AdPlaner\Tests\assertDomainException;
-    use function OCA\AdPlaner\Tests\assertSameValue;
+    use function OCA\FlzPlaner\Tests\assertDomainException;
+    use function OCA\FlzPlaner\Tests\assertSameValue;
 
     final class PlanningHintEventDispatcherFake implements IEventDispatcher {
         public bool $provideData = true;
@@ -53,14 +53,14 @@ namespace {
             if ($event instanceof ScheduleConflictQueryEvent && $event->employeeUid() === 'assistant-a') {
                 $this->calendarRequesters[] = $event->requesterAppId();
                 $event->add(new ScheduleConflict('appointment', new \DateTimeImmutable('2026-08-07 10:00:00', $utc), new \DateTimeImmutable('2026-08-07 11:00:00', $utc), 'Vertraulicher Titel'));
-                $event->add(new ScheduleConflict('shift', new \DateTimeImmutable('2026-08-08 10:00:00', $utc), new \DateTimeImmutable('2026-08-08 12:00:00', $utc), 'Dienst/Büro', 'adcalendar'));
+                $event->add(new ScheduleConflict('shift', new \DateTimeImmutable('2026-08-08 10:00:00', $utc), new \DateTimeImmutable('2026-08-08 12:00:00', $utc), 'Dienst/Büro', 'flzcalendar'));
             }
 
             return $event;
         }
     }
 
-    final class PlanningHintLoggerFake extends AdPlanerLogger {
+    final class PlanningHintLoggerFake extends FlzPlanerLogger {
         public array $errors = [];
 
         public function __construct() {}
@@ -76,7 +76,7 @@ namespace {
     $hints = $service->forMonth('2026-08', ['assistant-a', 'assistant-b']);
 
     assertSameValue('U?', $hints['2026-08-02'][0]['marker'] ?? null, 'Planned vacation is exposed as U?.');
-    assertSameValue(true, $hints['2026-08-02'][0]['blocks'] ?? null, 'Geplanter Urlaub muss Schichten wie im AD Kalender blockieren.');
+    assertSameValue(true, $hints['2026-08-02'][0]['blocks'] ?? null, 'Geplanter Urlaub muss Schichten wie im Filzmann Kalender blockieren.');
     assertSameValue('U', $hints['2026-08-05'][0]['marker'] ?? null, 'Approved vacation remains distinguishable.');
     assertSameValue('K', $hints['2026-08-07'][0]['marker'] ?? null, 'Calendar occupation is exposed as a compact marker.');
     assertSameValue('Termin', $hints['2026-08-07'][0]['label'] ?? null, 'Calendar titles are not leaked into the team plan.');
@@ -99,7 +99,7 @@ namespace {
     assertSameValue('vacation', $context['unavailable']['2026-08-04|night']['assistant-b'] ?? false, 'Eine Nachtschicht vor genehmigtem Urlaub muss als Konflikt gelten.');
     assertSameValue('vacation', $context['unavailable']['2026-08-05|early']['assistant-b'] ?? false, 'Genehmigter Urlaub muss die betroffene Tagschicht blockieren.');
     assertSameValue('calendar', $context['unavailable']['2026-08-08|early']['assistant-a'] ?? false, 'Ein überschneidender Calendar-Dienst muss die Assistenzschicht blockieren.');
-    assertSameValue(true, in_array('adplaner', $events->calendarRequesters, true), 'Der Planer muss sich an der öffentlichen API als anfragende App ausweisen.');
+    assertSameValue(true, in_array('flzplaner', $events->calendarRequesters, true), 'Der Planer muss sich an der öffentlichen API als anfragende App ausweisen.');
     assertDomainException(
         static fn() => $service->assertAvailableForSlot(new ShiftSlot(1,'A1','2026-08','2026-08-02','early','Früh','08:00','14:00',true), 'assistant-a'),
         'Eine direkte Zuweisung während geplantem Urlaub muss abgewiesen werden.'
@@ -136,5 +136,5 @@ namespace {
     $events->provideData = false;
     assertSameValue([], $service->forMonth('2026-08', ['assistant-a']), 'Missing providers are a valid empty standalone state.');
 
-    echo "AdPlaner planning hint service tests passed\n";
+    echo "FlzPlaner planning hint service tests passed\n";
 }

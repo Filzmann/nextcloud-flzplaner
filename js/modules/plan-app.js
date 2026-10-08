@@ -144,7 +144,7 @@
                     await this.repository.updateCandidateMetadata(team, month, slot, preference, note);
                 }
                 else if (action === 'save-note') {
-                    const noteContainer = button.closest('.adp-note-cell, .adp-mobile-notes');
+                    const noteContainer = button.closest('.flz-planer-note-cell, .flz-planer-mobile-notes');
                     const textarea = noteContainer?.querySelector(`textarea[data-note-date="${CSS.escape(button.dataset.date)}"]`);
                     await this.repository.saveDayNote(team, month, button.dataset.date, textarea ? textarea.value : '');
                 } else return;
@@ -217,6 +217,6 @@
         }
     }
 
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.PlanApp = PlanApp;
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.PlanApp = PlanApp;
 })();

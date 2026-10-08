@@ -5,8 +5,8 @@
     class PlanPanel {
         constructor(options) {
             Object.assign(this, options);
-            this.panel = this.byId('adp-panel');
-            this.workloadOverlay = this.byId('adp-workload-overlay');
+            this.panel = this.byId('flz-planer-panel');
+            this.workloadOverlay = this.byId('flz-planer-workload-overlay');
             this.panel.addEventListener('click', event => this.handleClick(event));
             this.workloadOverlay?.addEventListener('click', event => this.handleClick(event));
         }
@@ -16,11 +16,11 @@
             if (this.workloadOverlay) {
                 this.workloadOverlay.hidden = !workloadOpen;
                 this.workloadOverlay.innerHTML = workloadOpen
-                    ? `<button type="button" class="adp-overlay-close" aria-label="Auslastung schließen" title="Schließen" data-action="close-workload">&times;</button>${this.renderWorkload(state.monthPlan, state.currentUser)}`
+                    ? `<button type="button" class="flz-planer-overlay-close" aria-label="Auslastung schließen" title="Schließen" data-action="close-workload">&times;</button>${this.renderWorkload(state.monthPlan, state.currentUser)}`
                     : '';
             }
             if (state.loading) {
-                this.panel.innerHTML = '<p class="adp-loading">Lade...</p>';
+                this.panel.innerHTML = '<p class="flz-planer-loading">Lade...</p>';
                 return;
             }
             if (!state.selectedTeamCode) {
@@ -55,10 +55,10 @@
         setCandidateNoteEditor(button, open) {
             const selector = `[data-candidate-note-entry][data-slot-id="${CSS.escape(button.dataset.slotId || '')}"][data-target-uid="${CSS.escape(button.dataset.targetUid || '')}"]`;
             const closestEntry = button.closest(selector);
-            const surface = button.closest('.adp-mobile-plan, .adp-desktop-plan');
+            const surface = button.closest('.flz-planer-mobile-plan, .flz-planer-desktop-plan');
             const surfaceEntry = surface && typeof surface.querySelector === 'function' ? surface.querySelector(selector) : null;
             const entry = closestEntry && typeof closestEntry.querySelector === 'function' ? closestEntry : (surfaceEntry || this.panel.querySelector(selector));
-            const editor = entry?.querySelector('.adp-shift-note-editor');
+            const editor = entry?.querySelector('.flz-planer-shift-note-editor');
             if (!editor) return;
             editor.hidden = !open;
             if (open) editor.querySelector('[data-candidate-note]')?.focus();
@@ -105,6 +105,6 @@
         }
     }
 
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.PlanPanel = PlanPanel;
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.PlanPanel = PlanPanel;
 })();

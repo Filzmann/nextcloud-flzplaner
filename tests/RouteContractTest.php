@@ -16,4 +16,4 @@ foreach (['api#addShiftCandidate', 'api#removeShiftCandidate', 'api#updateCandid
     }
 }
 
-echo 'AdPlaner route contract tests passed' . PHP_EOL;
+echo 'FlzPlaner route contract tests passed' . PHP_EOL;

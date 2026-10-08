@@ -1,6 +1,6 @@
 (function() {
     const { Notice, byId, esc } = window.LocalBase.ui;
-    const notice = new Notice('adp-notice');
+    const notice = new Notice('flz-planer-notice');
     const weekday = ['', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
     const monthName = ['', 'Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
@@ -36,16 +36,16 @@
         const minimum = finiteOrNull(minimumValue);
         const maximum = finiteOrNull(maximumValue);
         if (!hasCapacityLimits(minimum, maximum)) {
-            return `<span class="adp-capacity adp-capacity--plain" title="${esc(count)} Schichten">${esc(count)}</span>`;
+            return `<span class="flz-planer-capacity flz-planer-capacity--plain" title="${esc(count)} Schichten">${esc(count)}</span>`;
         }
         if (minimum !== null && count < minimum) {
-            return `<span class="adp-capacity adp-capacity--under" title="${esc(count)} von mindestens ${esc(minimum)}">&lt;${esc(minimum)}</span>`;
+            return `<span class="flz-planer-capacity flz-planer-capacity--under" title="${esc(count)} von mindestens ${esc(minimum)}">&lt;${esc(minimum)}</span>`;
         }
         if (maximum !== null) {
             const status = count > maximum ? 'over' : 'within';
-            return `<span class="adp-capacity adp-capacity--${status}" title="${esc(count)} von maximal ${esc(maximum)}">${esc(count)}/${esc(maximum)}</span>`;
+            return `<span class="flz-planer-capacity flz-planer-capacity--${status}" title="${esc(count)} von maximal ${esc(maximum)}">${esc(count)}/${esc(maximum)}</span>`;
         }
-        return `<span class="adp-capacity adp-capacity--within" title="${esc(count)} Schichten">${esc(count)}</span>`;
+        return `<span class="flz-planer-capacity flz-planer-capacity--within" title="${esc(count)} Schichten">${esc(count)}</span>`;
     }
 
     function hasCapacityLimits(minimumValue, maximumValue) {
@@ -68,6 +68,6 @@
         notice.error(error, fallback);
     }
 
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.ui = { byId, esc, dateShort, dayHeader, monthHeader, statusLabel, renderCapacity, hasCapacityLimits, showNotice, showError };
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.ui = { byId, esc, dateShort, dayHeader, monthHeader, statusLabel, renderCapacity, hasCapacityLimits, showNotice, showError };
 })();

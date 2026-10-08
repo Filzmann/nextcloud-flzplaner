@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Service;
+namespace OCA\FlzPlaner\Service;
 
 use DateTimeImmutable;
-use OCA\AdPlaner\Model\Team;
-use OCA\AdPlaner\Store\ShiftPlanStore;
+use OCA\FlzPlaner\Model\Team;
+use OCA\FlzPlaner\Store\ShiftPlanStore;
 
 final class WorkloadPreferenceService {
     private const MAX_LIMIT = 100;

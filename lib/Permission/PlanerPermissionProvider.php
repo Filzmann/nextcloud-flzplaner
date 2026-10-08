@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
-namespace OCA\AdPlaner\Permission;
-use OCA\FilzmannPermissionMatrix\PublicApi\V1\{PermissionCondition,PermissionProvider,PermissionProviderDescriptor,PermissionProviderResult,PermissionRule};
+namespace OCA\FlzPlaner\Permission;
+use OCA\FlzPermissionMatrix\PublicApi\V1\{PermissionCondition,PermissionProvider,PermissionProviderDescriptor,PermissionProviderResult,PermissionRule};
 final class PlanerPermissionProvider implements PermissionProvider {
     public function __construct(private PlanerPermissionSourceInterface $source) {}
-    public function descriptor():PermissionProviderDescriptor{return new PermissionProviderDescriptor('adplaner','AD Planer','1.0',['permissions']);}
+    public function descriptor():PermissionProviderDescriptor{return new PermissionProviderDescriptor('flzplaner','Filzmann Assistenzplanung','1.0',['permissions']);}
     public function collect():PermissionProviderResult{
         $rules=[];$eb=$this->source->ebGroupId();
         foreach($this->source->teamGroupIds() as $team){
@@ -22,5 +22,5 @@ final class PlanerPermissionProvider implements PermissionProvider {
         $rules[]=$this->rule('Administration','Demo-Pack','Nextcloud-Administration mit aktiver app-lokaler Freigabe','plan.demo.manage','Demo verwalten','app',PermissionCondition::all([PermissionCondition::nextcloudAdmin(),PermissionCondition::temporaryAppAdminGrant()]));
         return new PermissionProviderResult($rules);
     }
-    private function rule(string $type,string $name,string $detail,string $key,string $label,string $scope,PermissionCondition $condition):PermissionRule{return new PermissionRule($type,$name,$detail,$key,$label,'allow',$scope,$condition,'adplaner:TeamAccessService','high');}
+    private function rule(string $type,string $name,string $detail,string $key,string $label,string $scope,PermissionCondition $condition):PermissionRule{return new PermissionRule($type,$name,$detail,$key,$label,'allow',$scope,$condition,'flzplaner:TeamAccessService','high');}
 }

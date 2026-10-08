@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/bootstrap.php';
 
-use OCA\AdPlaner\Model\ShiftSlot;
-use OCA\AdPlaner\Model\Team;
-use OCA\AdPlaner\Service\ScheduleService;
-use OCA\AdPlaner\Service\WorkloadPreferenceService;
-use OCA\AdPlaner\Service\FixedShiftService;
-use OCA\AdPlaner\Service\ShiftConfigService;
-use OCA\AdPlaner\Service\TeamAccessService;
-use OCA\AdPlaner\Service\PlanningHintService;
-use OCA\AdPlaner\Store\ShiftPlanStore;
-use function OCA\AdPlaner\Tests\assertDomainException;
-use function OCA\AdPlaner\Tests\assertSameValue;
+use OCA\FlzPlaner\Model\ShiftSlot;
+use OCA\FlzPlaner\Model\Team;
+use OCA\FlzPlaner\Service\ScheduleService;
+use OCA\FlzPlaner\Service\WorkloadPreferenceService;
+use OCA\FlzPlaner\Service\FixedShiftService;
+use OCA\FlzPlaner\Service\ShiftConfigService;
+use OCA\FlzPlaner\Service\TeamAccessService;
+use OCA\FlzPlaner\Service\PlanningHintService;
+use OCA\FlzPlaner\Store\ShiftPlanStore;
+use function OCA\FlzPlaner\Tests\assertDomainException;
+use function OCA\FlzPlaner\Tests\assertSameValue;
 
 final class MonthPlanStatusStoreFake extends ShiftPlanStore {
     /** @var array<string, string> */
@@ -150,8 +150,8 @@ $settings = ['shifts' => [[
     'endsAt' => '14:00',
     'enabled' => true,
 ]]];
-$assistantTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, false, $settings);
-$ebTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, $settings);
+$assistantTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, $settings);
+$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, $settings);
 $store = new MonthPlanStatusStoreFake();
 $service = new ScheduleService($store, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake(), new WorkloadPreferenceService($store), new FixedShiftService($store, new ShiftConfigService()));
 
@@ -186,7 +186,7 @@ assertDomainException(
 $store->updatedSlots = [];
 assertSameValue('approved', $service->monthPlan($ebTeam, '2026-08', 'test-eb')['status'] ?? null, 'Approved status remains visible after reload.');
 assertSameValue([], $store->updatedSlots, 'Loading an approved plan does not rewrite frozen slot definitions.');
-$changedSettingsTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, ['shifts' => [[
+$changedSettingsTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, ['shifts' => [[
     'key' => 'late',
     'label' => 'Spät neu',
     'startsAt' => '14:00',
@@ -202,8 +202,8 @@ assertSameValue(
 
 $store->candidatesBySlot = [
     1 => [
-        new \OCA\AdPlaner\Model\ShiftCandidate(1, 1, 'assistant-a', 'test-eb'),
-        new \OCA\AdPlaner\Model\ShiftCandidate(2, 1, 'former-assistant', 'test-eb'),
+        new \OCA\FlzPlaner\Model\ShiftCandidate(1, 1, 'assistant-a', 'test-eb'),
+        new \OCA\FlzPlaner\Model\ShiftCandidate(2, 1, 'former-assistant', 'test-eb'),
     ],
 ];
 $privacyMinimizedSnapshot = $service->monthPlan($ebTeam, '2026-08', 'test-eb');
@@ -215,8 +215,8 @@ assertSameValue(
 
 assertSameValue('planned', $service->transitionMonthStatus($ebTeam, '2026-08', 'planned', 'test-eb'), 'EB has an explicit unlock path back to planned.');
 $store->candidatesBySlot = [1=>[
-    new \OCA\AdPlaner\Model\ShiftCandidate(10,1,'assistant-a','assistant-a',source:'regular'),
-    new \OCA\AdPlaner\Model\ShiftCandidate(11,1,'assistant-b','assistant-b',source:'regular'),
+    new \OCA\FlzPlaner\Model\ShiftCandidate(10,1,'assistant-a','assistant-a',source:'regular'),
+    new \OCA\FlzPlaner\Model\ShiftCandidate(11,1,'assistant-b','assistant-b',source:'regular'),
 ]];
 $store->regularRules=[
     ['userUid'=>'assistant-a','weekday'=>6,'segmentKey'=>'early'],
@@ -240,4 +240,4 @@ $service->addCandidate($ebTeam, '2026-08', 1, 'assistant-a', 'test-eb');
 assertSameValue(1, count($store->added), 'Unlocked plans accept candidate mutations again.');
 assertSameValue('draft', $service->transitionMonthStatus($ebTeam, '2026-08', 'draft', 'test-eb'), 'EB can explicitly reset a planned plan to draft.');
 
-echo "AdPlaner month plan status tests passed\n";
+echo "FlzPlaner month plan status tests passed\n";

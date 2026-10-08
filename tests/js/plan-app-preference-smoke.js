@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-global.window = { ADPlaner: {} };
+global.window = { FlzPlaner: {} };
 global.CSS = { escape: String };
 require('../../js/modules/plan-app.js');
 
@@ -21,7 +21,7 @@ const repository = {
     async state() { return { currentUser:{uid:'self'}, teams:[{code:'A1',personalWorkload:{weeklyMin:2},canSetPersonalWorkload:true}], organization:{} }; },
 };
 const errors = [];
-const app = new window.ADPlaner.PlanApp({
+const app = new window.FlzPlaner.PlanApp({
     repository, PlanChrome:ChromeFake, PlanPanel:PanelFake, byId(){return null;}, esc:String,
     showNotice(){}, showError(error, fallback){errors.push({error,fallback});}, renderMonth(){return '';}, renderSettings(){return '';},
     addShiftRow(){}, removeShiftRow(){}, collectShifts(){return [];}, openAssignmentPicker(){},
@@ -49,5 +49,5 @@ function actionButton(action, preference = '') {
     assert.strictEqual(app.selectedTeam().canSetPersonalWorkload, true);
     assert.deepStrictEqual(errors, []);
 
-    console.log('AdPlaner preference and workload workflow smoke test passed.');
+    console.log('FlzPlaner preference and workload workflow smoke test passed.');
 })().catch(error => { console.error(error); process.exit(1); });

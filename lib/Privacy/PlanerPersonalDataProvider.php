@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Privacy;
+namespace OCA\FlzPlaner\Privacy;
 
 use DateTimeImmutable;
 use DateTimeInterface;
 use InvalidArgumentException;
-use OCA\AdPlaner\AppInfo\Application;
-use OCA\AdPlaner\Repository\ShiftPlanRepository;
-use OCA\AdPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataEntry;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataPage;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataProvider;
-use OCA\FilzmannDataProtection\PublicApi\V1\PersonalDataRequest;
-use OCA\FilzmannDataProtection\PublicApi\V1\ProviderDescriptor;
+use OCA\FlzPlaner\AppInfo\Application;
+use OCA\FlzPlaner\Repository\ShiftPlanRepository;
+use OCA\FlzPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataEntry;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataPage;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataProvider;
+use OCA\FlzDataProtection\PublicApi\V1\PersonalDataRequest;
+use OCA\FlzDataProtection\PublicApi\V1\ProviderDescriptor;
 
 final class PlanerPersonalDataProvider implements PersonalDataProvider {
     private const RETENTION = 'Keine feste Löschfrist festgelegt; gespeichert bis zur fachlich oder gesetzlich veranlassten Löschung.';
@@ -22,12 +22,12 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
     public function __construct(private ShiftPlanRepository $repository, private ?TemporaryAdminAccessRepositoryInterface $adminAccess = null) {}
 
     public function descriptor(): ProviderDescriptor {
-        return new ProviderDescriptor(Application::APP_ID, 'AD Planer', '1.0', ['nextcloud-user'], ['personal-data'], 500);
+        return new ProviderDescriptor(Application::APP_ID, 'Filzmann Assistenzplanung', '1.0', ['nextcloud-user'], ['personal-data'], 500);
     }
 
     public function collect(PersonalDataRequest $request): PersonalDataPage {
         if ($request->subject()->subjectType() !== 'nextcloud-user') return new PersonalDataPage('not_applicable');
-        if ($request->cursor() !== null) throw new InvalidArgumentException('AD Planer does not support cursor paging.');
+        if ($request->cursor() !== null) throw new InvalidArgumentException('Filzmann Assistenzplanung does not support cursor paging.');
         $limit = $request->pageLimit();
         $subjectUid = $request->subject()->subjectId();
         $data = $this->repository->personalDataForUid($subjectUid, $limit + 1);
@@ -60,10 +60,10 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
             'admin-access:' . (string)$row['id'],
             self::shortDateTime($row['startsAt']),
             'Nachweis einer zeitlich begrenzten administrativen Planer-Freigabe',
-            'App-lokale Freigabesteuerung im AD Planer',
+            'App-lokale Freigabesteuerung im Filzmann Assistenzplanung',
             ['Betroffene Person und ausdrücklich berechtigte Datenschutz-Prüfrolle'],
             self::RETENTION,
-            'Durch AD Planer sind keine Drittlandübermittlungen vorgesehen.',
+            'Durch Filzmann Assistenzplanung sind keine Drittlandübermittlungen vorgesehen.',
             'Der Server beendet den Vollzugriff spätestens nach 24 Stunden automatisch; es findet keine Entscheidung mit rechtlicher oder vergleichbar erheblicher Wirkung statt.',
             'Kennungen anderer beteiligter Personen werden nicht ausgegeben.',
             [
@@ -199,7 +199,7 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
             'Eigene Eingaben sowie Eingaben berechtigter Einsatzbegleitungen im Dienstplan',
             ['Mitglieder des jeweiligen Assistenzteams im zulässigen Planungsscope', 'Berechtigte Einsatzbegleitungen', 'Nextcloud-Administrator*innen mit Verwaltungsrechten'],
             self::RETENTION,
-            'Durch AD Planer sind keine Drittlandübermittlungen vorgesehen.',
+            'Durch Filzmann Assistenzplanung sind keine Drittlandübermittlungen vorgesehen.',
             'Planungshinweise und Konfliktprüfungen unterstützen die Bearbeitung; sie treffen keine Entscheidung mit rechtlicher oder vergleichbar erheblicher Wirkung.',
             $thirdPartyNotice,
             $attributes,

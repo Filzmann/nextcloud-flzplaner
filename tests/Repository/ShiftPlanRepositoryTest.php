@@ -33,10 +33,10 @@ namespace OCP\DB {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Repository\ShiftPlanRepository;
+    use OCA\FlzPlaner\Repository\ShiftPlanRepository;
     use OCP\DB\Exception;
     use OCP\IDBConnection;
-    use function OCA\AdPlaner\Tests\assertSameValue;
+    use function OCA\FlzPlaner\Tests\assertSameValue;
 
     final class CandidateResultFake {
         public function __construct(private array|false $row = false) {}
@@ -103,7 +103,7 @@ namespace {
             return $this;
         }
         public function executeQuery(): CandidateResultFake {
-            return new CandidateResultFake($this->table === 'adp_month_plans' ? $this->connection->statusRow : false);
+            return new CandidateResultFake($this->table === 'flz_planer_month_plans' ? $this->connection->statusRow : false);
         }
 
         public function executeStatement(): int {
@@ -152,7 +152,7 @@ namespace {
         $failingRepository->addCandidate(7, 'assistant-a', 'test-eb');
     } catch (Exception $exception) {
         assertSameValue(Exception::REASON_DRIVER, $exception->getReason(), 'A non-unique candidate database failure must propagate unchanged.');
-        echo 'AdPlaner shift plan repository tests passed' . PHP_EOL;
+        echo 'FlzPlaner shift plan repository tests passed' . PHP_EOL;
         return;
     }
 

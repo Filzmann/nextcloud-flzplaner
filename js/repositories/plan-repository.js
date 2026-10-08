@@ -1,6 +1,6 @@
 (function() {
     const { Repository } = window.LocalBase.repositories;
-    const { ShiftDefinition, ShiftSlot, Team } = window.ADPlaner.models;
+    const { ShiftDefinition, ShiftSlot, Team } = window.FlzPlaner.models;
 
     class PlanRepository extends Repository {
         async state() {
@@ -94,7 +94,7 @@
 
     }
 
-    window.ADPlaner = window.ADPlaner || {};
-    window.ADPlaner.repositories = window.ADPlaner.repositories || {};
-    window.ADPlaner.repositories.PlanRepository = PlanRepository;
+    window.FlzPlaner = window.FlzPlaner || {};
+    window.FlzPlaner.repositories = window.FlzPlaner.repositories || {};
+    window.FlzPlaner.repositories.PlanRepository = PlanRepository;
 })();

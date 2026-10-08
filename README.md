@@ -1,13 +1,13 @@
-# AdPlaner
+# FlzPlaner
 
-Monatliche Wunschdienstplanung für Assistenzteams. Urlaubsplanung liegt ausschließlich in der separaten App `adurlaub`.
+Monatliche Wunschdienstplanung für Assistenzteams. Urlaubsplanung liegt ausschließlich in der separaten App `flzurlaub`.
 
 ## Staging-Kompatibilität
 
 - Nextcloud 33 und 34
 - PHP 8.3 oder neuer innerhalb des von der jeweiligen Nextcloud-Version unterstützten Bereichs
-- Laufzeitbasis: `localbase`; `orgsuite` ist ab zwei AD-Fachprodukten optional aktiv
-- App-ID und Installationsordner: `adplaner`
+- Laufzeitbasis: `localbase`; `orgsuite` ist ab zwei FLZ-Fachprodukten optional aktiv
+- App-ID und Installationsordner: `flzplaner`
 
 Der deklarierte Bereich wurde mit einer frischen Installation auf Nextcloud
 33.0.7 und einem anschließenden Upgrade mit synthetischen Bestandsdaten auf
@@ -17,17 +17,17 @@ sichtbare mobile Oberfläche grün.
 
 ## Installation
 
-Für Staging und Auslieferung das Produktbundle `ad-product-adplaner-<release>.tar.gz` und dessen enthaltenes `install.sh` verwenden. Es prüft und installiert LocalBase automatisch; ab dem zweiten AD-Fachprodukt aktiviert es OrgSuite.
+Für Staging und Auslieferung das Produktbundle `flz-product-flzplaner-<release>.tar.gz` und dessen enthaltenes `install.sh` verwenden. Es prüft und installiert LocalBase automatisch; ab dem zweiten FLZ-Fachprodukt aktiviert es OrgSuite.
 
-AdPlaner funktioniert einzeln; optionale Abwesenheits- oder Kalenderhinweise entfallen ohne die jeweilige Fachapp, ohne den Monatsplan zu blockieren.
+FlzPlaner funktioniert einzeln; optionale Abwesenheits- oder Kalenderhinweise entfallen ohne die jeweilige Fachapp, ohne den Monatsplan zu blockieren.
 
 Assistenzteams werden aus den zentral konfigurierten Nextcloud-Gruppen abgeleitet. Teambezogene Schichtkonfigurationen werden durch berechtigte Einsatzbegleitungen gepflegt.
 
 Die zuständige Einsatzbegleitung führt Monatspläne kontrolliert von `draft` über `planned` nach `approved`. Genehmigte Pläne sind bis zu einer ausdrücklichen Rücknahme gegen Wünsche, Zuweisungen und Bemerkungsänderungen gesperrt. Optionale Urlaubs- und Kalenderprovider liefern ausschließlich datensparsame, schreibgeschützte Planungshinweise.
 
-Ist AD Kalender aktiv, blockieren dortige Dienste über den versionierten
+Ist Filzmann Kalender aktiv, blockieren dortige Dienste über den versionierten
 LocalBase-Konfliktvertrag überlappende Assistenzzuweisungen und erscheinen im
-Plan als `Dienst/Büro`. Umgekehrt veröffentlicht AdPlaner belegte
+Plan als `Dienst/Büro`. Umgekehrt veröffentlicht FlzPlaner belegte
 Assistenzschichten als read-only `Assistenz`-Konflikte. Ohne die jeweils andere
 App bleiben beide Produkte eigenständig nutzbar.
 
@@ -72,7 +72,7 @@ Für die fachliche, visuelle und sicherheitsbezogene Staging-Prüfung steht ein
 ausfüllbares [manuelles Abnahmeformular](docs/manual-acceptance.md) bereit.
 Zugangsdaten und personenbezogene Echtdaten werden darin nicht dokumentiert.
 
-Installations-, Betriebs- und Abnahmeunterlagen stehen im öffentlichen [AD-Suite-Projekt](https://github.com/Filzmann/ad-suite).
+Installations-, Betriebs- und Abnahmeunterlagen stehen im öffentlichen [Filzmann Nextcloud Plugins-Projekt](https://github.com/Filzmann/flz-full-suite).
 
 ## Dokumentation
 

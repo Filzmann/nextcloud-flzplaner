@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Listener;
+namespace OCA\FlzPlaner\Listener;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use OCA\AdPlaner\Repository\ShiftPlanRepository;
+use OCA\FlzPlaner\Repository\ShiftPlanRepository;
 use OCA\LocalBase\Calendar\ScheduleConflict;
 use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
 use OCP\EventDispatcher\Event;
@@ -27,7 +27,7 @@ final class ScheduleConflictQueryListener implements IEventListener {
             if ($end <= $start) $end = $end->modify('+1 day');
             if ($start >= $event->end() || $end <= $event->start()) continue;
 
-            $event->add(new ScheduleConflict('shift', $start, $end, 'Assistenz', 'adplaner'));
+            $event->add(new ScheduleConflict('shift', $start, $end, 'Assistenz', 'flzplaner'));
         }
     }
 }

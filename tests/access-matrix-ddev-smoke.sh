@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_url="${ADP_BASE_URL:-https://nextcloud-dev.ddev.site}"
-ddev_project="${ADP_DDEV_PROJECT:-$(cd "$(dirname "$0")/../../nextcloud-dev" && pwd)}"
+base_url="${FLZP_BASE_URL:-https://nextcloud-dev.ddev.site}"
+ddev_project="${FLZP_DDEV_PROJECT:-$(cd "$(dirname "$0")/../../nextcloud-dev" && pwd)}"
 suffix="$(date +%s)-$$"
 team_code="Smoke$$"
-team_group="ad-ASN-$team_code"
+team_group="flz-ASN-$team_code"
 created_users=()
 
 occ() {
@@ -29,13 +29,13 @@ create_user() {
 }
 
 occ group:add "$team_group" >/dev/null
-actor="adp-smoke-${suffix}-actor"
-foreign="adp-smoke-${suffix}-foreign"
+actor="flz-planer-smoke-${suffix}-actor"
+foreign="flz-planer-smoke-${suffix}-foreign"
 create_user "$actor"
 create_user "$foreign"
 
-ADP_BASE_URL="$base_url" ADP_USER="$actor" ADP_PASSWORD="$actor" \
-    ADP_TEAM_CODE="$team_code" ADP_FOREIGN_UID="$foreign" \
+FLZP_BASE_URL="$base_url" FLZP_USER="$actor" FLZP_PASSWORD="$actor" \
+    FLZP_TEAM_CODE="$team_code" FLZP_FOREIGN_UID="$foreign" \
     "$(dirname "$0")/access-http-smoke.sh"
 
-echo 'AdPlaner DDEV access matrix smoke: OK'
+echo 'FlzPlaner DDEV access matrix smoke: OK'

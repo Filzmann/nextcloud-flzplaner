@@ -1,4 +1,4 @@
-#adplaner-app {
+#flzplaner-app {
     box-sizing: border-box;
     width: 100%;
     height: 100%;
@@ -10,7 +10,7 @@
     background: var(--color-main-background);
 }
 
-.adp-head {
+.flz-planer-head {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -19,61 +19,61 @@
     margin-bottom: 16px;
 }
 
-.adp-head h1 {
+.flz-planer-head h1 {
     margin: 0;
 }
 
-.adp-title-row { display: flex; align-items: center; gap: 8px; }
-.adp-admin-access-warning { position: relative; display: inline-block; }
-.adp-admin-access-warning summary { display: grid; width: 26px; height: 26px; place-items: center; cursor: pointer; border: 1px solid var(--color-warning); border-radius: 50%; color: var(--color-warning-text, var(--color-main-text)); background: var(--color-warning-light); font-size: 16px; list-style: none; }
-.adp-admin-access-warning summary::-webkit-details-marker { display: none; }
-.adp-admin-access-warning summary:focus-visible { outline: 3px solid var(--color-primary-element); outline-offset: 2px; }
-.adp-admin-access-warning__panel { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; width: min(360px, calc(100vw - 48px)); padding: 12px; border: 1px solid var(--color-warning); border-radius: var(--border-radius-large); background: var(--color-main-background); box-shadow: 0 2px 10px rgba(0, 0, 0, .2); }
-.adp-admin-access-warning__panel p { margin: 8px 0; }
+.flz-planer-title-row { display: flex; align-items: center; gap: 8px; }
+.flz-planer-admin-access-warning { position: relative; display: inline-block; }
+.flz-planer-admin-access-warning summary { display: grid; width: 26px; height: 26px; place-items: center; cursor: pointer; border: 1px solid var(--color-warning); border-radius: 50%; color: var(--color-warning-text, var(--color-main-text)); background: var(--color-warning-light); font-size: 16px; list-style: none; }
+.flz-planer-admin-access-warning summary::-webkit-details-marker { display: none; }
+.flz-planer-admin-access-warning summary:focus-visible { outline: 3px solid var(--color-primary-element); outline-offset: 2px; }
+.flz-planer-admin-access-warning__panel { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; width: min(360px, calc(100vw - 48px)); padding: 12px; border: 1px solid var(--color-warning); border-radius: var(--border-radius-large); background: var(--color-main-background); box-shadow: 0 2px 10px rgba(0, 0, 0, .2); }
+.flz-planer-admin-access-warning__panel p { margin: 8px 0; }
 
-.adp-controls,
-.adp-tabs,
-.adp-section-head,
-.adp-plan-meta,
-.adp-plan-status,
-.adp-cell-actions {
+.flz-planer-controls,
+.flz-planer-tabs,
+.flz-planer-section-head,
+.flz-planer-plan-meta,
+.flz-planer-plan-status,
+.flz-planer-cell-actions {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.adp-controls label,
-.adp-settings-form label {
+.flz-planer-controls label,
+.flz-planer-settings-form label {
     display: grid;
     gap: 4px;
     font-weight: 600;
 }
 
-.adp-tabs {
+.flz-planer-tabs {
     border-bottom: 1px solid var(--color-border);
     margin-bottom: 16px;
 }
 
-.adp-tab {
+.flz-planer-tab {
     margin: 0;
     border-bottom: 3px solid transparent;
     border-radius: 0;
     background: transparent;
 }
 
-.adp-tab.is-active {
+.flz-planer-tab.is-active {
     border-color: var(--color-primary-element);
     font-weight: 700;
 }
 
-.adp-tab:focus-visible {
+.flz-planer-tab:focus-visible {
     outline: 2px solid var(--color-primary-element);
     outline-offset: 2px;
 }
 
-.adp-tab-area { position: relative; }
-.adp-workload-overlay {
+.flz-planer-tab-area { position: relative; }
+.flz-planer-workload-overlay {
     position: absolute;
     z-index: 120;
     top: calc(100% + 6px);
@@ -87,38 +87,38 @@
     background: var(--color-main-background);
     box-shadow: 0 8px 28px rgba(0,0,0,.24);
 }
-.adp-workload-overlay[hidden] { display: none !important; }
-.adp-overlay-close { float: right; min-width: 28px; min-height: 28px; padding: 0; font-size: 18px; }
-.adp-workload-view { padding: 0; border: 0; background: transparent; }
-.adp-workload-view .adp-section-head { margin: 0 34px 5px 0; }
-.adp-workload-view .adp-section-head h2 { font-size: 1rem; line-height: 28px; }
-.adp-workload-view .adp-table-wrap { max-height: none; }
-.adp-workload-view .adp-table th,
-.adp-workload-view .adp-table td { padding: 3px 5px; font-size: .86rem; line-height: 1.25; }
-.adp-workload-table th:first-child { width: 28%; }
-.adp-workload-table td:nth-child(2) { width: 4rem; }
-.adp-week-capacities { display: flex; flex-wrap: wrap; gap: 2px 6px; }
-.adp-week-capacity { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
-.adp-workload-view .adp-capacity { min-width: 2rem; padding: 0 4px; border-radius: 4px; }
-.adp-workload-view .adp-plan-proposal { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--color-border); }
-.adp-proposal-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.adp-proposal-head h3 { margin: 0; font-size: .95rem; }
-.adp-empty-summary { font-size: .78rem; }
-.adp-proposal-help { margin: 2px 0 5px; font-size: .78rem; }
-.adp-proposal-help summary { cursor: pointer; }
-.adp-proposal-help p { margin: 3px 0; }
-.adp-workload-view .adp-proposal-candidates { display: flex; flex-wrap: wrap; gap: 2px 5px; padding: 0; list-style: none; }
-.adp-workload-view .adp-proposal-candidates li { white-space: nowrap; }
-.adp-workload-view .adp-proposal-candidates li + li { margin-top: 0; }
-.adp-personal-month-capacity { display: inline-flex; margin-left: 6px; vertical-align: middle; font-size: .78rem; }
-.adp-personal-month-capacity .adp-capacity { min-width: 1.8rem; padding: 0 3px; border-radius: 4px; }
-.adp-fixed-marker { font-size: .85em; }
-.adp-vacation-conflict { display: inline-flex; align-items: center; justify-content: center; min-width: 1.25rem; min-height: 1.25rem; border: 1px solid currentColor; border-radius: 50%; font-size: .72rem; font-weight: 800; }
-.adp-vacation-summary { margin-right: 6px; font-size: .78rem; font-weight: 700; }
-.adp-fixed-conflict { display: grid; gap: 4px; margin-top: 6px; padding: 8px; border: 2px solid var(--color-warning); border-radius: var(--border-radius); background: var(--color-warning-hover); }
-.adp-regular-shifts-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 8px; }
+.flz-planer-workload-overlay[hidden] { display: none !important; }
+.flz-planer-overlay-close { float: right; min-width: 28px; min-height: 28px; padding: 0; font-size: 18px; }
+.flz-planer-workload-view { padding: 0; border: 0; background: transparent; }
+.flz-planer-workload-view .flz-planer-section-head { margin: 0 34px 5px 0; }
+.flz-planer-workload-view .flz-planer-section-head h2 { font-size: 1rem; line-height: 28px; }
+.flz-planer-workload-view .flz-planer-table-wrap { max-height: none; }
+.flz-planer-workload-view .flz-planer-table th,
+.flz-planer-workload-view .flz-planer-table td { padding: 3px 5px; font-size: .86rem; line-height: 1.25; }
+.flz-planer-workload-table th:first-child { width: 28%; }
+.flz-planer-workload-table td:nth-child(2) { width: 4rem; }
+.flz-planer-week-capacities { display: flex; flex-wrap: wrap; gap: 2px 6px; }
+.flz-planer-week-capacity { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.flz-planer-workload-view .flz-planer-capacity { min-width: 2rem; padding: 0 4px; border-radius: 4px; }
+.flz-planer-workload-view .flz-planer-plan-proposal { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--color-border); }
+.flz-planer-proposal-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.flz-planer-proposal-head h3 { margin: 0; font-size: .95rem; }
+.flz-planer-empty-summary { font-size: .78rem; }
+.flz-planer-proposal-help { margin: 2px 0 5px; font-size: .78rem; }
+.flz-planer-proposal-help summary { cursor: pointer; }
+.flz-planer-proposal-help p { margin: 3px 0; }
+.flz-planer-workload-view .flz-planer-proposal-candidates { display: flex; flex-wrap: wrap; gap: 2px 5px; padding: 0; list-style: none; }
+.flz-planer-workload-view .flz-planer-proposal-candidates li { white-space: nowrap; }
+.flz-planer-workload-view .flz-planer-proposal-candidates li + li { margin-top: 0; }
+.flz-planer-personal-month-capacity { display: inline-flex; margin-left: 6px; vertical-align: middle; font-size: .78rem; }
+.flz-planer-personal-month-capacity .flz-planer-capacity { min-width: 1.8rem; padding: 0 3px; border-radius: 4px; }
+.flz-planer-fixed-marker { font-size: .85em; }
+.flz-planer-vacation-conflict { display: inline-flex; align-items: center; justify-content: center; min-width: 1.25rem; min-height: 1.25rem; border: 1px solid currentColor; border-radius: 50%; font-size: .72rem; font-weight: 800; }
+.flz-planer-vacation-summary { margin-right: 6px; font-size: .78rem; font-weight: 700; }
+.flz-planer-fixed-conflict { display: grid; gap: 4px; margin-top: 6px; padding: 8px; border: 2px solid var(--color-warning); border-radius: var(--border-radius); background: var(--color-warning-hover); }
+.flz-planer-regular-shifts-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 8px; }
 
-.adp-notice {
+.flz-planer-notice {
     border: 1px solid var(--color-warning);
     border-radius: 8px;
     padding: 10px 12px;
@@ -126,7 +126,7 @@
     background: var(--color-warning-light);
 }
 
-.adp-admin-access {
+.flz-planer-admin-access {
     margin-bottom: 14px;
     padding: 14px;
     border: 1px solid var(--color-border);
@@ -134,50 +134,50 @@
     background: var(--color-main-background);
 }
 
-.adp-admin-access h2 {
+.flz-planer-admin-access h2 {
     margin-top: 0;
 }
 
-.adp-admin-access form {
+.flz-planer-admin-access form {
     display: flex;
     align-items: end;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.adp-admin-access form label {
+.flz-planer-admin-access form label {
     display: grid;
     gap: 4px;
     font-weight: 600;
 }
 
-.adp-admin-access .adp-table-wrap {
+.flz-planer-admin-access .flz-planer-table-wrap {
     max-height: 240px;
     margin-top: 8px;
 }
 
-.adp-admin-access :is(button, input, select, a):focus-visible {
+.flz-planer-admin-access :is(button, input, select, a):focus-visible {
     outline: 2px solid var(--color-primary-element);
     outline-offset: 2px;
 }
 
-.adp-section {
+.flz-planer-section {
     border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 16px;
     background: var(--color-main-background);
 }
 
-.adp-section-head {
+.flz-planer-section-head {
     justify-content: space-between;
     margin-bottom: 14px;
 }
 
-.adp-section-head h2 {
+.flz-planer-section-head h2 {
     margin: 0;
 }
 
-.adp-badge {
+.flz-planer-badge {
     display: inline-flex;
     align-items: center;
     flex-wrap: wrap;
@@ -190,20 +190,20 @@
     font-weight: 600;
 }
 
-.adp-table-wrap {
+.flz-planer-table-wrap {
     overflow: auto;
     max-width: 100%;
     max-height: calc(100vh - 260px);
 }
 
-.adp-table {
+.flz-planer-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
 }
 
-.adp-table th,
-.adp-table td {
+.flz-planer-table th,
+.flz-planer-table td {
     border-bottom: 1px solid var(--color-border);
     border-right: 1px solid var(--color-border);
     padding: 8px;
@@ -211,7 +211,7 @@
     background: var(--color-main-background);
 }
 
-.adp-table thead th {
+.flz-planer-table thead th {
     position: sticky;
     top: 0;
     z-index: 2;
@@ -219,39 +219,39 @@
     font-weight: 700;
 }
 
-.adp-table th:first-child {
+.flz-planer-table th:first-child {
     position: sticky;
     left: 0;
     z-index: 3;
     border-left: 1px solid var(--color-border);
 }
 
-.adp-month-table th:last-child,
-.adp-month-table td:last-child {
+.flz-planer-month-table th:last-child,
+.flz-planer-month-table td:last-child {
     position: sticky;
     right: 0;
     z-index: 2;
     box-shadow: -1px 0 0 var(--color-border);
 }
 
-.adp-month-table thead th:last-child {
+.flz-planer-month-table thead th:last-child {
     z-index: 4;
 }
 
-.adp-table small,
-.adp-day small {
+.flz-planer-table small,
+.flz-planer-day small {
     display: block;
     color: var(--color-text-maxcontrast);
     font-weight: 400;
 }
 
-.adp-month-table th:nth-child(n+4),
-.adp-month-table td:nth-child(n+4) {
+.flz-planer-month-table th:nth-child(n+4),
+.flz-planer-month-table td:nth-child(n+4) {
     min-width: 190px;
 }
 
-.adp-month-table .adp-week-column,
-.adp-month-table .adp-week-cell {
+.flz-planer-month-table .flz-planer-week-column,
+.flz-planer-month-table .flz-planer-week-cell {
     box-sizing: border-box;
     width: 1%;
     min-width: 2.7rem;
@@ -261,8 +261,8 @@
     white-space: nowrap;
 }
 
-.adp-month-table .adp-vacation-column,
-.adp-month-table .adp-vacation-cell {
+.flz-planer-month-table .flz-planer-vacation-column,
+.flz-planer-month-table .flz-planer-vacation-cell {
     box-sizing: border-box;
     width: 1%;
     min-width: 2.7rem;
@@ -271,16 +271,16 @@
     text-align: center;
 }
 
-.adp-month-table .adp-vacation-cell {
+.flz-planer-month-table .flz-planer-vacation-cell {
     vertical-align: top;
     background: var(--color-background-hover);
 }
 
-.adp-month-table .adp-vacation-cell--empty {
+.flz-planer-month-table .flz-planer-vacation-cell--empty {
     background: var(--color-main-background);
 }
 
-.adp-vacation-label {
+.flz-planer-vacation-label {
     position: sticky;
     top: 48px;
     bottom: 8px;
@@ -289,7 +289,7 @@
     gap: 5px;
 }
 
-.adp-vacation-entry {
+.flz-planer-vacation-entry {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
     font-size: .78rem;
@@ -298,57 +298,57 @@
     white-space: nowrap;
 }
 
-.adp-week-cell > span,
-.adp-week-cell > strong {
+.flz-planer-week-cell > span,
+.flz-planer-week-cell > strong {
     display: block;
     line-height: 1.15;
 }
 
-.adp-week-cell > span {
+.flz-planer-week-cell > span {
     font-size: .72rem;
 }
 
-.adp-week-cell > strong {
+.flz-planer-week-cell > strong {
     font-size: 1rem;
 }
 
-.adp-month-table .adp-week-cell.adp-capacity--under {
+.flz-planer-month-table .flz-planer-week-cell.flz-planer-capacity--under {
     color: var(--color-warning-text, #7c2d12);
     background: var(--color-warning-light, #ffedd5);
 }
 
-.adp-month-table .adp-week-cell.adp-capacity--within {
+.flz-planer-month-table .flz-planer-week-cell.flz-planer-capacity--within {
     color: #166534;
     background: #dcfce7;
 }
 
-.adp-month-table .adp-week-cell.adp-capacity--over {
+.flz-planer-month-table .flz-planer-week-cell.flz-planer-capacity--over {
     color: #991b1b;
     background: #fee2e2;
 }
 
-.adp-month-table tbody tr.adp-week-start > * {
+.flz-planer-month-table tbody tr.flz-planer-week-start > * {
     border-top: 3px solid var(--color-border-dark, var(--color-border));
 }
 
-.adp-day {
+.flz-planer-day {
     width: 90px;
     min-width: 90px;
 }
 
-.adp-day span {
+.flz-planer-day span {
     display: block;
     font-size: 1.15em;
     color: var(--color-main-text);
 }
 
-.adp-day-hints {
+.flz-planer-day-hints {
     display: grid;
     gap: 3px;
     margin-top: 6px;
 }
 
-.adp-day .adp-hint {
+.flz-planer-day .flz-planer-hint {
     display: inline-flex;
     width: max-content;
     max-width: 160px;
@@ -361,7 +361,7 @@
     white-space: normal;
 }
 
-.adp-candidates {
+.flz-planer-candidates {
     display: flex;
     align-items: flex-start;
     gap: 6px;
@@ -369,7 +369,7 @@
     min-height: 28px;
 }
 
-.adp-chip {
+.flz-planer-chip {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -381,34 +381,34 @@
     background: var(--color-background-dark);
 }
 
-.adp-chip--under {
+.flz-planer-chip--under {
     border: 2px solid var(--color-warning, #b45309);
     font-weight: 700;
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-warning, #b45309) 25%, transparent);
 }
 
-.adp-chip--over {
+.flz-planer-chip--over {
     color: var(--color-text-maxcontrast);
     background: var(--color-background-hover);
     border-style: dashed;
 }
 
-.adp-chip-status:empty,
-.adp-chip--normal .adp-chip-status {
+.flz-planer-chip-status:empty,
+.flz-planer-chip--normal .flz-planer-chip-status {
     display: none;
 }
 
-.adp-preference-marker {
+.flz-planer-preference-marker {
     font-size: 20px;
     line-height: 1;
 }
 
-.adp-preference-marker--favorite,
-.adp-preference-option--favorite > span {
+.flz-planer-preference-marker--favorite,
+.flz-planer-preference-option--favorite > span {
     color: #f5b301;
 }
 
-.adp-preference-panel {
+.flz-planer-preference-panel {
     position: absolute;
     z-index: 40;
     inset-block-start: 100%;
@@ -424,21 +424,21 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, .22);
 }
 
-.adp-chip--editable:hover > .adp-preference-panel,
-.adp-chip--editable:focus-within > .adp-preference-panel {
+.flz-planer-chip--editable:hover > .flz-planer-preference-panel,
+.flz-planer-chip--editable:focus-within > .flz-planer-preference-panel {
     display: flex;
 }
 
-.adp-preference-option {
+.flz-planer-preference-option {
     font-size: 19px;
 }
 
-.adp-preference-option[aria-pressed="true"] {
+.flz-planer-preference-option[aria-pressed="true"] {
     outline: 2px solid var(--color-primary-element, #00679e);
     outline-offset: 1px;
 }
 
-.adp-shift-notes {
+.flz-planer-shift-notes {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -447,50 +447,50 @@
     border-top: 1px solid var(--color-border);
 }
 
-.adp-shift-note--empty {
+.flz-planer-shift-note--empty {
     margin: 0;
 }
 
-.adp-shift-note-display {
+.flz-planer-shift-note-display {
     display: flex;
     align-items: flex-start;
     gap: 6px;
 }
 
-.adp-shift-note-display p {
+.flz-planer-shift-note-display p {
     flex: 1;
     min-width: 0;
     margin: 0;
     overflow-wrap: anywhere;
 }
 
-.adp-shift-note-actions {
+.flz-planer-shift-note-actions {
     display: inline-flex;
     flex: 0 0 auto;
     gap: 2px;
 }
 
-.adp-shift-note-editor {
+.flz-planer-shift-note-editor {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.adp-shift-note-editor[hidden] {
+.flz-planer-shift-note-editor[hidden] {
     display: none;
 }
 
-.adp-shift-note-editor label {
+.flz-planer-shift-note-editor label {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.adp-shift-note-editor textarea {
+.flz-planer-shift-note-editor textarea {
     width: 100%;
 }
 
-.adp-capacity {
+.flz-planer-capacity {
     display: inline-block;
     min-width: 2.5rem;
     padding: 2px 6px;
@@ -499,22 +499,22 @@
     text-align: center;
 }
 
-.adp-capacity--under {
+.flz-planer-capacity--under {
     color: var(--color-warning-text, #7c2d12);
     background: var(--color-warning-light, #ffedd5);
 }
 
-.adp-capacity--within {
+.flz-planer-capacity--within {
     color: #166534;
     background: #dcfce7;
 }
 
-.adp-capacity--over {
+.flz-planer-capacity--over {
     color: #991b1b;
     background: #fee2e2;
 }
 
-.adp-capacity--plain {
+.flz-planer-capacity--plain {
     min-width: 0;
     padding: 0;
     border-radius: 0;
@@ -522,20 +522,20 @@
     background: transparent;
 }
 
-.adp-plan-proposal {
+.flz-planer-plan-proposal {
     margin-top: 1.5rem;
 }
 
-.adp-proposal-candidates {
+.flz-planer-proposal-candidates {
     margin: 0;
     padding-inline-start: 1.5rem;
 }
 
-.adp-proposal-candidates li + li {
+.flz-planer-proposal-candidates li + li {
     margin-top: 4px;
 }
 
-.adp-visually-hidden {
+.flz-planer-visually-hidden {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -547,49 +547,49 @@
     border: 0;
 }
 
-.adp-chip button {
+.flz-planer-chip button {
     min-width: 24px;
     min-height: 24px;
     margin: 0;
     padding: 0 6px;
 }
 
-.adp-cell-actions {
+.flz-planer-cell-actions {
     margin-top: 8px;
 }
 
-.adp-small {
+.flz-planer-small {
     min-height: 30px;
     margin: 0;
     padding: 3px 8px;
 }
 
-.adp-icon-button {
+.flz-planer-icon-button {
     width: 32px;
     min-width: 32px;
     padding: 3px;
     text-align: center;
 }
 
-.adp-month-control {
+.flz-planer-month-control {
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
-.adp-month-control .adp-icon-button {
+.flz-planer-month-control .flz-planer-icon-button {
     min-height: 34px;
     margin: 0;
 }
 
-.adp-assignment-control {
+.flz-planer-assignment-control {
     position: relative;
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
-.adp-assignment-picker {
+.flz-planer-assignment-picker {
     position: absolute;
     left: 0;
     top: calc(100% + 4px);
@@ -606,36 +606,36 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, .18);
 }
 
-.adp-assignment-picker[hidden] {
+.flz-planer-assignment-picker[hidden] {
     display: none;
 }
 
-.adp-assignment-picker .adp-small {
+.flz-planer-assignment-picker .flz-planer-small {
     width: 100%;
     text-align: left;
 }
 
-.adp-note-cell textarea {
+.flz-planer-note-cell textarea {
     width: 100%;
     min-width: 210px;
     resize: vertical;
 }
 
-.adp-note-text {
+.flz-planer-note-text {
     white-space: pre-wrap;
 }
 
-.adp-table .is-weekend {
+.flz-planer-table .is-weekend {
     background-image: linear-gradient(rgba(0, 0, 0, .035), rgba(0, 0, 0, .035));
 }
 
-.adp-settings-form {
+.flz-planer-settings-form {
     display: grid;
     gap: 14px;
     max-width: 760px;
 }
 
-.adp-settings-form fieldset {
+.flz-planer-settings-form fieldset {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -645,40 +645,40 @@
     padding: 12px;
 }
 
-.adp-settings-form legend {
+.flz-planer-settings-form legend {
     padding: 0 6px;
     font-weight: 700;
 }
 
-.adp-check {
+.flz-planer-check {
     display: inline-flex !important;
     grid-template-columns: none !important;
     align-items: center;
     gap: 6px;
 }
 
-.adp-check input {
+.flz-planer-check input {
     width: auto;
 }
 
-.adp-settings-readonly {
+.flz-planer-settings-readonly {
     display: grid;
     grid-template-columns: max-content 1fr;
     gap: 8px 14px;
 }
 
-.adp-settings-readonly dt {
+.flz-planer-settings-readonly dt {
     color: var(--color-text-maxcontrast);
     font-weight: 700;
 }
 
-.adp-shift-list {
+.flz-planer-shift-list {
     display: grid;
     gap: 10px;
     width: 100%;
 }
 
-.adp-shift-row {
+.flz-planer-shift-row {
     display: grid;
     grid-template-columns: minmax(150px, 1.4fr) 130px 130px auto 40px;
     gap: 10px;
@@ -686,17 +686,17 @@
     width: 100%;
 }
 
-.adp-shift-row .adp-small {
+.flz-planer-shift-row .flz-planer-small {
     min-width: 34px;
 }
 
-.adp-readonly-shifts {
+.flz-planer-readonly-shifts {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
 }
 
-.adp-readonly-shift {
+.flz-planer-readonly-shift {
     display: inline-flex;
     min-height: 26px;
     align-items: center;
@@ -706,59 +706,59 @@
     background: var(--color-background-hover);
 }
 
-.adp-readonly-shift.is-disabled {
+.flz-planer-readonly-shift.is-disabled {
     opacity: .55;
 }
 
-.adp-loading {
+.flz-planer-loading {
     color: var(--color-text-maxcontrast);
 }
 
-.adp-mobile-plan {
+.flz-planer-mobile-plan {
     display: none;
 }
 
 @media (max-width: 700px) {
-    #adplaner-app {
+    #flzplaner-app {
         padding: 14px;
         padding-bottom: 90px;
     }
 
-    .adp-head {
+    .flz-planer-head {
         align-items: stretch;
     }
 
-    .adp-controls {
+    .flz-planer-controls {
         width: 100%;
     }
 
-    .adp-controls label {
+    .flz-planer-controls label {
         flex: 1 1 160px;
     }
 
-    .adp-tabs {
+    .flz-planer-tabs {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 2px;
     }
 
-    #adplaner-app .adp-tab,
-    #adplaner-app .adp-small,
-    #adplaner-app .adp-icon-button,
-    #adplaner-app .adp-chip button {
+    #flzplaner-app .flz-planer-tab,
+    #flzplaner-app .flz-planer-small,
+    #flzplaner-app .flz-planer-icon-button,
+    #flzplaner-app .flz-planer-chip button {
         min-height: 44px;
     }
 
-    .adp-desktop-plan {
+    .flz-planer-desktop-plan {
         display: none;
     }
 
-    .adp-mobile-plan {
+    .flz-planer-mobile-plan {
         display: grid;
         gap: 14px;
     }
 
-    .adp-mobile-day {
+    .flz-planer-mobile-day {
         display: grid;
         gap: 12px;
         min-width: 0;
@@ -768,35 +768,35 @@
         background: var(--color-main-background);
     }
 
-    .adp-mobile-day-head {
+    .flz-planer-mobile-day-head {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
         gap: 8px;
     }
 
-    .adp-mobile-day-head h3,
-    .adp-mobile-shift h4 {
+    .flz-planer-mobile-day-head h3,
+    .flz-planer-mobile-shift h4 {
         margin: 0;
     }
 
-    .adp-mobile-day-head h3 span {
+    .flz-planer-mobile-day-head h3 span {
         margin-left: 5px;
     }
 
-    .adp-mobile-day-head small,
-    .adp-mobile-shift small {
+    .flz-planer-mobile-day-head small,
+    .flz-planer-mobile-shift small {
         display: block;
         color: var(--color-text-maxcontrast);
         font-weight: 400;
     }
 
-    .adp-mobile-shifts {
+    .flz-planer-mobile-shifts {
         display: grid;
         gap: 10px;
     }
 
-    .adp-mobile-shift {
+    .flz-planer-mobile-shift {
         display: grid;
         gap: 8px;
         min-width: 0;
@@ -804,25 +804,25 @@
         padding-top: 10px;
     }
 
-    .adp-mobile-notes {
+    .flz-planer-mobile-notes {
         display: grid;
         gap: 8px;
         border-top: 1px solid var(--color-border);
         padding-top: 10px;
     }
 
-    .adp-mobile-notes textarea {
+    .flz-planer-mobile-notes textarea {
         box-sizing: border-box;
         width: 100%;
     }
 
-    .adp-workload-overlay {
+    .flz-planer-workload-overlay {
         right: auto;
         left: 0;
         width: calc(100vw - 28px);
     }
 
-    .adp-shift-row {
+    .flz-planer-shift-row {
         grid-template-columns: 1fr 1fr;
     }
 }

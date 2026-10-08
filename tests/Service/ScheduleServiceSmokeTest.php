@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/bootstrap.php';
 
-use OCA\AdPlaner\Model\ShiftCandidate;
-use OCA\AdPlaner\Model\ShiftSlot;
-use OCA\AdPlaner\Model\Team;
-use OCA\AdPlaner\Service\ScheduleService;
-use OCA\AdPlaner\Service\WorkloadPreferenceService;
-use OCA\AdPlaner\Service\ShiftConfigService;
-use OCA\AdPlaner\Service\TeamAccessService;
-use OCA\AdPlaner\Service\PlanningHintService;
-use OCA\AdPlaner\Service\FixedShiftService;
-use OCA\AdPlaner\Store\ShiftPlanStore;
-use function OCA\AdPlaner\Tests\assertDomainException;
-use function OCA\AdPlaner\Tests\assertSameValue;
+use OCA\FlzPlaner\Model\ShiftCandidate;
+use OCA\FlzPlaner\Model\ShiftSlot;
+use OCA\FlzPlaner\Model\Team;
+use OCA\FlzPlaner\Service\ScheduleService;
+use OCA\FlzPlaner\Service\WorkloadPreferenceService;
+use OCA\FlzPlaner\Service\ShiftConfigService;
+use OCA\FlzPlaner\Service\TeamAccessService;
+use OCA\FlzPlaner\Service\PlanningHintService;
+use OCA\FlzPlaner\Service\FixedShiftService;
+use OCA\FlzPlaner\Store\ShiftPlanStore;
+use function OCA\FlzPlaner\Tests\assertDomainException;
+use function OCA\FlzPlaner\Tests\assertSameValue;
 
 class FakeShiftPlanStoreForSchedule extends ShiftPlanStore {
     public array $added = [];
@@ -194,9 +194,9 @@ $assistants = [
     ['uid' => 'test-eb', 'displayName' => 'Test EB', 'isEb' => true, 'canReceiveShifts' => false],
 ];
 
-$assistantModel = \OCA\AdPlaner\Model\Assistant::get($assistants[0]);
-$assistantModels = \OCA\AdPlaner\Model\Assistant::get_all($assistants);
-assertSameValue(true, $assistantModel instanceof \OCA\AdPlaner\Model\Assistant, 'Assistant::get should hydrate API data.');
+$assistantModel = \OCA\FlzPlaner\Model\Assistant::get($assistants[0]);
+$assistantModels = \OCA\FlzPlaner\Model\Assistant::get_all($assistants);
+assertSameValue(true, $assistantModel instanceof \OCA\FlzPlaner\Model\Assistant, 'Assistant::get should hydrate API data.');
 assertSameValue(2, count($assistantModels), 'Assistant::get_all should hydrate API lists.');
 
 $settings = [
@@ -205,8 +205,8 @@ $settings = [
     ],
 ];
 
-$assistantTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, false, $settings);
-$ebTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, $settings);
+$assistantTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, $settings);
+$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, $settings);
 $mappedTeam = Team::get($ebTeam->toArray());
 assertSameValue('Team A1', $mappedTeam->toArray()['displayName'], 'Team::get should keep the API payload shape.');
 
@@ -395,7 +395,7 @@ $configuredStore->slots = [
     new ShiftSlot(10, 'A1', '2026-07', '2026-07-01', 'early', 'Altfrüh', '07:00', '13:00', true),
     new ShiftSlot(11, 'A1', '2026-07', '2026-07-01', 'obsolete', 'Alt', '00:00', '01:00', true),
 ];
-$configuredTeam = new Team('A1', 'ad-ASN-A1', 'Team A1', $assistants, true, [
+$configuredTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, [
     'shifts' => [
         ['key' => 'early', 'label' => 'Früh neu', 'startsAt' => '08:00', 'endsAt' => '14:00', 'enabled' => true],
         ['key' => 'late', 'label' => 'Spät', 'startsAt' => '14:00', 'endsAt' => '20:00', 'enabled' => true],
@@ -415,4 +415,4 @@ assertSameValue('late', $configuredStore->insertedSlots[0]['segmentKey'] ?? null
 assertSameValue(false, in_array('night', array_column($configuredStore->insertedSlots, 'segmentKey'), true), 'Disabled shift segments should not be inserted.');
 assertSameValue('Früh neu', $configuredPlan['days'][0]['slots'][0]['label'] ?? null, 'Month plan should use refreshed slot definitions.');
 
-echo 'AdPlaner schedule smoke tests passed' . PHP_EOL;
+echo 'FlzPlaner schedule smoke tests passed' . PHP_EOL;

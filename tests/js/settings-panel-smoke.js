@@ -7,7 +7,7 @@ require('../../js/modules/ui.js');
 require('../../js/components/shift-settings-list.js');
 require('../../js/components/settings-panel.js');
 
-const { settingsPanel, shiftSettingsList } = window.ADPlaner;
+const { settingsPanel, shiftSettingsList } = window.FlzPlaner;
 
 const team = {
     code: 'A1',
@@ -37,7 +37,7 @@ assert(!readonlyHtml.includes('Team <Settings>'));
 assert(readonlyHtml.includes('<dd>15.07.</dd>'));
 assert(readonlyHtml.includes('Früh &lt;A&gt; 08:00-14:00'));
 assert(!readonlyHtml.includes('Früh <A>'));
-assert(readonlyHtml.includes('adp-readonly-shift is-disabled'));
+assert(readonlyHtml.includes('flz-planer-readonly-shift is-disabled'));
 assert(!readonlyHtml.includes('id="settings-form"'));
 assert(readonlyHtml.includes('id="personal-workload-form"'));
 assert(readonlyHtml.includes('name="weeklyMin"'));
@@ -108,7 +108,7 @@ const originalNow = Date.now;
 Date.now = () => 1234567890;
 global.document = {
     getElementById(id) {
-        assert.strictEqual(id, 'adp-shift-list');
+        assert.strictEqual(id, 'flz-planer-shift-list');
 
         return shiftList;
     }
@@ -138,7 +138,7 @@ removeButton.closest = selector => {
 };
 global.document = {
     getElementById(id) {
-        assert.strictEqual(id, 'adp-shift-list');
+        assert.strictEqual(id, 'flz-planer-shift-list');
 
         return {
             querySelectorAll(selector) {
@@ -180,4 +180,4 @@ function row(values) {
     };
 }
 
-console.log('AdPlaner settings panel smoke test passed.');
+console.log('FlzPlaner settings panel smoke test passed.');

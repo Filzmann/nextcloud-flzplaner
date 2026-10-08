@@ -6,7 +6,7 @@ namespace OCP\EventDispatcher {
     interface IEventListener { public function handle(Event $event):void; }
 }
 
-namespace OCA\FilzmannPermissionMatrix\PublicApi\V1 {
+namespace OCA\FlzPermissionMatrix\PublicApi\V1 {
     interface PermissionProvider { public function descriptor(): PermissionProviderDescriptor; public function collect(): PermissionProviderResult; }
     final class PermissionProviderDescriptor { public function __construct(...$args) {} }
     final class PermissionCondition { private function __construct(public string $operator, public ?string $groupId=null, public array $children=[]) {} public static function group(string $id):self{return new self('group',$id);} public static function all(array $c):self{return new self('all',null,$c);} public static function any(array $c):self{return new self('any',null,$c);} public static function self():self{return new self('self');} public static function authenticated():self{return new self('authenticated');} public static function nextcloudAdmin():self{return new self('nextcloud-admin');} public static function temporaryAppAdminGrant():self{return new self('app-admin-grant');} }
@@ -17,15 +17,15 @@ namespace OCA\FilzmannPermissionMatrix\PublicApi\V1 {
 namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
-    use OCA\AdPlaner\Permission\PlanerPermissionProvider;
-    use OCA\AdPlaner\Permission\PlanerPermissionProviderListener;
-    use OCA\AdPlaner\Permission\PlanerPermissionSourceInterface;
-    use OCA\FilzmannPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
-    $source=new class implements PlanerPermissionSourceInterface { public function teamGroupIds():array{return ['ad-ASN-A','ad-ASN-B'];} public function ebGroupId():string{return 'ad-EB';} };
+    use OCA\FlzPlaner\Permission\PlanerPermissionProvider;
+    use OCA\FlzPlaner\Permission\PlanerPermissionProviderListener;
+    use OCA\FlzPlaner\Permission\PlanerPermissionSourceInterface;
+    use OCA\FlzPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
+    $source=new class implements PlanerPermissionSourceInterface { public function teamGroupIds():array{return ['flz-ASN-A','flz-ASN-B'];} public function ebGroupId():string{return 'flz-EB';} };
     $provider=new PlanerPermissionProvider($source); $result=$provider->collect(); $by=[]; foreach($result->rules as $rule)$by[$rule->permission][]=$rule;
     if(count($by['plan.team.read']??[])!==2)throw new RuntimeException('Jedes vorhandene Team braucht eine Leseregel.');
     $coordinate=$by['plan.team.coordinate'][0]??null;
-    if($coordinate?->condition->operator!=='all'||array_map(fn($c)=>$c->groupId,$coordinate->condition->children)!==['ad-ASN-A','ad-EB'])throw new RuntimeException('Koordination muss Team UND EB verlangen.');
+    if($coordinate?->condition->operator!=='all'||array_map(fn($c)=>$c->groupId,$coordinate->condition->children)!==['flz-ASN-A','flz-EB'])throw new RuntimeException('Koordination muss Team UND EB verlangen.');
     if(($by['plan.assignment.manage-own'][0]->condition->operator??null)!=='all')throw new RuntimeException('Eigene Zuweisungen müssen zusätzlich an das Team gebunden bleiben.');
     if(count($by['plan.assignment.preference.manage-own']??[])!==2)throw new RuntimeException('Eigene Schichtreaktionen und -anmerkungen brauchen je Team eine eigene Regel.');
     if(count($by['plan.fixed-shift.manage-own']??[])!==2)throw new RuntimeException('Eigene regelmäßige Schichten brauchen je Team eine eigene Regel.');

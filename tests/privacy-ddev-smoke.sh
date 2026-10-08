@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_url="${ADP_BASE_URL:-https://nextcloud-dev.ddev.site}"
-ddev_project="${ADP_DDEV_PROJECT:-$(cd "$(dirname "$0")/../../nextcloud-dev" && pwd)}"
+base_url="${FLZP_BASE_URL:-https://nextcloud-dev.ddev.site}"
+ddev_project="${FLZP_DDEV_PROJECT:-$(cd "$(dirname "$0")/../../nextcloud-dev" && pwd)}"
 suffix="$(date +%s)$$"
 team_code="P${suffix: -15}"
-team_group="ad-ASN-$team_code"
+team_group="flz-ASN-$team_code"
 month='2098-11'
 work_date="$month-03"
-actor="adp-privacy-$suffix-eb"
-active="adp-privacy-$suffix-active"
-disabled="adp-privacy-$suffix-disabled"
+actor="flz-planer-privacy-$suffix-eb"
+active="flz-planer-privacy-$suffix-active"
+disabled="flz-planer-privacy-$suffix-disabled"
 created_users=()
 workdir="$(mktemp -d)"
-probe='/var/www/html/html/custom_apps/adplaner/tests/integration/PrivacyRuntimeProbe.php'
+probe='/var/www/html/html/custom_apps/flzplaner/tests/integration/PrivacyRuntimeProbe.php'
 
 occ() {
     (cd "$ddev_project" && ddev exec -d /var/www/html/html php occ "$@")
@@ -49,8 +49,8 @@ create_user() {
     occ group:adduser "$team_group" "$uid" >/dev/null
 }
 
-if ! occ group:info ad-EB >/dev/null 2>&1; then
-    echo 'Die bestehende EB-Rollengruppe ad-EB fehlt; der Smoke verändert die Organisationskonfiguration nicht.' >&2
+if ! occ group:info flz-EB >/dev/null 2>&1; then
+    echo 'Die bestehende EB-Rollengruppe flz-EB fehlt; der Smoke verändert die Organisationskonfiguration nicht.' >&2
     exit 1
 fi
 
@@ -58,7 +58,7 @@ occ group:add "$team_group" >/dev/null
 create_user "$actor"
 create_user "$active"
 create_user "$disabled"
-occ group:adduser ad-EB "$actor" >/dev/null
+occ group:adduser flz-EB "$actor" >/dev/null
 occ user:disable "$disabled" >/dev/null
 
 page="$workdir/page.html"
@@ -67,14 +67,14 @@ plan="$workdir/plan.json"
 response="$workdir/response.json"
 
 curl --fail --silent --show-error --insecure --user "$actor:$actor" \
-    --cookie-jar "$cookies" "$base_url/index.php/apps/adplaner/" --output "$page"
+    --cookie-jar "$cookies" "$base_url/index.php/apps/flzplaner/" --output "$page"
 token="$(sed -n 's/.*data-requesttoken="\([^"]*\)".*/\1/p' "$page" | head -n 1)"
 if [[ -z "$token" ]]; then
     echo 'Request-Token fehlt.' >&2
     exit 1
 fi
 
-plan_endpoint="$base_url/index.php/apps/adplaner/api/teams/$team_code/months/$month"
+plan_endpoint="$base_url/index.php/apps/flzplaner/api/teams/$team_code/months/$month"
 curl --fail --silent --show-error --insecure --user "$actor:$actor" \
     --cookie "$cookies" --cookie-jar "$cookies" -H "requesttoken: $token" \
     "$plan_endpoint" --output "$plan"
@@ -133,4 +133,4 @@ if occ group:info "$team_group" >/dev/null 2>&1; then
     exit 1
 fi
 
-echo 'AdPlaner datensparsamer DDEV-Runtime-Smoke: OK'
+echo 'FlzPlaner datensparsamer DDEV-Runtime-Smoke: OK'

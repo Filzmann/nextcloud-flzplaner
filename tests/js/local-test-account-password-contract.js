@@ -18,6 +18,6 @@ scripts.forEach(relativePath => {
 
 const browser = fs.readFileSync(path.join(root, 'tests/js/browser-ddev-smoke.mjs'), 'utf8');
 assert(browser.includes('JSON.stringify(uid)'), 'Der Browser-Smoke meldet lokale Testkonten nicht mit UID = Passwort an.');
-assert(!browser.includes('ADP_BROWSER_PASSWORD'), 'Der Browser-Smoke erwartet weiterhin ein gemeinsames Testpasswort.');
+assert(!browser.includes('FLZP_BROWSER_PASSWORD'), 'Der Browser-Smoke erwartet weiterhin ein gemeinsames Testpasswort.');
 
-console.log('AdPlaner local test account password contract passed.');
+console.log('FlzPlaner local test account password contract passed.');

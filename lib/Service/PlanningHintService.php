@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Service;
+namespace OCA\FlzPlaner\Service;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use OCA\AdPlaner\Model\ShiftSlot;
+use OCA\FlzPlaner\Model\ShiftSlot;
 use OCA\LocalBase\Calendar\AbsenceInterval;
 use OCA\LocalBase\Calendar\AbsenceQueryEvent;
 use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
@@ -16,7 +16,7 @@ use OCP\EventDispatcher\IEventDispatcher;
 class PlanningHintService {
     public function __construct(
         private IEventDispatcher $events,
-        private AdPlanerLogger $logger,
+        private FlzPlanerLogger $logger,
     ) {}
 
     /** @param list<string> $employeeUids
@@ -73,7 +73,7 @@ class PlanningHintService {
 
         foreach ($employeeUids as $employeeUid) {
             try {
-                $conflictEvent = new ScheduleConflictQueryEvent($employeeUid, $start, $end, 'adplaner');
+                $conflictEvent = new ScheduleConflictQueryEvent($employeeUid, $start, $end, 'flzplaner');
                 $this->events->dispatchTyped($conflictEvent);
                 foreach ($conflictEvent->conflicts() as $conflict) {
                     $payload = $conflict->toArray();
@@ -135,7 +135,7 @@ class PlanningHintService {
         }
 
         try {
-            $event = new ScheduleConflictQueryEvent($employeeUid, $start, $end, 'adplaner');
+            $event = new ScheduleConflictQueryEvent($employeeUid, $start, $end, 'flzplaner');
             $this->events->dispatchTyped($event);
             foreach ($event->conflicts() as $conflict) {
                 if ($conflict->type() === 'shift' && $conflict->start() < $end && $conflict->end() > $start) {

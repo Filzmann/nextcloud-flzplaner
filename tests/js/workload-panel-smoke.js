@@ -26,18 +26,18 @@ const plan = {
     ]}]}],
 };
 
-const ebHtml = window.ADPlaner.workloadPanel.render(plan);
-assert(ebHtml.includes('id="adp-workload-heading"'));
-assert(ebHtml.includes('class="adp-week-capacities"'), 'Kalenderwochen müssen kompakt in einer gemeinsamen Zeile gruppiert werden.');
+const ebHtml = window.FlzPlaner.workloadPanel.render(plan);
+assert(ebHtml.includes('id="flz-planer-workload-heading"'));
+assert(ebHtml.includes('class="flz-planer-week-capacities"'), 'Kalenderwochen müssen kompakt in einer gemeinsamen Zeile gruppiert werden.');
 assert(!ebHtml.includes('<br>'), 'Kalenderwochen dürfen das Overlay nicht durch erzwungene Zeilenumbrüche aufblähen.');
-assert(ebHtml.includes('<details class="adp-proposal-help"><summary>Sortierung</summary>'), 'Die ausführliche Sortiererklärung muss platzsparend einklappbar sein.');
+assert(ebHtml.includes('<details class="flz-planer-proposal-help"><summary>Sortierung</summary>'), 'Die ausführliche Sortiererklärung muss platzsparend einklappbar sein.');
 assert(ebHtml.includes('1 Schicht ohne Wünsche'), 'Leere Schichten müssen kompakt zusammengefasst werden.');
 assert(!ebHtml.includes('>Keine Wünsche</span>'), 'Leere Schichten dürfen den Vorschlag nicht mit einzelnen Tabellenzeilen verlängern.');
-assert(ebHtml.includes('class="adp-capacity adp-capacity--under" title="2 von mindestens 3">&lt;3</span>'));
-assert(ebHtml.includes('class="adp-capacity adp-capacity--within" title="4 von maximal 5">4/5</span>'));
-assert(ebHtml.includes('class="adp-capacity adp-capacity--over" title="8 von maximal 5">8/5</span>'));
-assert(ebHtml.includes('<th scope="row">Ohne Grenzen</th><td><span class="adp-capacity adp-capacity--plain" title="6 Schichten">6</span></td>'), 'Ohne Monatsgrenzen darf nur die aktuelle Anzahl ohne Farbmarkierung erscheinen.');
-assert(ebHtml.includes('<span>KW 36</span><span class="adp-capacity adp-capacity--plain" title="2 Schichten">2</span>'), 'Ohne Wochengrenzen darf nur die aktuelle Anzahl ohne Farbmarkierung erscheinen.');
+assert(ebHtml.includes('class="flz-planer-capacity flz-planer-capacity--under" title="2 von mindestens 3">&lt;3</span>'));
+assert(ebHtml.includes('class="flz-planer-capacity flz-planer-capacity--within" title="4 von maximal 5">4/5</span>'));
+assert(ebHtml.includes('class="flz-planer-capacity flz-planer-capacity--over" title="8 von maximal 5">8/5</span>'));
+assert(ebHtml.includes('<th scope="row">Ohne Grenzen</th><td><span class="flz-planer-capacity flz-planer-capacity--plain" title="6 Schichten">6</span></td>'), 'Ohne Monatsgrenzen darf nur die aktuelle Anzahl ohne Farbmarkierung erscheinen.');
+assert(ebHtml.includes('<span>KW 36</span><span class="flz-planer-capacity flz-planer-capacity--plain" title="2 Schichten">2</span>'), 'Ohne Wochengrenzen darf nur die aktuelle Anzahl ohne Farbmarkierung erscheinen.');
 assert(!ebHtml.includes('Unter persönlichem Minimum'));
 assert(!ebHtml.includes('Über persönlichem Maximum'));
 assert(ebHtml.includes('Grober Planvorschlag'));
@@ -51,7 +51,7 @@ assert(proposalHtml.includes('2 Urlaubskonflikte nicht vorgeschlagen'), 'Ausgela
 assert(proposalHtml.includes('title="Feste Schicht"'));
 assert(!ebHtml.includes('data-action='), 'Der Vorschlag darf den Plan nicht automatisch verändern.');
 
-const personalHtml = window.ADPlaner.workloadPanel.render({...plan, team:{...plan.team,canCoordinate:false}, workload:[plan.workload[1]]});
+const personalHtml = window.FlzPlaner.workloadPanel.render({...plan, team:{...plan.team,canCoordinate:false}, workload:[plan.workload[1]]});
 assert.strictEqual(personalHtml, '', 'Normale Mitglieder erhalten weder Auslastungs-Overlay noch Team-Planvorschlag.');
 
-console.log('AdPlaner workload panel smoke test passed.');
+console.log('FlzPlaner workload panel smoke test passed.');

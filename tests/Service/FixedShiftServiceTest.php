@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/bootstrap.php';
 
-use OCA\AdPlaner\Model\ShiftCandidate;
-use OCA\AdPlaner\Model\ShiftSlot;
-use OCA\AdPlaner\Model\Team;
-use OCA\AdPlaner\Service\FixedShiftService;
-use OCA\AdPlaner\Service\ShiftConfigService;
-use OCA\AdPlaner\Store\ShiftPlanStore;
-use function OCA\AdPlaner\Tests\assertDomainException;
-use function OCA\AdPlaner\Tests\assertSameValue;
+use OCA\FlzPlaner\Model\ShiftCandidate;
+use OCA\FlzPlaner\Model\ShiftSlot;
+use OCA\FlzPlaner\Model\Team;
+use OCA\FlzPlaner\Service\FixedShiftService;
+use OCA\FlzPlaner\Service\ShiftConfigService;
+use OCA\FlzPlaner\Store\ShiftPlanStore;
+use function OCA\FlzPlaner\Tests\assertDomainException;
+use function OCA\FlzPlaner\Tests\assertSameValue;
 
 final class FixedShiftStoreFake extends ShiftPlanStore {
     public array $rules = [];
@@ -46,8 +46,8 @@ $settings = ['shifts'=>[
     ['key'=>'early','label'=>'Früh','startsAt'=>'08:00','endsAt'=>'14:10','enabled'=>true],
     ['key'=>'late','label'=>'Spät','startsAt'=>'14:00','endsAt'=>'20:00','enabled'=>true],
 ]];
-$assistantTeam = new Team('A1','ad-ASN-A1','Team A1',$assistants,false,$settings);
-$ebTeam = new Team('A1','ad-ASN-A1','Team A1',$assistants,true,$settings);
+$assistantTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,false,$settings);
+$ebTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,true,$settings);
 $store = new FixedShiftStoreFake();
 $service = new FixedShiftService($store, new ShiftConfigService());
 
@@ -91,4 +91,4 @@ assertDomainException(static fn() => $service->resolveConflict($assistantTeam, '
 
 assertSameValue(true, $service->deleteOwnOccurrence($assistantTeam, $slots[0], 'a'), 'Eine eigene Festschicht muss als dauerhafte Ausnahme löschbar sein.');
 
-echo "AdPlaner fixed shift service tests passed\n";
+echo "FlzPlaner fixed shift service tests passed\n";

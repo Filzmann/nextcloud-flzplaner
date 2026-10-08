@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OCA\AdPlaner\Service;
+namespace OCA\FlzPlaner\Service;
 
 use InvalidArgumentException;
-use OCA\AdPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
+use OCA\FlzPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IGroupManager;
 use OCP\IUserSession;
