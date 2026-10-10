@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Nextcloud 35.0.1 durch Fresh Install, Upgrade 34→35 sowie Provider-,
+  Berechtigungs-, Runtime-, UI-/API- und Asset-Smokes nachgewiesen und den
+  unterstützten Bereich auf die lückenlosen Hauptversionen 33 bis 35
+  erweitert. Nextcloud 36 bleibt ungeprüft.
 - Temporären fachlichen Admin-Vollzugriff auf höchstens 24 Stunden begrenzt:
   Nur `Datenschutzbeauftragte` dürfen aktuelle Nextcloud-Administrationskonten
   in der Hauptoberfläche freigeben oder widerrufen; native Administration
