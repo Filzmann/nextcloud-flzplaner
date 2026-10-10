@@ -4,7 +4,7 @@ Monatliche Wunschdienstplanung für Assistenzteams. Urlaubsplanung liegt ausschl
 
 ## Staging-Kompatibilität
 
-- Nextcloud 33 und 34
+- Nextcloud 33 bis 35
 - PHP 8.3 oder neuer innerhalb des von der jeweiligen Nextcloud-Version unterstützten Bereichs
 - Laufzeitbasis: `localbase`; `orgsuite` ist ab zwei FLZ-Fachprodukten optional aktiv
 - App-ID und Installationsordner: `flzplaner`

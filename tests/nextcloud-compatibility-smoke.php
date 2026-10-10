@@ -18,6 +18,7 @@ return [
     'preGrantUiStatuses' => [200],
     'postGrantUiStatuses' => [200],
     'grantService' => TemporaryAdminAccessService::class,
+    'grantManagerGroups' => ['Datenschutzbeauftragte'],
     'permissionProbe' => static fn(string $uid): bool => OCP\Server::get(TemporaryAdminAccessService::class)
         ->hasActiveGrant($uid),
     'apiSmokes' => [
