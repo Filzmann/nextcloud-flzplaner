@@ -36,7 +36,7 @@ Begründung verpflichtend.
 | A3 | Team und Monat | Zwischen mindestens zwei synthetischen Teams sowie vorherigem und nächstem Monat wechseln. | Auswahl, Überschrift, Tage, Schichten und Zuweisungen gehören stets zum gewählten Team und Monat. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | A4 | Monatsgrenzen | Februar sowie einen Monats-/Jahreswechsel öffnen. | Kalendertage und gespeicherte Planwerte werden ohne fehlende oder doppelte Tage angezeigt. | [x] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | A5 | Tastatur und Fokus | Team-, Monats-, Tab- und Plansteuerung nur mit Tastatur bedienen. | Alle Funktionen sind erreichbar, der Fokus ist sichtbar und die Tabs melden Auswahl und Zielbereich korrekt. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
-| A6 | Responsivität und Scrollen | Viele Schichten und Personen bei kleinem Fenster anzeigen und horizontal sowie vertikal scrollen. | App-Inhalte bleiben erreichbar; der App-Root scrollt vertikal und breite Planungselemente sprengen nicht die Nextcloud-Seite. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| A6 | Responsivität und Scrollen | Viele Schichten und Personen nacheinander bei breitem und kleinem Fenster anzeigen und horizontal sowie vertikal scrollen. | App-Inhalte bleiben erreichbar; der App-Root scrollt vertikal, breite Planungselemente sprengen nicht die Nextcloud-Seite und es ist jeweils nur die passende Desktopmatrix oder mobile Tagesliste sichtbar. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 
 ## B. Schichtkonfiguration und Wunschplanung
 
@@ -48,7 +48,7 @@ Begründung verpflichtend.
 | B4 | Eigener Wunsch | Als schichtfähiges Teammitglied einen eigenen Wunsch hinzufügen, Bemerkung speichern und den Wunsch wieder entfernen. | Nur der eigene Eintrag wird verändert; Status und Bemerkung bleiben nach Neuladen erhalten. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | B5 | Fremdzuweisung durch EB | Als zuständige EB eine andere schichtfähige Person zuweisen und wieder entfernen. | Die Zuweisung ist möglich und betrifft ausschließlich das gewählte Team und die gewählte Schicht. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 | B6 | EB nicht schichtfähig | Versuchen, das reine EB-Testkonto selbst einer Schicht zuzuweisen. | Das EB-Konto wird nicht als schichtfähige Person angeboten beziehungsweise serverseitig abgewiesen. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
-| B7 | Planstatus | Als EB die angebotenen Statuswechsel einschließlich `planned` und `approved` durchführen; als normales Teammitglied wiederholen. | Nur die EB kann den Status wechseln; unberechtigte Versuche verändern den Plan nicht. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
+| B7 | Planstatus | Als EB die angebotenen Statuswechsel einschließlich `planned` und `approved` durchführen; im genehmigten Plan Wünsche, Zuweisungen und Bemerkungen zu ändern versuchen; als normales Teammitglied den Statuswechsel wiederholen. | Nur die EB kann den Status wechseln; ein genehmigter Plan bleibt bis zur berechtigten Rücknahme gegen Änderungen gesperrt und unberechtigte Versuche verändern den Plan nicht. | [ ] erfolgreich [ ] nicht erfolgreich [ ] nicht geprüft | |
 
 ## C. Team- und Rechteabgrenzung
 
@@ -77,10 +77,10 @@ Begründung verpflichtend.
 | Anzahl erfolgreich | 4 |
 | Anzahl nicht erfolgreich | 0 |
 | Anzahl nicht geprüft | 19 |
-| Kritische Abweichungen / Ticketreferenzen | Siehe `FLZP-STAGING-FOLLOWUP` in `ROADMAP.md`.<br>Beobachtet wurden fehlende Planstatus/Änderungssperre, fehlende read-only Integrationshinweise, der ausstehende direkte Fremdänderungs-Deny sowie Abweichungen bei Monatsnavigation, Scrollleiste, Kommentar-Speicheraktion und Mitarbeiterauswahl. Zusätzlich erschien unterhalb des Monatsplans eine weitere Schichtdarstellung. |
+| Kritische Abweichungen / Ticketreferenzen | Historischer Befund vom 02.08.2026: fehlende Planstatus/Änderungssperre, fehlende read-only Integrationshinweise, der ausstehende direkte Fremdänderungs-Deny sowie Abweichungen bei Monatsnavigation, Scrollleiste, Kommentar-Speicheraktion, Mitarbeiterauswahl und eine doppelte Schichtdarstellung. Die Umsetzung ist seit `0.4.0-rc.1` dokumentiert und automatisiert abgedeckt; die Wiederholungsabnahme am aktuell bereitgestellten Stand bleibt offen. |
 | Erneute Prüfung erforderlich bis | Vor Freigabe einer abnahmefähigen Version; kein konkretes Datum festgelegt |
 | Gesamtentscheidung | [ ] abgenommen [ ] mit Auflagen abgenommen [ ] nicht abgenommen |
-| Begründung der Gesamtentscheidung | Die zentrale Planfreigabe einschließlich Statusverwaltung und Änderungssperre fehlt. Außerdem werden optionale Urlaubs- beziehungsweise Kalenderhinweise nicht wie vorgesehen dargestellt. C3 ist serverseitig noch nicht vollständig geprüft. |
+| Begründung der Gesamtentscheidung | Der historische Stand vom 02.08.2026 war wegen der genannten Abweichungen nicht freigabefähig. Dieses Formular enthält noch keine neue Gesamtentscheidung für den aktuell bereitgestellten Stand. |
 | Name / Datum | Simon / 02.08.2026 |
 
 

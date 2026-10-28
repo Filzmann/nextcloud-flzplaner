@@ -20,4 +20,8 @@ class TeamSettingsService {
     public function save(string $teamCode, string $displayName, array $config): array {
         return $this->store->save($teamCode, $displayName, $config)->toArray();
     }
+
+    public function saveBureauKey(string $teamCode, string $bureauKey): array {
+        return $this->store->saveBureauKey($teamCode, $bureauKey)->toArray();
+    }
 }

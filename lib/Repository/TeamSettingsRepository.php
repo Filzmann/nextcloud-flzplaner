@@ -62,4 +62,17 @@ class TeamSettingsRepository {
             ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)));
         $qb->executeStatement();
     }
+
+    public function saveBureauKey(string $teamCode, string $bureauKey): void {
+        $existing = $this->findByCode($teamCode);
+        if ($existing === null) {
+            throw new \DomainException('Das Assistenzteam besitzt noch keine Einstellungen.');
+        }
+        $qb = $this->db->getQueryBuilder();
+        $qb->update('flz_planer_team_settings')
+            ->set('bureau_key', $qb->createNamedParameter($bureauKey))
+            ->set('updated_at', $qb->createNamedParameter(new DateTimeImmutable(), IQueryBuilder::PARAM_DATETIME_IMMUTABLE))
+            ->where($qb->expr()->eq('team_code', $qb->createNamedParameter($teamCode)));
+        $qb->executeStatement();
+    }
 }

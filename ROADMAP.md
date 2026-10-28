@@ -12,25 +12,15 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 - Den umgesetzten temporären Admin-Vollzugriff einschließlich DPO-Steuerung,
   Rollenmatrix, CSRF und Tastaturbedienung in DDEV und auf Staging abnehmen.
 - Produktive Rechte- und Datenschutzprüfung der Wunschdienstplanung.
-- Monatsplan, variable Schichten, EB-Koordination und Standalone-Betrieb auf einem realitätsnahen Staging fachlich abnehmen.
+- Monatsplan, variable Schichten, EB-Koordination und Standalone-Betrieb auf
+  einem realitätsnahen Staging fachlich erneut abnehmen. Dabei die seit
+  `0.4.0-rc.1` automatisiert belegten früheren Abweichungen zu Planstatus,
+  optionalen Hinweisen, direkter Fremdänderung, Navigation, Scrollen,
+  Bemerkungen, Mitarbeiterauswahl und exklusiver Desktop-/Mobilprojektion am
+  aktuell bereitgestellten Stand bestätigen.
 - Die mobile Tagesliste für Assistenz und EB in realen Smartphone-Browsern
   mit langen Beschriftungen, Tastatur/Fokus, 200-Prozent-Zoom, Touchzielen
   und vertikalem Scrollen abnehmen.
-
-### FLZP-STAGING-FOLLOWUP – Abweichungen der laufenden Abnahme schließen
-
-- Die Planstatus `planned` und `approved` einschließlich der fachlichen
-  Änderungssperre vollständig in Oberfläche und serverseitigem Vertrag
-  abbilden.
-- Optionale Urlaubs- und Kalenderhinweise ausschließlich read-only anzeigen;
-  ihr Fehlen darf den Standalone-Monatsplan weiterhin nicht blockieren.
-- Fremdänderungen durch normale Teammitglieder auch per direktem Request
-  negativ prüfen und die Mutationsfreiheit belegen.
-- Monatsnavigation, dauerhaft erreichbare horizontale Scrollleiste,
-  Kommentar-Speicheraktion und Mitarbeiterauswahl nacharbeiten.
-- Die in der Abnahme zusätzlich unterhalb des Monatsplans erschienene
-  Schichtdarstellung prüfen und eine unbeabsichtigte doppelte Darstellung
-  entfernen.
 
 ## Geplante Erweiterungen
 

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Den früheren Staging-Follow-up gegen den vorhandenen Status-, Rechte-,
+  Integrations- und UI-Vertrag abgeglichen und die Browserabnahme um den
+  expliziten Ausschluss einer doppelten Desktop-/Mobilprojektion ergänzt.
 - Nextcloud 35.0.1 durch Fresh Install, Upgrade 34→35 sowie Provider-,
   Berechtigungs-, Runtime-, UI-/API- und Asset-Smokes nachgewiesen und den
   unterstützten Bereich auf die lückenlosen Hauptversionen 33 bis 35
