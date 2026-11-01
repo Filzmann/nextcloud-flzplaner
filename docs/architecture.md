@@ -76,6 +76,19 @@ bei eigener Berechtigung zur Freigabeverwaltung gerendert. Der technische,
 ausschließlich synthetische Demo-Pack ist hiervon getrennt und darf nach
 Bestätigung von jedem nativen Nextcloud-Admin installiert werden.
 
+Die Planer-Ausnahme für Einsatzbegleitungen setzt bei jedem Historienzugriff
+und jeder Mutation die aktuelle Schnittmenge aus der kanonischen EB-Rolle und
+mindestens einer aktuell ermittelten Assistenzteam-Gruppe voraus. Reine
+Rollen- oder Teammitgliedschaft, unbekannte beziehungsweise manipulierte
+Teamgruppen und Fehler der Organisations- oder Gruppenquelle bleiben ohne
+Zugriff und ohne Mutation. Der Verlust einer der beiden Mitgliedschaften
+entzieht die Verwaltungsberechtigung sofort, beendet aber keine zuvor
+wirksam erteilte Freigabe des Ziel-Admins rückwirkend; diese endet durch
+Ablauf, Verlust des nativen Adminstatus oder den Widerruf einer zu diesem
+Zeitpunkt berechtigten Person. Die Ausnahme umfasst ausschließlich
+`plan.admin-grant.manage` und erzeugt weder ein eigenes fachliches Vollrecht
+der EB noch weitere teamübergreifende Planerrechte.
+
 Der zusätzliche `ProcessingMetadataProvider` veröffentlicht den app-eigenen
 Katalog `resources/privacy-processing.json` lazy über den öffentlichen
 Standalone-V1-Vertrag des Datenschutz-Centers. Der Katalog ist die kanonische

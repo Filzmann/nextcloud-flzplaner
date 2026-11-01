@@ -77,6 +77,13 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
   `Datenschutzbeauftragte` sowie zuständige Einsatzbegleitungen mit aktueller
   Assistenzteam-Mitgliedschaft dürfen die Freigabe in der Hauptoberfläche
   erteilen oder widerrufen; nativer Adminstatus allein reicht dafür nicht.
+  Die EB-Ausnahme setzt bei jeder Lese-, Erteilungs- und Widerrufsaktion die
+  aktuelle Schnittmenge aus kanonischer EB-Rollengruppe und mindestens einer
+  aktuell ermittelten Assistenzteam-Gruppe voraus. Unbekannte Gruppen und
+  Quellen- oder Prüffehler bleiben fail-closed. Der Verlust einer der beiden
+  Mitgliedschaften entzieht die Freigabeverwaltung sofort; eine bereits
+  erteilte Adminfreigabe endet weiterhin durch Ablauf, Verlust des nativen
+  Adminstatus oder Widerruf einer aktuell berechtigten Person.
   Der sichere Eintrittshinweis erscheint nur für betroffene native
   Administrationskonten und verlinkt die Steuerung nur, wenn das Konto selbst
   zur Freigabeverwaltung berechtigt ist.

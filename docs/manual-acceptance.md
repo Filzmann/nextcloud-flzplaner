@@ -95,6 +95,11 @@ In einer freigegebenen DDEV- oder Staging-Umgebung mit synthetischen Konten prü
   ein bestätigtes Administrationskonto freigeben sowie widerrufen; eine reine
   EB-Rolle und eine manipulierte, nicht vorhandene Teamgruppe bleiben ohne
   Zugriff und Mutation.
+- Nach Entzug der EB-Rolle oder der letzten aktuellen Teammitgliedschaft
+  verliert die zuvor berechtigte EB sofort Historien-, Erteilungs- und
+  Widerrufszugriff. Eine bereits wirksame Freigabe des Ziel-Admins bleibt bis
+  zu Ablauf, Verlust des nativen Adminstatus oder Widerruf durch eine aktuell
+  berechtigte Person bestehen.
 - Native Administration ohne Datenschutz- oder zuständige EB-Rolle erhält weder Steuerung noch
   Direktlink und direkte Schreibrequests bleiben mutationsfrei mit HTTP 403.
 - Ein gewöhnliches Konto sieht weder Eintrittshinweis noch Steuerung und
