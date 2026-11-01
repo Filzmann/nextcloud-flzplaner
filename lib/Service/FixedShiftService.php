@@ -20,6 +20,7 @@ final class FixedShiftService {
     }
 
     public function savePersonal(Team $team, string $uid, array $rules): array {
+        $this->assertPermission($team, PlanerPermissionPolicy::FIXED_SHIFT_MANAGE_OWN);
         $assistant = $team->assistantByUid($uid);
         if ($assistant === null || !$assistant->canReceiveShifts) throw new \DomainException('Nur schichtfähige Assistenzkräfte dürfen regelmäßige Schichten speichern.');
         $segments = [];
@@ -85,13 +86,14 @@ final class FixedShiftService {
                 'status'=>(string)($report['status'] ?? 'detected'),
                 'candidateUids'=>$uids,
                 'canReport'=>in_array($currentUid,$uids,true) && ($report['status'] ?? '') !== 'escalated',
-                'canResolve'=>$team->isEb && ($report['status'] ?? '') === 'escalated',
+                'canResolve'=>$team->hasPermission(PlanerPermissionPolicy::FIXED_CONFLICT_RESOLVE) && ($report['status'] ?? '') === 'escalated',
             ];
         }
         return $result;
     }
 
     public function reportConflict(Team $team, string $month, ShiftSlot $slot, string $uid): void {
+        $this->assertPermission($team, PlanerPermissionPolicy::FIXED_SHIFT_MANAGE_OWN);
         if ($slot->teamCode !== $team->code || $slot->planMonth !== $this->shiftConfig->normalizeMonth($month)) throw new \DomainException('Diese Schicht gehört nicht zum Plan.');
         $conflict = $this->conflictsForSlots($team, [$slot->id], $uid)[$slot->id] ?? null;
         if ($conflict === null || !in_array($uid,$conflict['candidateUids'],true)) throw new \DomainException('Nur Beteiligte dürfen diesen Konflikt weitergeben.');
@@ -99,10 +101,14 @@ final class FixedShiftService {
     }
 
     public function resolveConflict(Team $team, string $month, ShiftSlot $slot, string $keptUid, string $uid): void {
-        if (!$team->isEb) throw new \DomainException('Nur die Einsatzbegleitung darf Festschichtkonflikte lösen.');
+        $this->assertPermission($team, PlanerPermissionPolicy::FIXED_CONFLICT_RESOLVE);
         if ($slot->teamCode !== $team->code || $slot->planMonth !== $this->shiftConfig->normalizeMonth($month)) throw new \DomainException('Diese Schicht gehört nicht zum Plan.');
         $conflict = $this->conflictsForSlots($team, [$slot->id], $uid)[$slot->id] ?? null;
         if ($conflict === null || !in_array($keptUid,$conflict['candidateUids'],true)) throw new \DomainException('Die beizubehaltende Festschicht ist ungültig.');
         $this->store->resolveFixedConflict($slot->id,$keptUid,$uid);
+    }
+
+    private function assertPermission(Team $team, string $permission): void {
+        if (!$team->hasPermission($permission)) throw new \DomainException('Keine Berechtigung für diese Aktion im Assistenzteam.');
     }
 }

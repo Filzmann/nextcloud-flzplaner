@@ -6,6 +6,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 
 use OCA\FlzPlaner\Model\Team;
 use OCA\FlzPlaner\Service\WorkloadPreferenceService;
+use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
 use OCA\FlzPlaner\Store\ShiftPlanStore;
 use function OCA\FlzPlaner\Tests\assertDomainException;
 use function OCA\FlzPlaner\Tests\assertSameValue;
@@ -28,8 +29,9 @@ $assistants = [
     ['uid'=>'unbounded','displayName'=>'Ohne Grenzen','isEb'=>false,'canReceiveShifts'=>true],
     ['uid'=>'eb','displayName'=>'EB','isEb'=>true,'canReceiveShifts'=>false],
 ];
-$selfTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, []);
-$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, []);
+$selfTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, [], PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
+$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, [], [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
+$roleOnlyEbTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, [], []);
 $store = new WorkloadStoreFake();
 $service = new WorkloadPreferenceService($store);
 
@@ -62,6 +64,9 @@ assertSameValue(2, $overview[0]['weeks'][0]['count'] ?? null, 'Eine Kalenderwoch
 assertSameValue('over', $overview[1]['monthStatus'] ?? null, 'Monatlich über Maximum muss blasser markiert werden.');
 assertSameValue('normal', $overview[2]['monthStatus'] ?? null, '0/0 bedeutet keine Monatsgrenze und darf keine Überlastung markieren.');
 assertSameValue('normal', $overview[2]['weeks'][0]['status'] ?? null, '0/0 bedeutet keine Wochengrenze und darf keine Überlastung markieren.');
+
+$roleOnlyOverview = $service->overview($roleOnlyEbTeam, '2026-09', 'eb');
+assertSameValue([], $roleOnlyOverview, 'Die EB-Rolle ohne Auslastungsberechtigung darf keine fremden Belastungsgrenzen sehen.');
 
 $ownOverview = $service->overview($selfTeam, '2026-09', 'self');
 assertSameValue(['self'], array_column($ownOverview, 'uid'), 'Assistenzkräfte dürfen nur die eigene Auslastung erhalten.');

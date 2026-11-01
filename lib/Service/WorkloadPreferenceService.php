@@ -19,6 +19,9 @@ final class WorkloadPreferenceService {
     }
 
     public function savePersonal(Team $team, string $uid, mixed $weeklyMin, mixed $weeklyMax, mixed $monthlyMin, mixed $monthlyMax): array {
+        if (!$team->hasPermission(PlanerPermissionPolicy::WORKLOAD_MANAGE_OWN)) {
+            throw new \DomainException('Keine Berechtigung für persönliche Schichtgrenzen.');
+        }
         $assistant = $team->assistantByUid($uid);
         if ($assistant === null || !$assistant->canReceiveShifts) {
             throw new \DomainException('Nur schichtfähige Teammitglieder dürfen persönliche Schichtgrenzen speichern.');
@@ -85,7 +88,7 @@ final class WorkloadPreferenceService {
         }
         $overview = [];
         foreach ($team->assistants() as $assistant) {
-            if (!$assistant->canReceiveShifts || (!$team->isEb && $assistant->uid !== $currentUid)) {
+            if (!$assistant->canReceiveShifts || (!$team->hasPermission(PlanerPermissionPolicy::WORKLOAD_READ_TEAM) && $assistant->uid !== $currentUid)) {
                 continue;
             }
             $limits = $limitsByUid[$assistant->uid] ?? $this->emptyLimits();

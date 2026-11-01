@@ -27,6 +27,14 @@ bei schreibenden Prüfungen nicht als Konfliktfreiheit behauptet.
   durch die zuständige EB gepflegt.
 - Eigene Wünsche und fremde Zuweisungen besitzen getrennte serverseitige
   Rechte; EB-Konten sind nicht selbst schichtfähig.
+- Teambezogene Fremdzuweisung, Schichtkonfiguration, Statuswechsel,
+  Auslastungslesezugriff und Festschichtkonfliktlösung sind getrennte
+  Berechtigungen. Standardmäßig erhält sie ausschließlich die Schnittmenge
+  aus aktueller Teammitgliedschaft und EB-Rolle.
+- Eine EB gehört für den Planer genau einem Bürobereich an. Die
+  Team-Bürozuordnung darf nur die EB setzen, die zugleich dem Team und genau
+  diesem einen Bürobereich zugeordnet ist; Büroleitungen erhalten daraus kein
+  Planerrecht.
 - Planungsstatus und Konflikte werden über zuständige Services verändert oder
   abgefragt. Optionale Provider dürfen einen Standalone-Monatsplan nicht
   blockieren.
@@ -54,8 +62,9 @@ PersonalDataProvider und PermissionProvider bilden Schichtbezüge,
 Bearbeitungsreferenzen und die app-lokale temporäre Adminfreigabe ab. Native
 Nextcloud-Administration allein erteilt keinen fachlichen Vollzugriff.
 
-Der temporäre fachliche Admin-Vollzugriff wird ausschließlich von Mitgliedern
-der kanonischen Nextcloud-Gruppe `Datenschutzbeauftragte` erteilt und
+Der temporäre fachliche Admin-Vollzugriff wird von Mitgliedern der kanonischen
+Nextcloud-Gruppe `Datenschutzbeauftragte` oder von zuständigen
+Einsatzbegleitungen mit aktueller Assistenzteam-Mitgliedschaft erteilt und
 widerrufen. Nativer Adminstatus allein erteilt weder Vollzugriff noch Zugriff
 auf Freigabehistorie oder -steuerung. Ziel ist immer ein aktuell von
 Nextcloud bestätigtes Administrationskonto; die app-lokale Freigabe gilt
@@ -63,7 +72,9 @@ höchstens 24 Stunden und wird bei Ablauf, Widerruf, Verlust des nativen
 Adminstatus oder Prüffehlern deny by default unwirksam. Die Steuerung liegt
 rollenabhängig in der Hauptoberfläche. Der Eintrittshinweis erscheint nur für
 native Administrationskonten ohne aktive Freigabe; ein Direktlink wird nur
-bei zusätzlicher Datenschutzrolle gerendert.
+bei eigener Berechtigung zur Freigabeverwaltung gerendert. Der technische,
+ausschließlich synthetische Demo-Pack ist hiervon getrennt und darf nach
+Bestätigung von jedem nativen Nextcloud-Admin installiert werden.
 
 Der zusätzliche `ProcessingMetadataProvider` veröffentlicht den app-eigenen
 Katalog `resources/privacy-processing.json` lazy über den öffentlichen

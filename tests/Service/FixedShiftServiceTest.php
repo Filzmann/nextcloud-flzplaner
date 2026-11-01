@@ -8,6 +8,7 @@ use OCA\FlzPlaner\Model\ShiftCandidate;
 use OCA\FlzPlaner\Model\ShiftSlot;
 use OCA\FlzPlaner\Model\Team;
 use OCA\FlzPlaner\Service\FixedShiftService;
+use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
 use OCA\FlzPlaner\Service\ShiftConfigService;
 use OCA\FlzPlaner\Store\ShiftPlanStore;
 use function OCA\FlzPlaner\Tests\assertDomainException;
@@ -46,8 +47,9 @@ $settings = ['shifts'=>[
     ['key'=>'early','label'=>'Früh','startsAt'=>'08:00','endsAt'=>'14:10','enabled'=>true],
     ['key'=>'late','label'=>'Spät','startsAt'=>'14:00','endsAt'=>'20:00','enabled'=>true],
 ]];
-$assistantTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,false,$settings);
-$ebTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,true,$settings);
+$assistantTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,false,$settings,PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
+$ebTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,true,$settings,[...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
+$roleOnlyEbTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,true,$settings,[]);
 $store = new FixedShiftStoreFake();
 $service = new FixedShiftService($store, new ShiftConfigService());
 
@@ -87,6 +89,8 @@ assertDomainException(static fn() => $service->reportConflict($assistantTeam, '2
 
 $service->resolveConflict($ebTeam, '2026-09', $slots[0], 'a', 'eb');
 assertSameValue('a', $store->resolved[0]['keptUid'] ?? null, 'Die EB muss genau eine feste Zuordnung beibehalten können.');
+assertDomainException(static fn() => $service->resolveConflict($roleOnlyEbTeam, '2026-09', $slots[0], 'a', 'eb'), 'Die EB-Rolle ohne Einzelberechtigung darf Festschichtkonflikte nicht auflösen.');
+assertSameValue(1, count($store->resolved), 'Eine abgewiesene Konfliktlösung darf nichts speichern.');
 assertDomainException(static fn() => $service->resolveConflict($assistantTeam, '2026-09', $slots[0], 'a', 'a'), 'Assistenzkräfte dürfen Festschichtkonflikte nicht auflösen.');
 
 assertSameValue(true, $service->deleteOwnOccurrence($assistantTeam, $slots[0], 'a'), 'Eine eigene Festschicht muss als dauerhafte Ausnahme löschbar sein.');

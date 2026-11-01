@@ -51,8 +51,8 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
     private function adminAccessItem(array $row, string $subjectUid): PersonalDataEntry {
         $roles = [];
         if ($row['targetUid'] === $subjectUid) $roles[] = 'Ziel der Vollzugriffsfreigabe';
-        if ($row['grantedBy'] === $subjectUid) $roles[] = 'Freigebendes Mitglied von Datenschutzbeauftragte';
-        if ($row['revokedBy'] === $subjectUid) $roles[] = 'Widerrufendes Mitglied von Datenschutzbeauftragte';
+        if ($row['grantedBy'] === $subjectUid) $roles[] = 'Freigebende berechtigte Person';
+        if ($row['revokedBy'] === $subjectUid) $roles[] = 'Widerrufende berechtigte Person';
         $actualEnd = $row['revokedAt'] ?? $row['endsAt'];
         return new PersonalDataEntry(
             'admin-access',
@@ -61,7 +61,7 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
             self::shortDateTime($row['startsAt']),
             'Nachweis einer zeitlich begrenzten administrativen Planer-Freigabe',
             'App-lokale Freigabesteuerung im Filzmann Assistenzplanung',
-            ['Betroffene Person und ausdrücklich berechtigte Datenschutz-Prüfrolle'],
+            ['Betroffene Person und ausdrücklich berechtigte Prüfrolle'],
             self::RETENTION,
             'Durch Filzmann Assistenzplanung sind keine Drittlandübermittlungen vorgesehen.',
             'Der Server beendet den Vollzugriff spätestens nach 24 Stunden automatisch; es findet keine Entscheidung mit rechtlicher oder vergleichbar erheblicher Wirkung statt.',

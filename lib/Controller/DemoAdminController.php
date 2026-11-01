@@ -6,7 +6,6 @@ namespace OCA\FlzPlaner\Controller;
 
 use OCA\FlzPlaner\AppInfo\Application;
 use OCA\FlzPlaner\Service\PlanerDemoPackService;
-use OCA\FlzPlaner\Service\TemporaryAdminAccessChecker;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
@@ -17,7 +16,7 @@ use Psr\Log\LoggerInterface;
 
 /** Zweck: Startet den Assistenzplaner-Demo-Pack ausschließlich mit Admin- und CSRF-Schutz. */
 final class DemoAdminController extends Controller {
-    public function __construct(IRequest $request, private IUserSession $session, private IGroupManager $groups, private PlanerDemoPackService $demoPack, private LoggerInterface $logger, private TemporaryAdminAccessChecker $temporaryAdminAccess) { parent::__construct(Application::APP_ID, $request); }
+    public function __construct(IRequest $request, private IUserSession $session, private IGroupManager $groups, private PlanerDemoPackService $demoPack, private LoggerInterface $logger) { parent::__construct(Application::APP_ID, $request); }
     public function install(mixed $confirmed = false): JSONResponse {
         if (!$this->isAdmin()) return new JSONResponse(['error' => 'Keine Berechtigung.'], Http::STATUS_FORBIDDEN);
         if ($confirmed !== true) return new JSONResponse(['error' => 'Die Installation muss ausdrücklich bestätigt werden.'], Http::STATUS_BAD_REQUEST);
@@ -30,6 +29,6 @@ final class DemoAdminController extends Controller {
     }
     private function isAdmin(): bool {
         $user = $this->session->getUser();
-        return $user !== null && $this->groups->isAdmin($user->getUID()) && $this->temporaryAdminAccess->hasActiveGrant($user->getUID());
+        return $user !== null && $this->groups->isAdmin($user->getUID());
     }
 }

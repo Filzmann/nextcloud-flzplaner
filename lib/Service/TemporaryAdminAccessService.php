@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\FlzPlaner\Service;
 
 use InvalidArgumentException;
+use OCA\FlzPlaner\Permission\PlanerPermissionSourceInterface;
 use OCA\FlzPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IGroupManager;
@@ -23,10 +24,12 @@ final class TemporaryAdminAccessService implements TemporaryAdminAccessChecker {
         private TemporaryAdminAccessRepositoryInterface $repository,
         private ITimeFactory $clock,
         private LoggerInterface $logger,
+        private PlanerPermissionSourceInterface $permissionSource,
+        private PlanerPermissionPolicy $permissionPolicy,
     ) {}
 
     public function activate(string $targetUid, int $durationMinutes): array {
-        $actorUid = $this->requirePrivacyOfficer();
+        $actorUid = $this->requireGrantManager();
         $targetUid = $this->requireAdminTarget($targetUid);
         if ($durationMinutes < 1 || $durationMinutes > self::MAX_DURATION_MINUTES) {
             throw new InvalidArgumentException('Die Freigabedauer muss zwischen 1 und 1440 Minuten liegen.');
@@ -44,7 +47,7 @@ final class TemporaryAdminAccessService implements TemporaryAdminAccessChecker {
     }
 
     public function revoke(string $targetUid): bool {
-        $actorUid = $this->requirePrivacyOfficer();
+        $actorUid = $this->requireGrantManager();
         $revoked = $this->repository->revokeActive(
             $this->requireAdminTarget($targetUid),
             $actorUid,
@@ -70,7 +73,7 @@ final class TemporaryAdminAccessService implements TemporaryAdminAccessChecker {
     }
 
     public function state(): array {
-        $this->requirePrivacyOfficer();
+        $this->requireGrantManager();
         return [
             'maxDurationMinutes' => self::MAX_DURATION_MINUTES,
             'history' => $this->repository->history(),
@@ -83,7 +86,16 @@ final class TemporaryAdminAccessService implements TemporaryAdminAccessChecker {
             return false;
         }
         try {
-            return $this->groups->isInGroup($uid, self::GRANT_MANAGER_GROUP);
+            $user = $this->session->getUser();
+            if ($user === null) {
+                return false;
+            }
+            return $this->permissionPolicy->mayManageTemporaryAdminGrants(
+                array_map('strval', $this->groups->getUserGroupIds($user)),
+                self::GRANT_MANAGER_GROUP,
+                $this->permissionSource->ebGroupId(),
+                $this->permissionSource->teamGroupIds(),
+            );
         } catch (Throwable) {
             $this->logger->error('Temporary app admin access grantor check failed.');
             return false;
@@ -103,7 +115,7 @@ final class TemporaryAdminAccessService implements TemporaryAdminAccessChecker {
         }
     }
 
-    private function requirePrivacyOfficer(): string {
+    private function requireGrantManager(): string {
         $uid = $this->session->getUser()?->getUID() ?? '';
         if ($uid === '' || !$this->canManageGrants()) {
             throw new TemporaryAdminAccessDeniedException('Zugriff verweigert.');

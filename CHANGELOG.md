@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Organigrammrollen und Planerrechte getrennt: eigene Teamrechte sowie die
+  fünf EB-Teamrechte für Fremdzuweisung, Teamkonfiguration, Status,
+  Auslastung und Festschichtkonflikte werden serverseitig einzeln geprüft.
+- Team-Bürozuordnungen auf die zuständige, genau einem Büro zugeordnete EB
+  begrenzt; Büroleitungen erhalten daraus kein Planerrecht.
+- Den ausschließlich synthetischen Demo-Pack für native Admins von der
+  fachlichen Vollzugriffsfreigabe getrennt. Temporäre fachliche
+  Adminfreigaben können nun Datenschutzbeauftragte oder zuständige
+  Einsatzbegleitungen verwalten.
 - Den früheren Staging-Follow-up gegen den vorhandenen Status-, Rechte-,
   Integrations- und UI-Vertrag abgeglichen und die Browserabnahme um den
   expliziten Ausschluss einer doppelten Desktop-/Mobilprojektion ergänzt.
@@ -9,10 +18,8 @@
   Berechtigungs-, Runtime-, UI-/API- und Asset-Smokes nachgewiesen und den
   unterstützten Bereich auf die lückenlosen Hauptversionen 33 bis 35
   erweitert. Nextcloud 36 bleibt ungeprüft.
-- Temporären fachlichen Admin-Vollzugriff auf höchstens 24 Stunden begrenzt:
-  Nur `Datenschutzbeauftragte` dürfen aktuelle Nextcloud-Administrationskonten
-  in der Hauptoberfläche freigeben oder widerrufen; native Administration
-  allein bleibt ohne Freigabe- und Historienzugriff.
+- Temporären fachlichen Admin-Vollzugriff auf höchstens 24 Stunden begrenzt;
+  native Administration allein bleibt ohne fachlichen Vollzugriff.
 - Einen app-eigenen Processing-Metadata-Katalog für Wunschdienstplanung und
   temporäre Adminfreigaben über den öffentlichen V1-Vertrag des
   Datenschutz-Centers veröffentlicht.

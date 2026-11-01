@@ -14,12 +14,16 @@ final class PlanerPermissionProvider implements PermissionProvider {
             $rules[]=$this->rule('Schichtgrenzen',$team,'Eigene Wochen- und Monatsgrenzen','plan.workload.manage-own','Eigene Grenzen','team:'.$team,PermissionCondition::all([PermissionCondition::group($team),PermissionCondition::self()]));
             $rules[]=$this->rule('Feste Schichten',$team,'Eigene regelmäßige Schichten und Konflikteskalation','plan.fixed-shift.manage-own','Eigene feste Schichten','team:'.$team,PermissionCondition::all([PermissionCondition::group($team),PermissionCondition::self()]));
             $condition=PermissionCondition::all([PermissionCondition::group($team),PermissionCondition::group($eb)]);
-            $rules[]=$this->rule('Monatsplan',$team,'Fremdzuweisungen und Teamkonfiguration','plan.team.coordinate','Koordinieren','team:'.$team,$condition);
+            $rules[]=$this->rule('Schichtzuweisung',$team,'Fremde Zuweisungen im eigenen Assistenzteam bearbeiten','plan.assignment.manage-team','Fremdzuweisungen bearbeiten','team:'.$team,$condition);
+            $rules[]=$this->rule('Teamkonfiguration',$team,'Schichten und Teameinstellungen des eigenen Assistenzteams bearbeiten','plan.team-settings.manage','Team konfigurieren','team:'.$team,$condition);
             $rules[]=$this->rule('Monatsplan',$team,'Status planned/approved ändern','plan.status.transition','Status ändern','team:'.$team,$condition);
             $rules[]=$this->rule('Auslastungsübersicht',$team,'Grenzen und Zählstände des Teams lesen','plan.workload.read-team','Teamübersicht','team:'.$team,$condition);
             $rules[]=$this->rule('Festschichtkonflikt',$team,'Eskalierte Konflikte lesen und auflösen','plan.fixed-conflict.resolve','Konflikte lösen','team:'.$team,$condition);
         }
-        $rules[]=$this->rule('Administration','Demo-Pack','Nextcloud-Administration mit aktiver app-lokaler Freigabe','plan.demo.manage','Demo verwalten','app',PermissionCondition::all([PermissionCondition::nextcloudAdmin(),PermissionCondition::temporaryAppAdminGrant()]));
+        $grantConditions=[PermissionCondition::group('Datenschutzbeauftragte')];
+        foreach($this->source->teamGroupIds() as $team)$grantConditions[]=PermissionCondition::all([PermissionCondition::group($team),PermissionCondition::group($eb)]);
+        $rules[]=$this->rule('Administration','Demo-Pack','Native Nextcloud-Administration; ausschließlich synthetische Demodaten','plan.demo.manage','Demo verwalten','app',PermissionCondition::nextcloudAdmin());
+        $rules[]=$this->rule('Administration','Temporärer fachlicher Admin-Vollzugriff','Datenschutzbeauftragte oder zuständige Einsatzbegleitung','plan.admin-grant.manage','Adminfreigaben verwalten','app',PermissionCondition::any($grantConditions));
         return new PermissionProviderResult($rules);
     }
     private function rule(string $type,string $name,string $detail,string $key,string $label,string $scope,PermissionCondition $condition):PermissionRule{return new PermissionRule($type,$name,$detail,$key,$label,'allow',$scope,$condition,'flzplaner:TeamAccessService','high');}

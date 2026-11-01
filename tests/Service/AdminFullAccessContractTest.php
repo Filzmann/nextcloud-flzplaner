@@ -13,9 +13,9 @@ $pageController = (string)file_get_contents($root . '/lib/Controller/PageControl
 $accessController = (string)file_get_contents($root . '/lib/Controller/TemporaryAdminAccessController.php');
 
 foreach (['flz-planer-full-access-form', 'flz-planer-full-access-enabled', 'flz-planer-full-access-history', 'value="1440"'] as $value) {
-    if (!str_contains($template, $value)) throw new RuntimeException('DPO-Freigabesteuerung fehlt: ' . $value);
+    if (!str_contains($template, $value)) throw new RuntimeException('Freigabesteuerung fehlt: ' . $value);
 }
-foreach (['Datenschutzbeauftragte', 'Native Nextcloud-Administration erteilt keinen fachlichen Vollzugriff', 'href="#flz-planer-full-access"'] as $value) {
+foreach (['Datenschutzbeauftragte', 'zuständige Einsatzbegleitungen', 'Native Nextcloud-Administration erteilt keinen fachlichen Vollzugriff', 'href="#flz-planer-full-access"'] as $value) {
     if (!str_contains($template, $value)) throw new RuntimeException('Sichere rollenabhängige Eintrittsmeldung fehlt: ' . $value);
 }
 foreach (['/api/admin/full-access', 'durationMinutes', 'targetUid', 'Widerrufen'] as $value) {
@@ -30,6 +30,9 @@ foreach (['canManageAdminAccess', 'showMissingAdminGrant', 'showAdminAccessLink'
 }
 if (!str_contains($pageController, "'showAdminAccessLink' => \$canManageAdminAccess && \$showMissingAdminGrant")) throw new RuntimeException('Direktlink ist nicht auf gleichzeitige Datenschutz- und Adminrolle begrenzt.');
 if (str_contains($accessController, 'PublicPage')) throw new RuntimeException('Freigaberouten dürfen nicht öffentlich erreichbar sein.');
+foreach (['PlanerPermissionPolicy', 'PlanerPermissionSourceInterface', 'mayManageTemporaryAdminGrants'] as $value) {
+    if (!str_contains($service, $value)) throw new RuntimeException('Serverseitige DPO-/Team-EB-Grenze fehlt: ' . $value);
+}
 foreach (['flz-planer-admin-access-warning', '<details', '<summary', 'Datenschutzbeauftragte', 'target="_blank"', 'rel="noopener noreferrer"'] as $value) {
     if (!str_contains($template, $value)) throw new RuntimeException('Kompakte Vollzugriffswarnung am App-Titel fehlt: ' . $value);
 }

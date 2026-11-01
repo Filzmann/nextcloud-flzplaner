@@ -17,6 +17,7 @@ namespace {
 
     use OCA\FlzPlaner\Model\TeamSettings;
     use OCA\FlzPlaner\Service\TeamAccessService;
+    use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
     use OCA\FlzPlaner\Service\TeamSettingsService;
     use OCP\IGroupManager;
     use OCP\IUserSession;
@@ -170,6 +171,10 @@ namespace {
     assertSameValue(['Alice Assistenz', 'Bob EB'], array_map(static fn($assistant): string => $assistant->displayName, $team->assistants()), 'Assistants should be sorted by display name.');
     assertSameValue(null, $team->assistantByUid('disabled-assistant'), 'Disabled Nextcloud users must not be exposed as current shift-capable team members.');
     assertSameValue(false, $team->assistantByUid('bob')->canReceiveShifts, 'EB users should not receive shifts.');
+    foreach (PlanerPermissionPolicy::TEAM_EB_PERMISSIONS as $permission) {
+        assertSameValue(true, $team->hasPermission($permission), "Die zuständige EB braucht die getrennte Berechtigung {$permission}.");
+        $service->assertPermission('TeamB', $permission);
+    }
     assertSameValue(
         ['alice'],
         array_column($team->toArray()['assistants'] ?? [], 'uid'),
@@ -207,9 +212,11 @@ namespace {
     $session->setUser($alice);
     assertSameValue(['TeamB'], array_map(static fn($team): string => $team->code, $service->teamsForCurrentUser()), 'Teams for current user should derive unique ASN group codes and skip missing groups.');
     assertSameValue(false, $service->currentUserIsEbForTeam('TeamB'), 'Non-EB team users should not coordinate.');
+    assertSameValue(true, $service->assertPermission('TeamB', PlanerPermissionPolicy::ASSIGNMENT_MANAGE_OWN)->hasPermission(PlanerPermissionPolicy::ASSIGNMENT_MANAGE_OWN), 'Teammitglieder müssen eigene Wünsche verwalten dürfen.');
+    assertSameValue(false, $service->assertTeamAccess('TeamB')->hasPermission(PlanerPermissionPolicy::ASSIGNMENT_MANAGE_TEAM), 'Teammitgliedschaft darf keine Fremdzuweisung erlauben.');
     assertDomainException(
-        static fn() => $service->assertCanCoordinate('TeamB'),
-        'Non-EB users should not coordinate team settings.'
+        static fn() => $service->assertPermission('TeamB', PlanerPermissionPolicy::TEAM_SETTINGS_MANAGE),
+        'Non-EB users should not manage team settings.'
     );
 
     $session->setUser($legacyEb);

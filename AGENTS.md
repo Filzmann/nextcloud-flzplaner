@@ -68,14 +68,18 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
 - Bereichszuordnungen werden app-uebergreifend separat als `flz-Bereich-<Name>` gepflegt; kombinierte Rollen-/Bereichsgruppen werden dynamisch abgeleitet.
 - FlzPlaner und Filzmann Urlaubsplanung verwenden dieselben Assistenzteam-Gruppen; separate Suffix-Gruppen werden nicht unterstützt.
 - Der app-eigene Adminabschnitt installiert Demo-Inhalte nur nach ausdrücklicher Bestätigung. Das Pack legt Team A, Team B und Team C mit ausschließlich synthetischen lokalen Konten und Standardschichten an; WordPress-Bestandsdaten werden nicht importiert.
-- Native Nextcloud-Administration allein erteilt kein Recht auf den fachlichen
-  Demo-Datenpfad. Dafür ist je Admin eine app-lokale Freigabe von höchstens 24
+- Der ausschließlich synthetische Demo-Pack ist eine technische Funktion für
+  native Nextcloud-Admins und benötigt keine fachliche Vollzugriffsfreigabe.
+  Reale fachliche Planungsdaten bleiben davon strikt getrennt. Für deren
+  Admin-Vollzugriff ist je Admin eine app-lokale Freigabe von höchstens 24
   Stunden erforderlich; Beginn, geplantes Ende und Widerruf werden
-  protokolliert. Ausschließlich Mitglieder der kanonischen Nextcloud-Gruppe
-  `Datenschutzbeauftragte` dürfen die Freigabe in der Hauptoberfläche erteilen
-  oder widerrufen; nativer Adminstatus allein reicht dafür nicht. Der sichere
-  Eintrittshinweis erscheint nur für betroffene native Administrationskonten
-  und verlinkt die Steuerung nur bei zusätzlicher Datenschutzrolle.
+  protokolliert. Mitglieder der kanonischen Nextcloud-Gruppe
+  `Datenschutzbeauftragte` sowie zuständige Einsatzbegleitungen mit aktueller
+  Assistenzteam-Mitgliedschaft dürfen die Freigabe in der Hauptoberfläche
+  erteilen oder widerrufen; nativer Adminstatus allein reicht dafür nicht.
+  Der sichere Eintrittshinweis erscheint nur für betroffene native
+  Administrationskonten und verlinkt die Steuerung nur, wenn das Konto selbst
+  zur Freigabeverwaltung berechtigt ist.
 - Fremde oder LDAP-verwaltete Konten werden nicht als Demokonten übernommen. Bestehende read-only LDAP-Team- oder Rollengruppen brechen die Demo-Installation im Preflight vor jeder Mutation ab.
 - Ausschließlich lokal erzeugte Test- und Demokonten erhalten initial ihr
   jeweiliges Benutzerkürzel als Passwort. Diese bewusst einfache Vorgabe darf

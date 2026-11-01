@@ -27,6 +27,7 @@ class ScheduleService {
     }
 
     public function monthPlan(Team $team, string $month, string $currentUid): array {
+        $this->assertPermission($team, PlanerPermissionPolicy::TEAM_READ);
         $month = $this->shiftConfig->normalizeMonth($month);
         $assignableUids = $team->assignableAssistantUidMap();
         $planningSegments = array_values(array_filter($this->shiftConfig->segments($team->settings), static fn(array $segment): bool => $segment['enabled']));
@@ -110,13 +111,16 @@ class ScheduleService {
     public function addCandidate(Team $team, string $month, int $slotId, string $targetUid, string $currentUid): void {
         $month = $this->shiftConfig->normalizeMonth($month);
         if ($targetUid === '') {
-            if ($team->isEb) {
+            if ($team->hasPermission(PlanerPermissionPolicy::ASSIGNMENT_MANAGE_TEAM)) {
                 throw new \DomainException('Bitte eine Assistenzkraft auswählen.');
             }
 
             $targetUid = $currentUid;
         }
 
+        $this->assertPermission($team, $targetUid === $currentUid
+            ? PlanerPermissionPolicy::ASSIGNMENT_MANAGE_OWN
+            : PlanerPermissionPolicy::ASSIGNMENT_MANAGE_TEAM);
         $this->assertCandidateMutationAllowed($team, $targetUid, $currentUid);
         $this->assertAssignableAssistantInTeam($team, $targetUid);
         $requestedSlot = $this->requireSlot($slotId, $team->code, $month);
@@ -132,6 +136,9 @@ class ScheduleService {
         $month = $this->shiftConfig->normalizeMonth($month);
         $targetUid = $targetUid === '' ? $currentUid : $targetUid;
 
+        $this->assertPermission($team, $targetUid === $currentUid
+            ? PlanerPermissionPolicy::ASSIGNMENT_MANAGE_OWN
+            : PlanerPermissionPolicy::ASSIGNMENT_MANAGE_TEAM);
         $this->assertCandidateMutationAllowed($team, $targetUid, $currentUid);
         $this->assertAssignableAssistantInTeam($team, $targetUid);
 
@@ -148,6 +155,7 @@ class ScheduleService {
     }
 
     public function reportFixedConflict(Team $team, string $month, int $slotId, string $currentUid): void {
+        $this->assertPermission($team, PlanerPermissionPolicy::FIXED_SHIFT_MANAGE_OWN);
         $month = $this->shiftConfig->normalizeMonth($month);
         $this->withMutableMonth($team->code,$month,$currentUid,function() use($team,$month,$slotId,$currentUid): void {
             $this->fixedShifts->reportConflict($team,$month,$this->requireSlot($slotId,$team->code,$month),$currentUid);
@@ -155,6 +163,7 @@ class ScheduleService {
     }
 
     public function resolveFixedConflict(Team $team, string $month, int $slotId, string $keptUid, string $currentUid): void {
+        $this->assertPermission($team, PlanerPermissionPolicy::FIXED_CONFLICT_RESOLVE);
         $month = $this->shiftConfig->normalizeMonth($month);
         $this->withMutableMonth($team->code,$month,$currentUid,function() use($team,$month,$slotId,$keptUid,$currentUid): void {
             $this->fixedShifts->resolveConflict($team,$month,$this->requireSlot($slotId,$team->code,$month),$keptUid,$currentUid);
@@ -163,6 +172,7 @@ class ScheduleService {
 
     public function updateCandidateMetadata(Team $team, string $month, int $slotId, string $preference, string $note, string $currentUid): void {
         $month = $this->shiftConfig->normalizeMonth($month);
+        $this->assertPermission($team, PlanerPermissionPolicy::ASSIGNMENT_PREFERENCE_MANAGE_OWN);
         $this->assertAssignableAssistantInTeam($team, $currentUid);
         $preference = strtolower(trim($preference));
         if (!in_array($preference, ['neutral', 'favorite', 'emergency'], true)) {
@@ -189,9 +199,7 @@ class ScheduleService {
     }
 
     public function saveDayNote(Team $team, string $month, string $workDate, string $note, string $currentUid): void {
-        if (!$team->isEb) {
-            throw new \DomainException('Nur die Einsatzbegleitung darf Bemerkungen bearbeiten.');
-        }
+        $this->assertPermission($team, PlanerPermissionPolicy::ASSIGNMENT_MANAGE_TEAM);
 
         $month = $this->shiftConfig->normalizeMonth($month);
         $workDate = $this->shiftConfig->normalizeDate($workDate);
@@ -210,9 +218,7 @@ class ScheduleService {
     }
 
     public function transitionMonthStatus(Team $team, string $month, string $targetStatus, string $currentUid): string {
-        if (!$team->isEb) {
-            throw new \DomainException('Nur die Einsatzbegleitung darf den Planstatus ändern.');
-        }
+        $this->assertPermission($team, PlanerPermissionPolicy::STATUS_TRANSITION);
 
         $month = $this->shiftConfig->normalizeMonth($month);
         $targetStatus = strtolower(trim($targetStatus));
@@ -390,6 +396,12 @@ class ScheduleService {
         }
 
         return $note;
+    }
+
+    private function assertPermission(Team $team, string $permission): void {
+        if (!$team->hasPermission($permission)) {
+            throw new \DomainException('Keine Berechtigung für diese Aktion im Assistenzteam.');
+        }
     }
 
     private function withMutableMonth(string $teamCode, string $month, string $currentUid, callable $operation): mixed {

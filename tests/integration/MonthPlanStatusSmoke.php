@@ -7,6 +7,7 @@ require_once dirname(__DIR__, 4) . '/lib/base.php';
 use OCA\FlzPlaner\Repository\ShiftPlanRepository;
 use OCA\FlzPlaner\Model\Team;
 use OCA\FlzPlaner\Service\ScheduleService;
+use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
 use OCA\FlzPlaner\Store\ShiftPlanStore;
 use OCP\IDBConnection;
 
@@ -24,7 +25,7 @@ $team = new Team($teamCode, 'flz-ASN-' . $teamCode, 'Transaktionstest', [], true
         'endsAt' => '14:00',
         'enabled' => true,
     ]],
-]);
+], [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
 
 $cleanup = static function () use ($db, $teamCode, $month): void {
     $qb = $db->getQueryBuilder();

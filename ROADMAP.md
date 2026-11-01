@@ -9,8 +9,9 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 - Die manuellen Prüfungen werden im ausfüllbaren
   [`docs/manual-acceptance.md`](docs/manual-acceptance.md) dokumentiert.
-- Den umgesetzten temporären Admin-Vollzugriff einschließlich DPO-Steuerung,
-  Rollenmatrix, CSRF und Tastaturbedienung in DDEV und auf Staging abnehmen.
+- Den umgesetzten temporären Admin-Vollzugriff einschließlich DPO-/zuständiger
+  EB-Steuerung, Rollenmatrix, CSRF und Tastaturbedienung in DDEV und auf
+  Staging abnehmen.
 - Produktive Rechte- und Datenschutzprüfung der Wunschdienstplanung.
 - Monatsplan, variable Schichten, EB-Koordination und Standalone-Betrieb auf
   einem realitätsnahen Staging fachlich erneut abnehmen. Dabei die seit

@@ -91,7 +91,11 @@ In einer freigegebenen DDEV- oder Staging-Umgebung mit synthetischen Konten prü
 
 - `Datenschutzbeauftragte` ohne nativen Adminstatus können Historie lesen und
   ein bestätigtes Administrationskonto freigeben sowie widerrufen.
-- Native Administration ohne Datenschutzrolle erhält weder Steuerung noch
+- Eine EB mit aktueller Assistenzteam-Mitgliedschaft kann Historie lesen und
+  ein bestätigtes Administrationskonto freigeben sowie widerrufen; eine reine
+  EB-Rolle und eine manipulierte, nicht vorhandene Teamgruppe bleiben ohne
+  Zugriff und Mutation.
+- Native Administration ohne Datenschutz- oder zuständige EB-Rolle erhält weder Steuerung noch
   Direktlink und direkte Schreibrequests bleiben mutationsfrei mit HTTP 403.
 - Ein gewöhnliches Konto sieht weder Eintrittshinweis noch Steuerung und
   erhält keine Historie.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\FlzPlaner\Model;
 
 use OCA\LocalBase\Model\ModelApiTrait;
+use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
 
 class Team {
     use ModelApiTrait;
@@ -15,7 +16,8 @@ class Team {
         public string $displayName,
         public array $assistants,
         public bool $isEb,
-        public array $settings
+        public array $settings,
+        public array $permissions = [],
     ) {
         $this->assistants = $this->normalizeAssistants($this->assistants);
     }
@@ -27,7 +29,8 @@ class Team {
             (string)($data['displayName'] ?? $data['display_name'] ?? ''),
             is_array($data['assistants'] ?? null) ? $data['assistants'] : [],
             (bool)($data['isEb'] ?? $data['is_eb'] ?? $data['canCoordinate'] ?? false),
-            is_array($data['settings'] ?? null) ? $data['settings'] : []
+            is_array($data['settings'] ?? null) ? $data['settings'] : [],
+            is_array($data['permissions'] ?? null) ? array_values(array_map('strval', $data['permissions'])) : []
         );
     }
 
@@ -38,9 +41,18 @@ class Team {
             'displayName' => $this->displayName,
             'assistants' => $this->assistantsArray(),
             'isEb' => $this->isEb,
-            'canCoordinate' => $this->isEb,
+            'permissions' => $this->permissions,
+            'canManageTeamAssignments' => $this->hasPermission(PlanerPermissionPolicy::ASSIGNMENT_MANAGE_TEAM),
+            'canManageTeamSettings' => $this->hasPermission(PlanerPermissionPolicy::TEAM_SETTINGS_MANAGE),
+            'canTransitionStatus' => $this->hasPermission(PlanerPermissionPolicy::STATUS_TRANSITION),
+            'canReadTeamWorkload' => $this->hasPermission(PlanerPermissionPolicy::WORKLOAD_READ_TEAM),
+            'canResolveFixedConflicts' => $this->hasPermission(PlanerPermissionPolicy::FIXED_CONFLICT_RESOLVE),
             'settings' => $this->settings,
         ];
+    }
+
+    public function hasPermission(string $permission): bool {
+        return in_array($permission, $this->permissions, true);
     }
 
     public function assistants(): array {

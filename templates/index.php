@@ -38,7 +38,7 @@
                     <summary aria-label="Informationen zum fehlenden fachlichen Admin-Vollzugriff"><span aria-hidden="true">⚠</span></summary>
                     <div class="flz-planer-admin-access-warning__panel">
                         <strong>Kein fachlicher Admin-Vollzugriff aktiv.</strong>
-                        <p>Native Nextcloud-Administration erteilt keinen fachlichen Vollzugriff. Mitglieder der Gruppe Datenschutzbeauftragte können eine app-lokale Freigabe von höchstens 24 Stunden erteilen.</p>
+                        <p>Native Nextcloud-Administration erteilt keinen fachlichen Vollzugriff. Datenschutzbeauftragte und zuständige Einsatzbegleitungen können eine app-lokale Freigabe von höchstens 24 Stunden erteilen.</p>
                         <?php if ($_['showAdminAccessLink'] ?? false): ?><a href="#flz-planer-full-access" target="_blank" rel="noopener noreferrer">Freigabesteuerung in neuem Tab öffnen</a><?php endif; ?>
                     </div>
                 </details>
@@ -63,7 +63,7 @@
     <?php if ($_['canManageAdminAccess'] ?? false): ?>
         <section id="flz-planer-full-access" class="flz-planer-admin-access" aria-labelledby="flz-planer-full-access-heading">
             <h2 id="flz-planer-full-access-heading">Zeitlich begrenzter Admin-Vollzugriff</h2>
-            <p>Ausschließlich Mitglieder von Datenschutzbeauftragte dürfen einem aktuellen Nextcloud-Administrationskonto fachlichen Vollzugriff erteilen oder ihn widerrufen. Maximal 24 Stunden sind zulässig.</p>
+            <p>Datenschutzbeauftragte und zuständige Einsatzbegleitungen dürfen einem aktuellen Nextcloud-Administrationskonto fachlichen Vollzugriff erteilen oder ihn widerrufen. Zuständig ist eine Einsatzbegleitung nur mit aktueller Mitgliedschaft in mindestens einem Assistenzteam. Maximal 24 Stunden sind zulässig.</p>
             <form id="flz-planer-full-access-form">
                 <label>Admin-Benutzerkennung <input name="targetUid" required maxlength="64" autocomplete="off"></label>
                 <label>Dauer
