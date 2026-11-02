@@ -47,9 +47,9 @@ $settings = ['shifts'=>[
     ['key'=>'early','label'=>'Früh','startsAt'=>'08:00','endsAt'=>'14:10','enabled'=>true],
     ['key'=>'late','label'=>'Spät','startsAt'=>'14:00','endsAt'=>'20:00','enabled'=>true],
 ]];
-$assistantTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,false,$settings,PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
-$ebTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,true,$settings,[...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
-$roleOnlyEbTeam = new Team('A1','flz-ASN-A1','Team A1',$assistants,true,$settings,[]);
+$assistantTeam = new Team('A1','ASN-A1','Team A1',$assistants,false,$settings,PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
+$ebTeam = new Team('A1','ASN-A1','Team A1',$assistants,true,$settings,[...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
+$roleOnlyEbTeam = new Team('A1','ASN-A1','Team A1',$assistants,true,$settings,[]);
 $store = new FixedShiftStoreFake();
 $service = new FixedShiftService($store, new ShiftConfigService());
 

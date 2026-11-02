@@ -29,9 +29,9 @@ $assistants = [
     ['uid'=>'unbounded','displayName'=>'Ohne Grenzen','isEb'=>false,'canReceiveShifts'=>true],
     ['uid'=>'eb','displayName'=>'EB','isEb'=>true,'canReceiveShifts'=>false],
 ];
-$selfTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, [], PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
-$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, [], [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
-$roleOnlyEbTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, [], []);
+$selfTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, false, [], PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
+$ebTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, [], [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
+$roleOnlyEbTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, [], []);
 $store = new WorkloadStoreFake();
 $service = new WorkloadPreferenceService($store);
 

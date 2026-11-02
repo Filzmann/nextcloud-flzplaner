@@ -62,10 +62,10 @@ Gruppenschema fuer `flzplaner`:
 
 Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer Teamname, maximale Kürzellänge, EB-Rollengruppe und Bereiche stammen aus der gemeinsamen `FlzOrganizationDefinition` und dürfen nicht zusätzlich im FlzPlaner festverdrahtet werden.
 
-- Assistenznehmer-Gruppen: `flz-ASN-<Kuerzel>`, zum Beispiel `flz-ASN-TeamA`, `flz-ASN-TeamB`, `flz-ASN-TeamC`.
+- Assistenznehmer-Gruppen: `ASN-<Kuerzel>`, zum Beispiel `ASN-TeamA`, `ASN-TeamB`, `ASN-TeamC`.
 - `<Kuerzel>` ist das Kuerzel eines Assistenznehmers und darf Unicode-Buchstaben sowie Ziffern enthalten.
-- EB-Rechte: Nutzer*innen, die zugleich in der Assistenznehmer-Gruppe und der gemeinsamen Rollengruppe `flz-EB` sind. Rollen-/Bereichskombinationen werden nicht als eigene Gruppen akzeptiert.
-- Bereichszuordnungen werden app-uebergreifend separat als `flz-Bereich-<Name>` gepflegt; kombinierte Rollen-/Bereichsgruppen werden dynamisch abgeleitet.
+- EB-Rechte: Nutzer*innen, die zugleich in der Assistenznehmer-Gruppe und der gemeinsamen Rollengruppe `EB` sind. Rollen-/Bereichskombinationen werden nicht als eigene Gruppen akzeptiert.
+- Bereichszuordnungen werden app-uebergreifend separat als `Bereich-<Name>` gepflegt; kombinierte Rollen-/Bereichsgruppen werden dynamisch abgeleitet.
 - FlzPlaner und Filzmann Urlaubsplanung verwenden dieselben Assistenzteam-Gruppen; separate Suffix-Gruppen werden nicht unterstützt.
 - Der app-eigene Adminabschnitt installiert Demo-Inhalte nur nach ausdrücklicher Bestätigung. Das Pack legt Team A, Team B und Team C mit ausschließlich synthetischen lokalen Konten und Standardschichten an; WordPress-Bestandsdaten werden nicht importiert.
 - Der ausschließlich synthetische Demo-Pack ist eine technische Funktion für

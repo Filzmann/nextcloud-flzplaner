@@ -21,12 +21,12 @@ namespace {
     use OCA\FlzPlaner\Permission\PlanerPermissionProviderListener;
     use OCA\FlzPlaner\Permission\PlanerPermissionSourceInterface;
     use OCA\FlzPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
-    $source=new class implements PlanerPermissionSourceInterface { public function teamGroupIds():array{return ['flz-ASN-A','flz-ASN-B'];} public function ebGroupId():string{return 'flz-EB';} };
+    $source=new class implements PlanerPermissionSourceInterface { public function teamGroupIds():array{return ['ASN-A','ASN-B'];} public function ebGroupId():string{return 'EB';} };
     $provider=new PlanerPermissionProvider($source); $result=$provider->collect(); $by=[]; foreach($result->rules as $rule)$by[$rule->permission][]=$rule;
     if(count($by['plan.team.read']??[])!==2)throw new RuntimeException('Jedes vorhandene Team braucht eine Leseregel.');
     foreach (['plan.assignment.manage-team','plan.team-settings.manage','plan.status.transition','plan.workload.read-team','plan.fixed-conflict.resolve'] as $permission) {
         $rule=$by[$permission][0]??null;
-        if($rule?->condition->operator!=='all'||array_map(fn($c)=>$c->groupId,$rule->condition->children)!==['flz-ASN-A','flz-EB'])throw new RuntimeException("{$permission} muss als getrennte Berechtigung Team UND EB verlangen.");
+        if($rule?->condition->operator!=='all'||array_map(fn($c)=>$c->groupId,$rule->condition->children)!==['ASN-A','EB'])throw new RuntimeException("{$permission} muss als getrennte Berechtigung Team UND EB verlangen.");
     }
     if(isset($by['plan.team.coordinate']))throw new RuntimeException('Die Sammelberechtigung plan.team.coordinate darf getrennte Fachrechte nicht überlagern.');
     if(($by['plan.assignment.manage-own'][0]->condition->operator??null)!=='all')throw new RuntimeException('Eigene Zuweisungen müssen zusätzlich an das Team gebunden bleiben.');

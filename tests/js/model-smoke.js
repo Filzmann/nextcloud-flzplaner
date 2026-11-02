@@ -77,7 +77,7 @@ assert.strictEqual(slot.candidates.length, 1);
 
 const team = Team.get({
     code: 'TeamA',
-    group_name: 'flz-ASN-TeamA',
+    group_name: 'ASN-TeamA',
     assistants: [assistant.toArray()]
 });
 

@@ -37,17 +37,17 @@ namespace {
         public array $admins = ['native-admin', 'admin-target'];
         public array $memberships = [
             'privacy-officer' => ['Datenschutzbeauftragte'],
-            'responsible-eb' => ['flz-EB', 'flz-ASN-TeamA'],
-            'role-only-eb' => ['flz-EB'],
-            'manipulated-eb' => ['flz-EB', 'flz-ASN-Manipuliert'],
+            'responsible-eb' => ['EB', 'ASN-TeamA'],
+            'role-only-eb' => ['EB'],
+            'manipulated-eb' => ['EB', 'ASN-Manipuliert'],
         ];
         public function isAdmin(string $uid): bool { return in_array($uid, $this->admins, true); }
         public function isInGroup(string $uid, string $gid): bool { return in_array($gid, $this->memberships[$uid] ?? [], true); }
         public function getUserGroupIds($user): array { return $this->memberships[$user->getUID()] ?? []; }
     };
     $permissionSource = new class implements PlanerPermissionSourceInterface {
-        public function teamGroupIds(): array { return ['flz-ASN-TeamA', 'flz-ASN-TeamB']; }
-        public function ebGroupId(): string { return 'flz-EB'; }
+        public function teamGroupIds(): array { return ['ASN-TeamA', 'ASN-TeamB']; }
+        public function ebGroupId(): string { return 'EB'; }
     };
     $repository = new class implements TemporaryAdminAccessRepositoryInterface {
         public array $rows = [];
@@ -109,7 +109,7 @@ namespace {
     if (!$service->revoke('admin-target') || $service->hasActiveGrant('admin-target')) throw new RuntimeException('DPO-Widerruf beendet die Freigabe nicht.');
 
     $session->user = new class implements OCP\IUser { public function getUID(): string { return 'responsible-eb'; } };
-    $groups->memberships['responsible-eb'] = ['flz-EB', 'flz-ASN-TeamA'];
+    $groups->memberships['responsible-eb'] = ['EB', 'ASN-TeamA'];
     if (!$service->canManageGrants() || $service->state()['history'] === []) throw new RuntimeException('Die zuständige Einsatzbegleitung muss Freigaben und Historie verwalten dürfen.');
     $ebGrant = $service->activate('admin-target', 60);
     if ($ebGrant['grantedBy'] !== 'responsible-eb') throw new RuntimeException('Die EB-Freigabe wird nicht mit der handelnden Person auditiert.');

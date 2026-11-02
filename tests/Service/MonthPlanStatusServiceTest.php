@@ -151,9 +151,9 @@ $settings = ['shifts' => [[
     'endsAt' => '14:00',
     'enabled' => true,
 ]]];
-$assistantTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, $settings, PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
-$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, $settings, [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
-$roleOnlyEbTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, $settings, []);
+$assistantTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, false, $settings, PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
+$ebTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, $settings, [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
+$roleOnlyEbTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, $settings, []);
 $store = new MonthPlanStatusStoreFake();
 $service = new ScheduleService($store, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake(), new WorkloadPreferenceService($store), new FixedShiftService($store, new ShiftConfigService()));
 
@@ -194,7 +194,7 @@ assertDomainException(
 $store->updatedSlots = [];
 assertSameValue('approved', $service->monthPlan($ebTeam, '2026-08', 'test-eb')['status'] ?? null, 'Approved status remains visible after reload.');
 assertSameValue([], $store->updatedSlots, 'Loading an approved plan does not rewrite frozen slot definitions.');
-$changedSettingsTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, ['shifts' => [[
+$changedSettingsTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, ['shifts' => [[
     'key' => 'late',
     'label' => 'Spät neu',
     'startsAt' => '14:00',
