@@ -7,8 +7,6 @@ erledigte Änderungen in `CHANGELOG.md` und geltende Architektur in
 
 ## Aktueller Fokus
 
-- Die manuellen Prüfungen werden im ausfüllbaren
-  [`docs/manual-acceptance.md`](docs/manual-acceptance.md) dokumentiert.
 - Den umgesetzten temporären Admin-Vollzugriff einschließlich DPO-/zuständiger
   EB-Steuerung, Rollenmatrix, CSRF und Tastaturbedienung in DDEV und auf
   Staging abnehmen.
