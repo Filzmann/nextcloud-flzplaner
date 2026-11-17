@@ -1,0 +1,14 @@
+{
+    "schema": 1,
+    "component": "browser",
+    "app_id": "flzplaner",
+    "app_namespace": "FlzPlaner",
+    "browser_global": "window.OCA.FlzPlaner.Shared",
+    "packages": {
+        "browser": {
+            "name": "@filzmann/shared-browser",
+            "version": "0.1.0",
+            "sha256": "eb2c516d3beb43714f7c8782930ff82e435c39be2c479e75b801f0480be000f6"
+        }
+    }
+}

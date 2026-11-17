@@ -4,7 +4,7 @@
     const button = document.getElementById('flz-planer-demo-install');
     const notice = document.getElementById('flz-planer-demo-notice');
     if (!confirmation || !button || !notice) return;
-    const client = new window.LocalBase.api.ApiClient({ appId: 'flzplaner' });
+    const client = new window.OCA.FlzPlaner.Shared.api.ApiClient({ appId: 'flzplaner' });
     confirmation.addEventListener('change', () => { button.disabled = !confirmation.checked; });
     button.addEventListener('click', async () => {
         if (!confirmation.checked || button.disabled) return;

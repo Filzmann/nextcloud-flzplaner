@@ -1,5 +1,5 @@
 (function() {
-    const { Notice, byId, esc } = window.LocalBase.ui;
+    const { Notice, byId, esc } = window.OCA.FlzPlaner.Shared.ui;
     const notice = new Notice('flz-planer-notice');
     const weekday = ['', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
     const monthName = ['', 'Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];

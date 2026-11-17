@@ -19,6 +19,30 @@ echte Überlappungen blockieren Planvorschlag, Festschichten und Zuweisungen.
 Fehlende Provider sind ein gültiger Standalone-Zustand; Providerfehler werden
 bei schreibenden Prüfungen nicht als Konfliktfreiheit behauptet.
 
+## Frontend und gebündelte Browserbibliothek
+
+API-Zugriffe, Modelle, Repository-Basis und sichtbare Statusmeldungen verwenden
+die app-lokal gebündelten Kategorie-A-Verträge `ApiClient`, `Model`,
+`Repository` und `Notice` aus `flz_shared`. Das reproduzierbare
+Browserartefakt liegt vollständig unter `js/shared`, besitzt einen eigenen
+Paket-Lock und stellt seine Laufzeittypen ausschließlich unter
+`window.OCA.FlzPlaner.Shared` bereit. Es lädt weder die entsprechenden
+privaten LocalBase-Browserassets noch Dateien aus einem benachbarten
+Workspace-Repository.
+
+Das Bundle besitzt keinen eigenen Nextcloud-Lebenszyklus: Installation,
+Update, Deinstallation und Rückbau erfolgen ausschließlich mit der jeweiligen
+FlzPlaner-Version. Ein Shared-Update benötigt deshalb ein neues
+FlzPlaner-Artefakt; der Rückbau auf die vorherige Appversion stellt zugleich
+deren gesperrte Bundleversion wieder her. Persistente Daten oder Migrationen
+sind mit diesem Browserpaket nicht verbunden.
+
+Die weiterhin verwendeten Organisations-, Kalender-, Event-, Navigations-
+und Demo-Provisionierungsverträge sind nicht Bestandteil dieses zustandslosen
+Kategorie-A-Pakets. Sie bleiben bis zu ihren jeweils getrennten
+Kategorie-B-Migrationsschritten unverändert; aus dem Browserbundle entsteht
+keine zweite Organisations-, Rechte- oder Planungsquelle.
+
 ## Fach- und Datenmodell
 
 - Assistenzteams, EB-Rolle und Organisationsschlüssel stammen aus der

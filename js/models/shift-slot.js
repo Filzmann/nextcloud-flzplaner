@@ -1,5 +1,5 @@
 (function() {
-    const { Model } = window.LocalBase.models;
+    const { Model } = window.OCA.FlzPlaner.Shared.models;
     window.FlzPlaner = window.FlzPlaner || {};
     window.FlzPlaner.models = window.FlzPlaner.models || {};
     const { ShiftCandidate } = window.FlzPlaner.models;

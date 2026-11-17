@@ -6,7 +6,7 @@
     const status = document.getElementById('flz-planer-full-access-status');
     if (!form || !history || !status) return;
 
-    const client = new window.LocalBase.api.ApiClient({ appId: 'flzplaner' });
+    const client = new window.OCA.FlzPlaner.Shared.api.ApiClient({ appId: 'flzplaner' });
 
     const setStatus = (message, isError = false) => {
         status.textContent = message;

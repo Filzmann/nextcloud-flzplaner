@@ -1,5 +1,5 @@
 (function() {
-    const client = new window.LocalBase.api.ApiClient({ appId: 'flzplaner' });
+    const client = new window.OCA.FlzPlaner.Shared.api.ApiClient({ appId: 'flzplaner' });
 
     window.FlzPlaner = window.FlzPlaner || {};
     window.FlzPlaner.api = {

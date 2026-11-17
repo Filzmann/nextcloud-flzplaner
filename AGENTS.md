@@ -104,8 +104,15 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
   Suite-Einstellung verschoben.
 - FlzPlaner-spezifische API-Pfade, Modelle, Workflows und Darstellung bleiben
   in diesem Repository.
-- Gemeinsame Bausteine werden erst nach LocalBase verschoben, wenn mindestens
-  zwei Apps denselben semantischen und testbaren Vertrag benötigen.
+- Gemeinsame Bausteine werden erst in ein versioniertes Shared-Paket oder
+  einen öffentlichen Laufzeitvertrag überführt, wenn mindestens zwei Apps
+  denselben semantischen und testbaren Vertrag benötigen.
+- Der Frontend-Unterbau verwendet `ApiClient`, `Model`, `Repository` und die
+  kleinen UI-Primitives aus dem app-lokal gebündelten Kategorie-A-Paket
+  `flz_shared` unter `window.OCA.FlzPlaner.Shared`. Private LocalBase-
+  Browserassets und benachbarte Paketpfade sind keine Laufzeitabhängigkeit.
+  Organisations-, Kalender-, Event-, Navigations- und Demo-Verträge bleiben
+  davon getrennte Kategorie-B-Laufzeitverträge.
 - WordPress-Kompatibilität und parallele Urlaubspersistenz sind unzulässig.
 - Der `PersonalDataProvider` registriert sich lazy über den öffentlichen
   Standalone-V1-Vertrag von `flz_data_protection` und weist eigene

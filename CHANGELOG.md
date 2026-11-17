@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Der Category-A-Browser-Smoke ordnet ausgeführte Bundle-Dateien über ihre
+  absoluten Quellpfade zuverlässig der JavaScript-Coverage zu.
+- Die zustandslosen Browserprimitives aus `flz_shared` 0.1.0 reproduzierbar
+  unter `window.OCA.FlzPlaner.Shared` gebündelt und private LocalBase-
+  Browserassets aus den Planer-Templates entfernt; Kategorie-B-Verträge
+  bleiben unverändert.
 - Organigrammrollen und Planerrechte getrennt: eigene Teamrechte sowie die
   fünf EB-Teamrechte für Fremdzuweisung, Teamkonfiguration, Status,
   Auslastung und Festschichtkonflikte werden serverseitig einzeln geprüft.

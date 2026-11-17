@@ -1,10 +1,11 @@
 <?php
-\OCP\Util::addScript('localbase', 'api/api-client');
+\OCP\Util::addScript('flzplaner', 'shared/api-client');
+\OCP\Util::addScript('flzplaner', 'shared/model');
+\OCP\Util::addScript('flzplaner', 'shared/repository');
+\OCP\Util::addScript('flzplaner', 'shared/ui');
 \OCP\Util::addScript('flzplaner', 'admin-access');
 \OCP\Util::addScript('flzplaner', 'modules/api');
-\OCP\Util::addScript('localbase', 'ui/ui');
 \OCP\Util::addScript('flzplaner', 'modules/ui');
-\OCP\Util::addScript('localbase', 'models/model');
 \OCP\Util::addScript('flzplaner', 'models/assistant');
 \OCP\Util::addScript('flzplaner', 'models/shift-candidate');
 \OCP\Util::addScript('flzplaner', 'models/shift-definition');
@@ -12,7 +13,6 @@
 \OCP\Util::addScript('flzplaner', 'models/team-settings');
 \OCP\Util::addScript('flzplaner', 'models/team');
 \OCP\Util::addScript('flzplaner', 'models/day-note');
-\OCP\Util::addScript('localbase', 'repositories/repository');
 \OCP\Util::addScript('flzplaner', 'repositories/plan-repository');
 \OCP\Util::addScript('flzplaner', 'components/candidate-chip');
 \OCP\Util::addScript('flzplaner', 'components/day-note-control');

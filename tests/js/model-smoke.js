@@ -2,7 +2,7 @@ const assert = require('assert');
 
 global.window = {};
 
-require('../../../localbase/js/models/model.js');
+require('../../js/shared/model.js');
 
 require('../../js/models/assistant.js');
 require('../../js/models/shift-candidate.js');

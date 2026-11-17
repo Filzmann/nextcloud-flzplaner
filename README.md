@@ -19,6 +19,12 @@ sichtbare mobile Oberfläche grün.
 
 Für Staging und Auslieferung das Produktbundle `flz-product-flzplaner-<release>.tar.gz` und dessen enthaltenes `install.sh` verwenden. Es prüft und installiert LocalBase automatisch; ab dem zweiten FLZ-Fachprodukt aktiviert es OrgSuite.
 
+Die zustandslosen Browserprimitives werden als reproduzierbares,
+app-lokal isoliertes `flz_shared`-0.1.0-Artefakt unter
+`window.OCA.FlzPlaner.Shared` mitgeliefert. Dafür werden zur Laufzeit weder
+private LocalBase-Browserassets noch ein benachbartes Quellrepository geladen;
+die getrennten Kategorie-B-Verträge von LocalBase bleiben hiervon unberührt.
+
 FlzPlaner funktioniert einzeln; optionale Abwesenheits- oder Kalenderhinweise entfallen ohne die jeweilige Fachapp, ohne den Monatsplan zu blockieren.
 
 Assistenzteams werden aus den zentral konfigurierten Nextcloud-Gruppen abgeleitet. Teambezogene Schichtkonfigurationen werden durch berechtigte Einsatzbegleitungen gepflegt.

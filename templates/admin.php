@@ -1,5 +1,5 @@
 <?php
-\OCP\Util::addScript('localbase', 'api/api-client');
+\OCP\Util::addScript('flzplaner', 'shared/api-client');
 \OCP\Util::addScript('flzplaner', 'admin');
 \OCP\Util::addStyle('flzplaner', 'admin');
 ?>

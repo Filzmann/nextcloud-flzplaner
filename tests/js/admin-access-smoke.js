@@ -29,7 +29,7 @@ global.document = {
     createElement() { return element(); },
 };
 global.window = {
-    LocalBase: { api: { ApiClient: class { async request(path, options = {}) { requests.push({ path, options }); return path === '/api/admin/full-access' && !options.method ? { history: [] } : {}; } } } },
+    OCA: { FlzPlaner: { Shared: { api: { ApiClient: class { async request(path, options = {}) { requests.push({ path, options }); return path === '/api/admin/full-access' && !options.method ? { history: [] } : {}; } } } } } },
 };
 
 require('../../js/admin-access.js');
