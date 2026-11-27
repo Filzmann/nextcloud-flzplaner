@@ -11,7 +11,7 @@ global.document = {
     }
 };
 
-require('../../../localbase/js/ui/ui.js');
+require('../../js/shared/ui.js');
 require('../../js/modules/ui.js');
 
 const { dateShort, dayHeader, monthHeader, statusLabel, showError, showNotice } = window.FlzPlaner.ui;

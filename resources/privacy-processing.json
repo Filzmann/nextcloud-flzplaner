@@ -167,10 +167,10 @@
       "name": "Zeitlich begrenzte fachliche Adminfreigabe",
       "controller": {
         "component": "Assistenz Dienstplanung",
-        "business_owner": "Datenschutzbeauftragte"
+        "business_owner": "Datenschutzbeauftragte und zuständige Einsatzbegleitungen"
       },
       "data_categories": [
-        "Nextcloud-UID des Zielkontos (aktives Nextcloud-Administrationskonto) sowie UIDs der freigebenden und widerrufenden Mitglieder von Datenschutzbeauftragte",
+        "Nextcloud-UID des Zielkontos (aktives Nextcloud-Administrationskonto) sowie UIDs der freigebenden und widerrufenden Datenschutzbeauftragten oder zuständigen Einsatzbegleitungen",
         "Beginn, geplantes Ende, tatsächliches Ende und Status der Freigabe"
       ],
       "data_subjects": [
@@ -181,7 +181,7 @@
         "Sicherheits- und Auditnachweis der Freigabehistorie"
       ],
       "access_roles": [
-        "Erteilen und Widerrufen: Mitglied der kanonischen Nextcloud-Gruppe Datenschutzbeauftragte; nativer Adminstatus ist dafür weder erforderlich noch ausreichend",
+        "Erteilen und Widerrufen: Mitglied der kanonischen Nextcloud-Gruppe Datenschutzbeauftragte oder Einsatzbegleitung mit aktueller Assistenzteam-Mitgliedschaft; nativer Adminstatus ist dafür weder erforderlich noch ausreichend",
         "Ziel: ausschließlich aktives Nextcloud-Administrationskonto",
         "Betroffene Person für die eigene Art.-15-Projektion",
         "Ausdrücklich berechtigte Datenschutz-Prüfrolle"
@@ -204,7 +204,7 @@
         }
       ],
       "data_sources": [
-        "App-lokaler Freigabevorgang durch Datenschutzbeauftragte im Filzmann Assistenzplanung",
+        "App-lokaler Freigabevorgang durch Datenschutzbeauftragte oder zuständige Einsatzbegleitung im Filzmann Assistenzplanung",
         "App-eigene Tabelle flz_planer_admin_access"
       ],
       "legal_basis": {

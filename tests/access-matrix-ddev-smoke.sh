@@ -5,7 +5,7 @@ base_url="${FLZP_BASE_URL:-https://nextcloud-dev.ddev.site}"
 ddev_project="${FLZP_DDEV_PROJECT:-$(cd "$(dirname "$0")/../../nextcloud-dev" && pwd)}"
 suffix="$(date +%s)-$$"
 team_code="Smoke$$"
-team_group="flz-ASN-$team_code"
+team_group="ASN-$team_code"
 created_users=()
 
 occ() {

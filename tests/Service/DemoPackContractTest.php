@@ -14,7 +14,8 @@ foreach (['DemoAccountProvisioningService', "->provision('flz-full-suite-demo'",
 foreach (['PlanerDemoPackService', '->install()'] as $contract) if (!str_contains($command, $contract)) throw new RuntimeException("Demo-Command delegiert nicht: {$contract}");
 foreach (['/api/admin/demo-pack/install', "'verb' => 'POST'"] as $contract) if (!str_contains($routes, $contract)) throw new RuntimeException("Demo-Route fehlt: {$contract}");
 foreach (['<command>OCA\\FlzPlaner\\Command\\SeedDemoCommand</command>', '<admin>OCA\\FlzPlaner\\Settings\\Admin</admin>', '<admin-section>OCA\\FlzPlaner\\Settings\\AdminSection</admin-section>'] as $contract) if (!str_contains($info, $contract)) throw new RuntimeException("Admin-/Command-Registrierung fehlt: {$contract}");
-foreach (['private function isAdmin()', '$this->groups->isAdmin(', 'temporaryAdminAccess->hasActiveGrant(', 'Http::STATUS_FORBIDDEN'] as $contract) if (!str_contains($controller, $contract)) throw new RuntimeException("Adminschutz fehlt: {$contract}");
+foreach (['private function isAdmin()', '$this->groups->isAdmin(', 'Http::STATUS_FORBIDDEN'] as $contract) if (!str_contains($controller, $contract)) throw new RuntimeException("Adminschutz fehlt: {$contract}");
+if (str_contains($controller, 'temporaryAdminAccess')) throw new RuntimeException('Der ausschließlich synthetische Demo-Pack darf keine fachliche Adminfreigabe verlangen.');
 if (str_contains($controller, 'NoCSRFRequired')) throw new RuntimeException('Demo-Installation umgeht CSRF.');
 foreach (['id="flz-planer-demo-confirm"', 'id="flz-planer-demo-install"', 'Team A, Team B und Team C'] as $contract) if (!str_contains($template, $contract)) throw new RuntimeException("Demo-Adminoberfläche fehlt: {$contract}");
 

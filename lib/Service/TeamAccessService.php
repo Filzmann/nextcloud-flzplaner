@@ -22,6 +22,7 @@ class TeamAccessService {
         private IUserSession $userSession,
         private TeamSettingsService $settingsService,
         private ?FlzOrganizationSettingsService $organization = null,
+        private ?PlanerPermissionPolicy $permissionPolicy = null,
     ) {
     }
 
@@ -72,14 +73,17 @@ class TeamAccessService {
 
         $settings = $this->settingsService->settingsForTeam($teamCode);
         $assistants = $this->assistantsForGroup($group);
+        $actorGroups = $this->currentUserGroupIds();
+        $ebGroup = (string)$this->definition()->roleGroupId('eb');
 
         return new Team(
             $teamCode,
             $groupName,
             $settings->displayName,
             $assistants,
-            $this->currentUserIsEbForTeam($teamCode),
-            $settings->config
+            in_array($ebGroup, $actorGroups, true),
+            $settings->config,
+            $this->policy()->forTeam($actorGroups, $groupName, $ebGroup),
         );
     }
 
@@ -98,11 +102,14 @@ class TeamAccessService {
     }
 
     public function assertCanCoordinate(string $teamCode): Team {
-        $team = $this->assertTeamAccess($teamCode);
-        if (!$team->isEb) {
-            throw new \DomainException('Nur die Einsatzbegleitung darf diese Aktion ausführen.');
-        }
+        return $this->assertPermission($teamCode, PlanerPermissionPolicy::ASSIGNMENT_MANAGE_TEAM);
+    }
 
+    public function assertPermission(string $teamCode, string $permission): Team {
+        $team = $this->assertTeamAccess($teamCode);
+        if (!$team->hasPermission($permission)) {
+            throw new \DomainException('Keine Berechtigung für diese Aktion im Assistenzteam.');
+        }
         return $team;
     }
 
@@ -160,6 +167,13 @@ class TeamAccessService {
         return in_array($groupName, $this->groupManager->getUserGroupIds($user), true);
     }
 
+    /** @return list<string> */
+    private function currentUserGroupIds(): array {
+        $user = $this->userSession->getUser();
+        if ($user === null) return [];
+        return array_values(array_unique(array_map('strval', $this->groupManager->getUserGroupIds($user))));
+    }
+
     private function currentUserHasEbGroup(): bool {
         $user = $this->userSession->getUser();
         if ($user === null) {
@@ -195,5 +209,9 @@ class TeamAccessService {
 
     private function definition(): FlzOrganizationDefinition {
         return $this->organization?->definition() ?? FlzOrganizationDefinition::defaults();
+    }
+
+    private function policy(): PlanerPermissionPolicy {
+        return $this->permissionPolicy ??= new PlanerPermissionPolicy();
     }
 }

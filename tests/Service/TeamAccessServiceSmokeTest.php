@@ -17,6 +17,7 @@ namespace {
 
     use OCA\FlzPlaner\Model\TeamSettings;
     use OCA\FlzPlaner\Service\TeamAccessService;
+    use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
     use OCA\FlzPlaner\Service\TeamSettingsService;
     use OCP\IGroupManager;
     use OCP\IUserSession;
@@ -112,7 +113,7 @@ namespace {
 
         public function get($gid): ?object {
             return match ((string)$gid) {
-                'flz-ASN-TeamB' => $this->teamGroup,
+                'ASN-TeamB' => $this->teamGroup,
                 default => null,
             };
         }
@@ -120,13 +121,13 @@ namespace {
         public function getUserGroupIds($user): array {
             $uid = $user->getUID();
             if ($uid === 'bob') {
-                return ['flz-ASN-TeamB', 'flz-EB'];
+                return ['ASN-TeamB', 'EB'];
             }
             if ($uid === 'alice') {
-                return ['flz-ASN-TeamB', 'flz-ASN-Zulu', 'ignored', 'flz-ASN-TeamB'];
+                return ['ASN-TeamB', 'ASN-Zulu', 'ignored', 'ASN-TeamB'];
             }
             if ($uid === 'legacy-eb') {
-                return ['flz-ASN-TeamB', 'flz-EB-Altschema'];
+                return ['ASN-TeamB', 'EB-Altschema'];
             }
 
             return [];
@@ -162,14 +163,18 @@ namespace {
 
     assertSameValue('bob', $service->currentUserId(), 'Current user id should come from the user session.');
     assertSameValue('TeamB', $service->normalizeTeamCode(' TeamB '), 'Team codes should be trimmed.');
-    assertSameValue(true, $service->currentUserIsEbForTeam('TeamB'), 'EB users should be detected through flz-EB groups.');
+    assertSameValue(true, $service->currentUserIsEbForTeam('TeamB'), 'EB users should be detected through EB groups.');
 
     $team = $service->assertTeamAccess('TeamB');
     assertSameValue('Team B', $team->displayName, 'Team display name should come from team settings.');
-    assertSameValue('flz-ASN-TeamB', $team->groupName, 'Team group name should follow the FLZ schema.');
+    assertSameValue('ASN-TeamB', $team->groupName, 'Team group name should follow the FLZ schema.');
     assertSameValue(['Alice Assistenz', 'Bob EB'], array_map(static fn($assistant): string => $assistant->displayName, $team->assistants()), 'Assistants should be sorted by display name.');
     assertSameValue(null, $team->assistantByUid('disabled-assistant'), 'Disabled Nextcloud users must not be exposed as current shift-capable team members.');
     assertSameValue(false, $team->assistantByUid('bob')->canReceiveShifts, 'EB users should not receive shifts.');
+    foreach (PlanerPermissionPolicy::TEAM_EB_PERMISSIONS as $permission) {
+        assertSameValue(true, $team->hasPermission($permission), "Die zuständige EB braucht die getrennte Berechtigung {$permission}.");
+        $service->assertPermission('TeamB', $permission);
+    }
     assertSameValue(
         ['alice'],
         array_column($team->toArray()['assistants'] ?? [], 'uid'),
@@ -183,10 +188,10 @@ namespace {
     );
     assertSameValue(
         [
-            'teamGroupPrefix' => 'flz-ASN-',
+            'teamGroupPrefix' => 'ASN-',
             'teamLabelPrefix' => 'Assistenzteam',
             'teamCodeMaxLength' => 16,
-            'coordinatorGroupId' => 'flz-EB',
+            'coordinatorGroupId' => 'EB',
             'coordinatorLabel' => 'Einsatzbegleitung',
         ],
         $service->organizationContract(),
@@ -207,13 +212,15 @@ namespace {
     $session->setUser($alice);
     assertSameValue(['TeamB'], array_map(static fn($team): string => $team->code, $service->teamsForCurrentUser()), 'Teams for current user should derive unique ASN group codes and skip missing groups.');
     assertSameValue(false, $service->currentUserIsEbForTeam('TeamB'), 'Non-EB team users should not coordinate.');
+    assertSameValue(true, $service->assertPermission('TeamB', PlanerPermissionPolicy::ASSIGNMENT_MANAGE_OWN)->hasPermission(PlanerPermissionPolicy::ASSIGNMENT_MANAGE_OWN), 'Teammitglieder müssen eigene Wünsche verwalten dürfen.');
+    assertSameValue(false, $service->assertTeamAccess('TeamB')->hasPermission(PlanerPermissionPolicy::ASSIGNMENT_MANAGE_TEAM), 'Teammitgliedschaft darf keine Fremdzuweisung erlauben.');
     assertDomainException(
-        static fn() => $service->assertCanCoordinate('TeamB'),
-        'Non-EB users should not coordinate team settings.'
+        static fn() => $service->assertPermission('TeamB', PlanerPermissionPolicy::TEAM_SETTINGS_MANAGE),
+        'Non-EB users should not manage team settings.'
     );
 
     $session->setUser($legacyEb);
-    assertSameValue(false, $service->currentUserIsEbForTeam('TeamB'), 'Legacy flz-EB-* groups must not grant EB rights.');
+    assertSameValue(false, $service->currentUserIsEbForTeam('TeamB'), 'Legacy EB-* groups must not grant EB rights.');
 
     $session->setUser(null);
     assertSameValue([], $service->teamsForCurrentUser(), 'Anonymous sessions should not expose teams.');

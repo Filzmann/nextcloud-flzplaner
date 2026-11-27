@@ -2,7 +2,7 @@ const assert = require('assert');
 
 global.window = {};
 
-require('../../../localbase/js/models/model.js');
+require('../../js/shared/model.js');
 
 require('../../js/models/assistant.js');
 require('../../js/models/shift-candidate.js');
@@ -77,7 +77,7 @@ assert.strictEqual(slot.candidates.length, 1);
 
 const team = Team.get({
     code: 'TeamA',
-    group_name: 'flz-ASN-TeamA',
+    group_name: 'ASN-TeamA',
     assistants: [assistant.toArray()]
 });
 

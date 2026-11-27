@@ -12,7 +12,8 @@ class TeamSettings {
     public function __construct(
         public string $teamCode,
         public string $displayName,
-        public array $config
+        public array $config,
+        public ?string $bureauKey = null,
     ) {
     }
 
@@ -20,7 +21,8 @@ class TeamSettings {
         return new self(
             (string)($data['teamCode'] ?? $data['team_code'] ?? ''),
             (string)($data['displayName'] ?? $data['display_name'] ?? ''),
-            is_array($data['config'] ?? null) ? $data['config'] : []
+            is_array($data['config'] ?? null) ? $data['config'] : [],
+            isset($data['bureauKey']) ? (string)$data['bureauKey'] : (isset($data['bureau_key']) ? (string)$data['bureau_key'] : null),
         );
     }
 
@@ -28,6 +30,7 @@ class TeamSettings {
         return [
             'displayName' => $this->displayName,
             'config' => $this->config,
+            'bureauKey' => $this->bureauKey,
         ];
     }
 }

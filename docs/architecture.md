@@ -19,6 +19,30 @@ echte Überlappungen blockieren Planvorschlag, Festschichten und Zuweisungen.
 Fehlende Provider sind ein gültiger Standalone-Zustand; Providerfehler werden
 bei schreibenden Prüfungen nicht als Konfliktfreiheit behauptet.
 
+## Frontend und gebündelte Browserbibliothek
+
+API-Zugriffe, Modelle, Repository-Basis und sichtbare Statusmeldungen verwenden
+die app-lokal gebündelten Kategorie-A-Verträge `ApiClient`, `Model`,
+`Repository` und `Notice` aus `flz_shared`. Das reproduzierbare
+Browserartefakt liegt vollständig unter `js/shared`, besitzt einen eigenen
+Paket-Lock und stellt seine Laufzeittypen ausschließlich unter
+`window.OCA.FlzPlaner.Shared` bereit. Es lädt weder die entsprechenden
+privaten LocalBase-Browserassets noch Dateien aus einem benachbarten
+Workspace-Repository.
+
+Das Bundle besitzt keinen eigenen Nextcloud-Lebenszyklus: Installation,
+Update, Deinstallation und Rückbau erfolgen ausschließlich mit der jeweiligen
+FlzPlaner-Version. Ein Shared-Update benötigt deshalb ein neues
+FlzPlaner-Artefakt; der Rückbau auf die vorherige Appversion stellt zugleich
+deren gesperrte Bundleversion wieder her. Persistente Daten oder Migrationen
+sind mit diesem Browserpaket nicht verbunden.
+
+Die weiterhin verwendeten Organisations-, Kalender-, Event-, Navigations-
+und Demo-Provisionierungsverträge sind nicht Bestandteil dieses zustandslosen
+Kategorie-A-Pakets. Sie bleiben bis zu ihren jeweils getrennten
+Kategorie-B-Migrationsschritten unverändert; aus dem Browserbundle entsteht
+keine zweite Organisations-, Rechte- oder Planungsquelle.
+
 ## Fach- und Datenmodell
 
 - Assistenzteams, EB-Rolle und Organisationsschlüssel stammen aus der
@@ -27,6 +51,14 @@ bei schreibenden Prüfungen nicht als Konfliktfreiheit behauptet.
   durch die zuständige EB gepflegt.
 - Eigene Wünsche und fremde Zuweisungen besitzen getrennte serverseitige
   Rechte; EB-Konten sind nicht selbst schichtfähig.
+- Teambezogene Fremdzuweisung, Schichtkonfiguration, Statuswechsel,
+  Auslastungslesezugriff und Festschichtkonfliktlösung sind getrennte
+  Berechtigungen. Standardmäßig erhält sie ausschließlich die Schnittmenge
+  aus aktueller Teammitgliedschaft und EB-Rolle.
+- Eine EB gehört für den Planer genau einem Bürobereich an. Die
+  Team-Bürozuordnung darf nur die EB setzen, die zugleich dem Team und genau
+  diesem einen Bürobereich zugeordnet ist; Büroleitungen erhalten daraus kein
+  Planerrecht.
 - Planungsstatus und Konflikte werden über zuständige Services verändert oder
   abgefragt. Optionale Provider dürfen einen Standalone-Monatsplan nicht
   blockieren.
@@ -54,8 +86,9 @@ PersonalDataProvider und PermissionProvider bilden Schichtbezüge,
 Bearbeitungsreferenzen und die app-lokale temporäre Adminfreigabe ab. Native
 Nextcloud-Administration allein erteilt keinen fachlichen Vollzugriff.
 
-Der temporäre fachliche Admin-Vollzugriff wird ausschließlich von Mitgliedern
-der kanonischen Nextcloud-Gruppe `Datenschutzbeauftragte` erteilt und
+Der temporäre fachliche Admin-Vollzugriff wird von Mitgliedern der kanonischen
+Nextcloud-Gruppe `Datenschutzbeauftragte` oder von zuständigen
+Einsatzbegleitungen mit aktueller Assistenzteam-Mitgliedschaft erteilt und
 widerrufen. Nativer Adminstatus allein erteilt weder Vollzugriff noch Zugriff
 auf Freigabehistorie oder -steuerung. Ziel ist immer ein aktuell von
 Nextcloud bestätigtes Administrationskonto; die app-lokale Freigabe gilt
@@ -63,7 +96,22 @@ höchstens 24 Stunden und wird bei Ablauf, Widerruf, Verlust des nativen
 Adminstatus oder Prüffehlern deny by default unwirksam. Die Steuerung liegt
 rollenabhängig in der Hauptoberfläche. Der Eintrittshinweis erscheint nur für
 native Administrationskonten ohne aktive Freigabe; ein Direktlink wird nur
-bei zusätzlicher Datenschutzrolle gerendert.
+bei eigener Berechtigung zur Freigabeverwaltung gerendert. Der technische,
+ausschließlich synthetische Demo-Pack ist hiervon getrennt und darf nach
+Bestätigung von jedem nativen Nextcloud-Admin installiert werden.
+
+Die Planer-Ausnahme für Einsatzbegleitungen setzt bei jedem Historienzugriff
+und jeder Mutation die aktuelle Schnittmenge aus der kanonischen EB-Rolle und
+mindestens einer aktuell ermittelten Assistenzteam-Gruppe voraus. Reine
+Rollen- oder Teammitgliedschaft, unbekannte beziehungsweise manipulierte
+Teamgruppen und Fehler der Organisations- oder Gruppenquelle bleiben ohne
+Zugriff und ohne Mutation. Der Verlust einer der beiden Mitgliedschaften
+entzieht die Verwaltungsberechtigung sofort, beendet aber keine zuvor
+wirksam erteilte Freigabe des Ziel-Admins rückwirkend; diese endet durch
+Ablauf, Verlust des nativen Adminstatus oder den Widerruf einer zu diesem
+Zeitpunkt berechtigten Person. Die Ausnahme umfasst ausschließlich
+`plan.admin-grant.manage` und erzeugt weder ein eigenes fachliches Vollrecht
+der EB noch weitere teamübergreifende Planerrechte.
 
 Der zusätzliche `ProcessingMetadataProvider` veröffentlicht den app-eigenen
 Katalog `resources/privacy-processing.json` lazy über den öffentlichen

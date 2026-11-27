@@ -2,14 +2,32 @@
 
 ## Unreleased
 
+- L10N-Migration (ZM-06): sichtbare Texte über Nextcloud-l10n (deutsche Quelltexte, Kataloge `l10n/en.*` + `l10n/en_GB.*`), inkl. `tests/Ui/L10nCatalogContractTest.php` und `docs/l10n-inventory.md`.
+
+- Der Category-A-Browser-Smoke ordnet ausgeführte Bundle-Dateien über ihre
+  absoluten Quellpfade zuverlässig der JavaScript-Coverage zu.
+- Die zustandslosen Browserprimitives aus `flz_shared` 0.1.0 reproduzierbar
+  unter `window.OCA.FlzPlaner.Shared` gebündelt und private LocalBase-
+  Browserassets aus den Planer-Templates entfernt; Kategorie-B-Verträge
+  bleiben unverändert.
+- Organigrammrollen und Planerrechte getrennt: eigene Teamrechte sowie die
+  fünf EB-Teamrechte für Fremdzuweisung, Teamkonfiguration, Status,
+  Auslastung und Festschichtkonflikte werden serverseitig einzeln geprüft.
+- Team-Bürozuordnungen auf die zuständige, genau einem Büro zugeordnete EB
+  begrenzt; Büroleitungen erhalten daraus kein Planerrecht.
+- Den ausschließlich synthetischen Demo-Pack für native Admins von der
+  fachlichen Vollzugriffsfreigabe getrennt. Temporäre fachliche
+  Adminfreigaben können nun Datenschutzbeauftragte oder zuständige
+  Einsatzbegleitungen verwalten.
+- Den früheren Staging-Follow-up gegen den vorhandenen Status-, Rechte-,
+  Integrations- und UI-Vertrag abgeglichen und die Browserabnahme um den
+  expliziten Ausschluss einer doppelten Desktop-/Mobilprojektion ergänzt.
 - Nextcloud 35.0.1 durch Fresh Install, Upgrade 34→35 sowie Provider-,
   Berechtigungs-, Runtime-, UI-/API- und Asset-Smokes nachgewiesen und den
   unterstützten Bereich auf die lückenlosen Hauptversionen 33 bis 35
   erweitert. Nextcloud 36 bleibt ungeprüft.
-- Temporären fachlichen Admin-Vollzugriff auf höchstens 24 Stunden begrenzt:
-  Nur `Datenschutzbeauftragte` dürfen aktuelle Nextcloud-Administrationskonten
-  in der Hauptoberfläche freigeben oder widerrufen; native Administration
-  allein bleibt ohne Freigabe- und Historienzugriff.
+- Temporären fachlichen Admin-Vollzugriff auf höchstens 24 Stunden begrenzt;
+  native Administration allein bleibt ohne fachlichen Vollzugriff.
 - Einen app-eigenen Processing-Metadata-Katalog für Wunschdienstplanung und
   temporäre Adminfreigaben über den öffentlichen V1-Vertrag des
   Datenschutz-Centers veröffentlicht.

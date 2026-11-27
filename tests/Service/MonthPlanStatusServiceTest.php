@@ -7,6 +7,7 @@ require_once dirname(__DIR__) . '/bootstrap.php';
 use OCA\FlzPlaner\Model\ShiftSlot;
 use OCA\FlzPlaner\Model\Team;
 use OCA\FlzPlaner\Service\ScheduleService;
+use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
 use OCA\FlzPlaner\Service\WorkloadPreferenceService;
 use OCA\FlzPlaner\Service\FixedShiftService;
 use OCA\FlzPlaner\Service\ShiftConfigService;
@@ -150,8 +151,9 @@ $settings = ['shifts' => [[
     'endsAt' => '14:00',
     'enabled' => true,
 ]]];
-$assistantTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, $settings);
-$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, $settings);
+$assistantTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, false, $settings, PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
+$ebTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, $settings, [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
+$roleOnlyEbTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, $settings, []);
 $store = new MonthPlanStatusStoreFake();
 $service = new ScheduleService($store, new ShiftConfigService(), new MonthPlanStatusTeamAccessFake(), new MonthPlanStatusHintServiceFake(), new WorkloadPreferenceService($store), new FixedShiftService($store, new ShiftConfigService()));
 
@@ -160,6 +162,12 @@ assertDomainException(
     static fn() => $service->transitionMonthStatus($assistantTeam, '2026-08', 'planned', 'assistant-a'),
     'Only the responsible EB may transition a month plan.'
 );
+$statusBeforeDeniedRole = $store->monthStatus('A1', '2026-08');
+assertDomainException(
+    static fn() => $service->transitionMonthStatus($roleOnlyEbTeam, '2026-08', 'planned', 'test-eb'),
+    'Die EB-Rolle ohne Statusberechtigung darf keinen Status ändern.'
+);
+assertSameValue($statusBeforeDeniedRole, $store->monthStatus('A1', '2026-08'), 'Ein abgewiesener Statuswechsel darf den Plan nicht verändern.');
 assertDomainException(
     static fn() => $service->transitionMonthStatus($ebTeam, '2026-08', 'approved', 'test-eb'),
     'A draft plan may not skip the planned state.'
@@ -186,13 +194,13 @@ assertDomainException(
 $store->updatedSlots = [];
 assertSameValue('approved', $service->monthPlan($ebTeam, '2026-08', 'test-eb')['status'] ?? null, 'Approved status remains visible after reload.');
 assertSameValue([], $store->updatedSlots, 'Loading an approved plan does not rewrite frozen slot definitions.');
-$changedSettingsTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, ['shifts' => [[
+$changedSettingsTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, ['shifts' => [[
     'key' => 'late',
     'label' => 'Spät neu',
     'startsAt' => '14:00',
     'endsAt' => '20:00',
     'enabled' => true,
-]]]);
+]]], [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
 $approvedSnapshot = $service->monthPlan($changedSettingsTeam, '2026-08', 'test-eb');
 assertSameValue(
     ['early'],

@@ -5,14 +5,22 @@ declare(strict_types=1);
 namespace OCA\FlzPlaner\Service;
 
 use OCA\FlzPlaner\Model\ShiftDefinition;
+use OCP\IL10N;
 
 class ShiftConfigService {
+    public function __construct(private ?IL10N $l10n = null) {}
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
     public function defaults(): array {
         return [
             'meetingDay' => '',
             'shifts' => [
-                $this->shift('early', 'Früh', '08:00', '14:00', true),
-                $this->shift('late', 'Spät', '14:00', '20:00', true),
+                $this->shift('early', $this->t('Früh'), '08:00', '14:00', true),
+                $this->shift('late', $this->t('Spät'), '14:00', '20:00', true),
                 $this->shift('night', 'Nacht', '20:00', '08:00', true),
             ],
         ];

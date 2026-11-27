@@ -1,4 +1,6 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
     const { esc } = window.FlzPlaner.ui;
 
     function render(slot, team, candidates, surface = 'default') {
@@ -10,9 +12,9 @@
 
         return `
             <span class="flz-planer-assignment-control" data-assignment-control="${esc(slot.id)}">
-                <button type="button" class="flz-planer-small flz-planer-icon-button" aria-label="Assistenz zuteilen" aria-controls="${pickerId}" aria-expanded="false" data-action="open-assignment-picker" data-assignment-trigger="${esc(slot.id)}" data-slot-id="${esc(slot.id)}" ${assistants.length === 0 ? 'disabled' : ''}>+</button>
-                <span id="${pickerId}" class="flz-planer-assignment-picker" role="group" aria-label="Assistenz auswählen" data-assignment-picker="${esc(slot.id)}" hidden>
-                    ${assistants.length === 0 ? '<span>Keine Assistenz verfügbar</span>' : assistants.map(assistant => option(assistant, slot.id)).join('')}
+                <button type="button" class="flz-planer-small flz-planer-icon-button" aria-label="${translate('flzplaner', 'Assistenz zuteilen')}" aria-controls="${pickerId}" aria-expanded="false" data-action="open-assignment-picker" data-assignment-trigger="${esc(slot.id)}" data-slot-id="${esc(slot.id)}" ${assistants.length === 0 ? 'disabled' : ''}>+</button>
+                <span id="${pickerId}" class="flz-planer-assignment-picker" role="group" aria-label="${translate('flzplaner', 'Assistenz auswählen')}" data-assignment-picker="${esc(slot.id)}" hidden>
+                    ${assistants.length === 0 ? `<span>${translate('flzplaner', 'Keine Assistenz verfügbar')}</span>` : assistants.map(assistant => option(assistant, slot.id)).join('')}
                 </span>
             </span>
         `;

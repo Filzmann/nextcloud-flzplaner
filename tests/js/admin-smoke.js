@@ -31,16 +31,20 @@ global.document = {
     }
 };
 global.window = {
-    LocalBase: {
-        api: {
-            ApiClient: class {
-                async request(path, options) {
-                    requests.push({ path, options });
-                    return pendingResponse;
+    OCA: {
+        FlzPlaner: {
+            Shared: {
+                api: {
+                    ApiClient: class {
+                        async request(path, options) {
+                            requests.push({ path, options });
+                            return pendingResponse;
+                        }
+                    }
                 }
             }
         }
-    }
+    },
 };
 
 require('../../js/admin.js');

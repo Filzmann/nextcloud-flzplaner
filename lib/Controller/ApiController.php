@@ -11,11 +11,13 @@ use OCA\FlzPlaner\Service\TeamAccessService;
 use OCA\FlzPlaner\Service\TeamSettingsService;
 use OCA\FlzPlaner\Service\WorkloadPreferenceService;
 use OCA\FlzPlaner\Service\FixedShiftService;
+use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
 use OCA\LocalBase\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\IL10N;
 use OCP\IRequest;
 
 class ApiController extends Controller {
@@ -27,9 +29,16 @@ class ApiController extends Controller {
         private FlzPlanerLogger $logger,
         private ApiResponder $responder,
         private WorkloadPreferenceService $workloadPreferences,
-        private FixedShiftService $fixedShifts
+        private FixedShiftService $fixedShifts,
+        private ?IL10N $l10n = null
     ) {
         parent::__construct(Application::APP_ID, $request);
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     #[NoAdminRequired, NoCSRFRequired]
@@ -52,7 +61,7 @@ class ApiController extends Controller {
                 'organization' => $this->teamAccess->organizationContract(),
                 'defaultMonth' => date('Y-m'),
                 'defaultYear' => (int)date('Y'),
-                'notice' => 'Assistenzteams und Koordinationsrechte folgen den gemeinsamen Filzmann-Organisationseinstellungen.',
+                'notice' => $this->t('Assistenzteams und Koordinationsrechte folgen den gemeinsamen Filzmann-Organisationseinstellungen.'),
             ];
         }, [$this->logger, 'error'], 'state');
     }
@@ -69,7 +78,7 @@ class ApiController extends Controller {
     #[NoAdminRequired]
     public function transitionMonthStatus(string $teamCode, string $month, string $targetStatus): DataResponse {
         return $this->responder->respond(function () use ($teamCode, $month, $targetStatus): array {
-            $team = $this->teamAccess->assertCanCoordinate($teamCode);
+            $team = $this->teamAccess->assertPermission($teamCode, PlanerPermissionPolicy::STATUS_TRANSITION);
             $status = $this->scheduleService->transitionMonthStatus(
                 $team,
                 $month,
@@ -98,7 +107,7 @@ class ApiController extends Controller {
             $meetingDay,
             $shiftsJson
         ): array {
-            $team = $this->teamAccess->assertCanCoordinate($teamCode);
+            $team = $this->teamAccess->assertPermission($teamCode, PlanerPermissionPolicy::TEAM_SETTINGS_MANAGE);
             $config = ['meetingDay' => $meetingDay, 'shifts' => $this->decodeShiftsJson($shiftsJson)];
 
             $settings = $this->teamSettings->save($team->code, $displayName, $config);
@@ -110,7 +119,7 @@ class ApiController extends Controller {
     #[NoAdminRequired]
     public function saveDayNote(string $teamCode, string $month, string $workDate, string $note = ''): DataResponse {
         return $this->responder->respond(function () use ($teamCode, $month, $workDate, $note): array {
-            $team = $this->teamAccess->assertCanCoordinate($teamCode);
+            $team = $this->teamAccess->assertPermission($teamCode, PlanerPermissionPolicy::ASSIGNMENT_MANAGE_TEAM);
             $this->scheduleService->saveDayNote($team, $month, $workDate, $note, $this->teamAccess->currentUserId());
 
             return ['ok' => true];
@@ -195,7 +204,7 @@ class ApiController extends Controller {
     #[NoAdminRequired]
     public function resolveFixedConflict(string $teamCode,string $month,int $slotId,string $keptUid=''): DataResponse {
         return $this->responder->respond(function() use($teamCode,$month,$slotId,$keptUid): array {
-            $team=$this->teamAccess->assertCanCoordinate($teamCode);
+            $team=$this->teamAccess->assertPermission($teamCode,PlanerPermissionPolicy::FIXED_CONFLICT_RESOLVE);
             $this->scheduleService->resolveFixedConflict($team,$month,$slotId,$keptUid,$this->teamAccess->currentUserId());
             return ['ok'=>true];
         },[$this->logger,'error'],'resolve_fixed_conflict',['team_code'=>$teamCode,'month'=>$month,'slot_id'=>$slotId]);

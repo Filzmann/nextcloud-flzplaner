@@ -176,16 +176,24 @@ try {
     await waitFor(`document.querySelector('[data-plan-status="approved"]')`, 'Status genehmigt');
     assert.equal(await evaluate(`Boolean(document.querySelector('textarea[data-note-date], [data-action="add-selected"], [data-action="remove-candidate"]'))`), false, 'Ein genehmigter Plan muss vollständig gesperrt sein.');
 
-    const layout = await evaluate(`(() => { const root = document.querySelector('#flzplaner-app'); const desktop = document.querySelector('.flz-planer-desktop-plan'); const mobile = document.querySelector('.flz-planer-mobile-plan'); const firstDay = document.querySelector('.flz-planer-mobile-day'); const firstTab = document.querySelector('.flz-planer-tab'); const rootStyle = getComputedStyle(root); return { rootOverflowY: rootStyle.overflowY, rootBackground: rootStyle.backgroundColor, rootScrollable: root.scrollHeight > root.clientHeight, desktopDisplay: getComputedStyle(desktop).display, mobileDisplay: getComputedStyle(mobile).display, mobileDayVisible: Boolean(firstDay && firstDay.getClientRects().length), tabMinHeight: getComputedStyle(firstTab).minHeight, viewportOverflowsX: document.documentElement.scrollWidth > document.documentElement.clientWidth, panelLabel: document.querySelector('#flz-planer-panel')?.getAttribute('aria-labelledby') }; })()`);
-    assert.equal(layout.rootOverflowY, 'auto');
-    assert.notEqual(layout.rootBackground, 'rgba(0, 0, 0, 0)');
-    assert.equal(layout.rootScrollable, true, 'Der App-Root muss bei langem Plan vertikal scrollen.');
-    assert.equal(layout.desktopDisplay, 'none', 'Die breite Planmatrix muss im schmalen Viewport ausgeblendet sein.');
-    assert.equal(layout.mobileDisplay, 'grid', 'Der schmale Viewport muss die vertikale Tagesliste zeigen.');
-    assert.equal(layout.mobileDayVisible, true, 'Mindestens ein mobiler Planungstag muss sichtbar sein.');
-    assert.equal(layout.tabMinHeight, '44px', 'Mobile Tab-Schalter müssen das Mindest-Touchziel einhalten.');
-    assert.equal(layout.viewportOverflowsX, false, 'Die mobile Tagesliste darf keinen horizontalen Seiten-Scroll erzeugen.');
-    assert.equal(layout.panelLabel, 'flz-planer-tab-month');
+    await cdp.call('Emulation.setDeviceMetricsOverride', { width: 1200, height: 800, deviceScaleFactor: 1, mobile: false });
+    const wideLayout = await evaluate(`(() => { const desktop = document.querySelector('.flz-planer-desktop-plan'); const mobile = document.querySelector('.flz-planer-mobile-plan'); return { desktopDisplay: getComputedStyle(desktop).display, mobileDisplay: getComputedStyle(mobile).display, visibleProjectionCount: [desktop, mobile].filter(element => element.getClientRects().length > 0).length }; })()`);
+    assert.equal(wideLayout.desktopDisplay, 'block', 'Die breite Planmatrix muss im Desktop-Viewport sichtbar sein.');
+    assert.equal(wideLayout.mobileDisplay, 'none', 'Die mobile Tagesliste darf im Desktop-Viewport nicht als zweite Schichtdarstellung erscheinen.');
+    assert.equal(wideLayout.visibleProjectionCount, 1, 'Im Desktop-Viewport darf genau eine Planprojektion sichtbar sein.');
+
+    await cdp.call('Emulation.setDeviceMetricsOverride', { width: 700, height: 700, deviceScaleFactor: 1, mobile: false });
+    const narrowLayout = await evaluate(`(() => { const root = document.querySelector('#flzplaner-app'); const desktop = document.querySelector('.flz-planer-desktop-plan'); const mobile = document.querySelector('.flz-planer-mobile-plan'); const firstDay = document.querySelector('.flz-planer-mobile-day'); const firstTab = document.querySelector('.flz-planer-tab'); const rootStyle = getComputedStyle(root); return { rootOverflowY: rootStyle.overflowY, rootBackground: rootStyle.backgroundColor, rootScrollable: root.scrollHeight > root.clientHeight, desktopDisplay: getComputedStyle(desktop).display, mobileDisplay: getComputedStyle(mobile).display, visibleProjectionCount: [desktop, mobile].filter(element => element.getClientRects().length > 0).length, mobileDayVisible: Boolean(firstDay && firstDay.getClientRects().length), tabMinHeight: getComputedStyle(firstTab).minHeight, viewportOverflowsX: document.documentElement.scrollWidth > document.documentElement.clientWidth, panelLabel: document.querySelector('#flz-planer-panel')?.getAttribute('aria-labelledby') }; })()`);
+    assert.equal(narrowLayout.rootOverflowY, 'auto');
+    assert.notEqual(narrowLayout.rootBackground, 'rgba(0, 0, 0, 0)');
+    assert.equal(narrowLayout.rootScrollable, true, 'Der App-Root muss bei langem Plan vertikal scrollen.');
+    assert.equal(narrowLayout.desktopDisplay, 'none', 'Die breite Planmatrix muss im schmalen Viewport ausgeblendet sein.');
+    assert.equal(narrowLayout.mobileDisplay, 'grid', 'Der schmale Viewport muss die vertikale Tagesliste zeigen.');
+    assert.equal(narrowLayout.visibleProjectionCount, 1, 'Im schmalen Viewport darf genau eine Planprojektion sichtbar sein.');
+    assert.equal(narrowLayout.mobileDayVisible, true, 'Mindestens ein mobiler Planungstag muss sichtbar sein.');
+    assert.equal(narrowLayout.tabMinHeight, '44px', 'Mobile Tab-Schalter müssen das Mindest-Touchziel einhalten.');
+    assert.equal(narrowLayout.viewportOverflowsX, false, 'Die mobile Tagesliste darf keinen horizontalen Seiten-Scroll erzeugen.');
+    assert.equal(narrowLayout.panelLabel, 'flz-planer-tab-month');
 
     const screenshot = await cdp.call('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
     await writeFile(screenshotPath, Buffer.from(screenshot.data, 'base64'));

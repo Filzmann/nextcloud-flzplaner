@@ -19,9 +19,23 @@ sichtbare mobile Oberfläche grün.
 
 Für Staging und Auslieferung das Produktbundle `flz-product-flzplaner-<release>.tar.gz` und dessen enthaltenes `install.sh` verwenden. Es prüft und installiert LocalBase automatisch; ab dem zweiten FLZ-Fachprodukt aktiviert es OrgSuite.
 
+Die zustandslosen Browserprimitives werden als reproduzierbares,
+app-lokal isoliertes `flz_shared`-0.1.0-Artefakt unter
+`window.OCA.FlzPlaner.Shared` mitgeliefert. Dafür werden zur Laufzeit weder
+private LocalBase-Browserassets noch ein benachbartes Quellrepository geladen;
+die getrennten Kategorie-B-Verträge von LocalBase bleiben hiervon unberührt.
+
 FlzPlaner funktioniert einzeln; optionale Abwesenheits- oder Kalenderhinweise entfallen ohne die jeweilige Fachapp, ohne den Monatsplan zu blockieren.
 
 Assistenzteams werden aus den zentral konfigurierten Nextcloud-Gruppen abgeleitet. Teambezogene Schichtkonfigurationen werden durch berechtigte Einsatzbegleitungen gepflegt.
+
+Lesen und eigene Wünsche, Präferenzen, Belastungsgrenzen sowie regelmäßige
+Schichten sind auf das eigene Assistenzteam begrenzt. Fremdzuweisungen,
+Team-Schichtkonfiguration, Statuswechsel, Team-Auslastung und
+Festschichtkonflikte sind getrennte Rechte und werden standardmäßig nur aus
+der Kombination von Teammitgliedschaft und EB-Rolle erteilt. Eine EB kann im
+Planer genau einem Büro zugeordnet sein; eine Büro- oder Büroleitungsrolle
+allein erteilt keine Planungsrechte.
 
 Die zuständige Einsatzbegleitung führt Monatspläne kontrolliert von `draft` über `planned` nach `approved`. Genehmigte Pläne sind bis zu einer ausdrücklichen Rücknahme gegen Wünsche, Zuweisungen und Bemerkungsänderungen gesperrt. Optionale Urlaubs- und Kalenderprovider liefern ausschließlich datensparsame, schreibgeschützte Planungshinweise.
 
@@ -46,14 +60,17 @@ dargestellt. Assistenz und EB verwenden dort dieselben rollenabhängigen
 Aktionen wie in der Desktopmatrix; genehmigte und unbekannte Planstatus
 bleiben auch mobil ohne fachliche Mutationsangebote.
 
-Native Nextcloud-Administration erteilt keinen automatischen Zugriff auf den
-fachlichen Demo-Datenpfad. Ausschließlich Mitglieder der kanonischen
-Nextcloud-Gruppe `Datenschutzbeauftragte` können in der Hauptoberfläche ein
-aktuelles Administrationskonto app-lokal für höchstens 24 Stunden freigeben
-oder die Freigabe widerrufen; nativer Adminstatus allein genügt dafür nicht.
+Native Nextcloud-Administration erteilt keinen automatischen Zugriff auf reale
+fachliche Planungsdaten. Mitglieder der kanonischen Nextcloud-Gruppe
+`Datenschutzbeauftragte` sowie zuständige Einsatzbegleitungen mit aktueller
+Assistenzteam-Mitgliedschaft können in der Hauptoberfläche ein aktuelles
+Administrationskonto app-lokal für höchstens 24 Stunden freigeben oder die
+Freigabe widerrufen; nativer Adminstatus allein genügt dafür nicht.
 Beginn, geplantes Ende und Widerruf bleiben auditierbar. Der sichere
 Eintrittshinweis erscheint nur für betroffene native Administrationskonten und
-verlinkt die Steuerung nur bei gleichzeitiger Datenschutzrolle.
+verlinkt die Steuerung nur bei eigener Berechtigung zur Freigabeverwaltung.
+Der ausdrücklich bestätigte Demo-Pack bleibt davon getrennt und ist als rein
+technische, ausschließlich synthetische Funktion für native Admins verfügbar.
 PermissionProvider und PersonalDataProvider bilden die kombinierte
 Adminbedingung beziehungsweise den eigenen Freigabebezug ab, ohne andere
 Admin-Kennungen in der Selbstauskunft offenzulegen.
@@ -77,6 +94,7 @@ Installations-, Betriebs- und Abnahmeunterlagen stehen im öffentlichen [Filzman
 ## Dokumentation
 
 - [Architektur](docs/architecture.md)
+- [Lokalisierungsinventar](docs/l10n-inventory.md)
 - [Manuelle Abnahme](docs/manual-acceptance.md)
 - [Roadmap](ROADMAP.md)
 - [Changelog](CHANGELOG.md)

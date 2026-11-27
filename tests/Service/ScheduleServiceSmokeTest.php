@@ -8,6 +8,7 @@ use OCA\FlzPlaner\Model\ShiftCandidate;
 use OCA\FlzPlaner\Model\ShiftSlot;
 use OCA\FlzPlaner\Model\Team;
 use OCA\FlzPlaner\Service\ScheduleService;
+use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
 use OCA\FlzPlaner\Service\WorkloadPreferenceService;
 use OCA\FlzPlaner\Service\ShiftConfigService;
 use OCA\FlzPlaner\Service\TeamAccessService;
@@ -205,8 +206,8 @@ $settings = [
     ],
 ];
 
-$assistantTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, false, $settings);
-$ebTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, $settings);
+$assistantTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, false, $settings, PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS);
+$ebTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, $settings, [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
 $mappedTeam = Team::get($ebTeam->toArray());
 assertSameValue('Team A1', $mappedTeam->toArray()['displayName'], 'Team::get should keep the API payload shape.');
 
@@ -395,13 +396,13 @@ $configuredStore->slots = [
     new ShiftSlot(10, 'A1', '2026-07', '2026-07-01', 'early', 'Altfrüh', '07:00', '13:00', true),
     new ShiftSlot(11, 'A1', '2026-07', '2026-07-01', 'obsolete', 'Alt', '00:00', '01:00', true),
 ];
-$configuredTeam = new Team('A1', 'flz-ASN-A1', 'Team A1', $assistants, true, [
+$configuredTeam = new Team('A1', 'ASN-A1', 'Team A1', $assistants, true, [
     'shifts' => [
         ['key' => 'early', 'label' => 'Früh neu', 'startsAt' => '08:00', 'endsAt' => '14:00', 'enabled' => true],
         ['key' => 'late', 'label' => 'Spät', 'startsAt' => '14:00', 'endsAt' => '20:00', 'enabled' => true],
         ['key' => 'night', 'label' => 'Nacht', 'startsAt' => '20:00', 'endsAt' => '08:00', 'enabled' => false],
     ],
-]);
+], [...PlanerPermissionPolicy::TEAM_MEMBER_PERMISSIONS,...PlanerPermissionPolicy::TEAM_EB_PERMISSIONS]);
 $configuredService = new ScheduleService($configuredStore, new ShiftConfigService(), new FakeTeamAccessServiceForSchedule(), new FakePlanningHintServiceForSchedule(), new WorkloadPreferenceService($configuredStore), new FixedShiftService($configuredStore, new ShiftConfigService()));
 $configuredPlan = $configuredService->monthPlan($configuredTeam, '2026-07', 'test-eb');
 $updatesById = [];

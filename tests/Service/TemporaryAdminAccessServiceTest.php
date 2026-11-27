@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCP {
     interface IUser { public function getUID(): string; }
     interface IUserSession { public function getUser(): ?IUser; }
-    interface IGroupManager { public function isAdmin(string $uid): bool; public function isInGroup(string $uid, string $gid): bool; }
+    interface IGroupManager { public function isAdmin(string $uid): bool; public function isInGroup(string $uid, string $gid): bool; public function getUserGroupIds($user): array; }
 }
 
 namespace OCP\AppFramework\Utility {
@@ -23,6 +23,8 @@ namespace {
     require_once dirname(__DIR__) . '/bootstrap.php';
 
     use OCA\FlzPlaner\Repository\TemporaryAdminAccessRepositoryInterface;
+    use OCA\FlzPlaner\Permission\PlanerPermissionSourceInterface;
+    use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
     use OCA\FlzPlaner\Service\TemporaryAdminAccessDeniedException;
     use OCA\FlzPlaner\Service\TemporaryAdminAccessService;
 
@@ -33,9 +35,19 @@ namespace {
     };
     $groups = new class implements OCP\IGroupManager {
         public array $admins = ['native-admin', 'admin-target'];
-        public array $memberships = ['privacy-officer' => ['Datenschutzbeauftragte']];
+        public array $memberships = [
+            'privacy-officer' => ['Datenschutzbeauftragte'],
+            'responsible-eb' => ['EB', 'ASN-TeamA'],
+            'role-only-eb' => ['EB'],
+            'manipulated-eb' => ['EB', 'ASN-Manipuliert'],
+        ];
         public function isAdmin(string $uid): bool { return in_array($uid, $this->admins, true); }
         public function isInGroup(string $uid, string $gid): bool { return in_array($gid, $this->memberships[$uid] ?? [], true); }
+        public function getUserGroupIds($user): array { return $this->memberships[$user->getUID()] ?? []; }
+    };
+    $permissionSource = new class implements PlanerPermissionSourceInterface {
+        public function teamGroupIds(): array { return ['ASN-TeamA', 'ASN-TeamB']; }
+        public function ebGroupId(): string { return 'EB'; }
     };
     $repository = new class implements TemporaryAdminAccessRepositoryInterface {
         public array $rows = [];
@@ -63,7 +75,7 @@ namespace {
         public function info(string|Stringable $message, array $context = []): void { $this->messages[] = ['info', (string)$message]; }
         public function error(string|Stringable $message, array $context = []): void { $this->messages[] = ['error', (string)$message]; }
     };
-    $service = new TemporaryAdminAccessService($session, $groups, $repository, $clock, $logger);
+    $service = new TemporaryAdminAccessService($session, $groups, $repository, $clock, $logger, $permissionSource, new PlanerPermissionPolicy());
 
     $before = $repository->mutations;
     try { $service->activate('admin-target', 60); throw new RuntimeException('Native Administration durfte ohne Datenschutzrolle freigeben.'); } catch (TemporaryAdminAccessDeniedException) {}
@@ -95,6 +107,23 @@ namespace {
     if ($repository->mutations !== $before) throw new RuntimeException('Abgewiesener Widerruf darf nichts persistieren.');
     $groups->memberships = ['privacy-officer' => ['Datenschutzbeauftragte']];
     if (!$service->revoke('admin-target') || $service->hasActiveGrant('admin-target')) throw new RuntimeException('DPO-Widerruf beendet die Freigabe nicht.');
+
+    $session->user = new class implements OCP\IUser { public function getUID(): string { return 'responsible-eb'; } };
+    $groups->memberships['responsible-eb'] = ['EB', 'ASN-TeamA'];
+    if (!$service->canManageGrants() || $service->state()['history'] === []) throw new RuntimeException('Die zuständige Einsatzbegleitung muss Freigaben und Historie verwalten dürfen.');
+    $ebGrant = $service->activate('admin-target', 60);
+    if ($ebGrant['grantedBy'] !== 'responsible-eb') throw new RuntimeException('Die EB-Freigabe wird nicht mit der handelnden Person auditiert.');
+    if (!$service->revoke('admin-target')) throw new RuntimeException('Die zuständige Einsatzbegleitung muss eine Freigabe widerrufen dürfen.');
+
+    foreach (['role-only-eb', 'manipulated-eb'] as $uid) {
+        $session->user = new class($uid) implements OCP\IUser {
+            public function __construct(private string $uid) {}
+            public function getUID(): string { return $this->uid; }
+        };
+        $before = $repository->mutations;
+        try { $service->activate('admin-target', 60); throw new RuntimeException('EB ohne Zuständigkeit durfte freigeben.'); } catch (TemporaryAdminAccessDeniedException) {}
+        if ($repository->mutations !== $before) throw new RuntimeException('Abgewiesene EB-Freigabe darf nichts persistieren.');
+    }
 
     $repository->failReads = true;
     if ($service->hasActiveGrant('admin-target')) throw new RuntimeException('Persistenzfehler muss fail-closed bleiben.');

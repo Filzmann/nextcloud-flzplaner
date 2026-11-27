@@ -21,7 +21,7 @@ class TeamSettingsStore {
     public function forTeam(string $teamCode): TeamSettings {
         $row = $this->repository->findByCode($teamCode);
         if ($row === null) {
-            return new TeamSettings($teamCode, $this->defaultDisplayName($teamCode), $this->shiftConfig->defaults());
+            return new TeamSettings($teamCode, $this->defaultDisplayName($teamCode), $this->shiftConfig->defaults(), null);
         }
 
         $decoded = json_decode((string)($row['settings_json'] ?? ''), true);
@@ -36,8 +36,22 @@ class TeamSettingsStore {
         return new TeamSettings(
             $teamCode,
             $displayName,
-            $this->shiftConfig->normalize($decoded)
+            $this->shiftConfig->normalize($decoded),
+            ($row['bureau_key'] ?? null) === null || trim((string)$row['bureau_key']) === '' ? null : trim((string)$row['bureau_key'])
         );
+    }
+
+    public function saveBureauKey(string $teamCode, string $bureauKey): TeamSettings {
+        $bureauKey = trim($bureauKey);
+        if ($bureauKey === '' || preg_match('/^[a-z][a-z0-9_-]{0,63}$/', $bureauKey) !== 1) {
+            throw new \InvalidArgumentException('Der Bürobereich ist ungültig.');
+        }
+        if ($this->repository->findByCode($teamCode) === null) {
+            $defaults = $this->shiftConfig->defaults();
+            $this->repository->save($teamCode, $this->defaultDisplayName($teamCode), $defaults);
+        }
+        $this->repository->saveBureauKey($teamCode, $bureauKey);
+        return $this->forTeam($teamCode);
     }
 
     public function save(string $teamCode, string $displayName, array $config): TeamSettings {

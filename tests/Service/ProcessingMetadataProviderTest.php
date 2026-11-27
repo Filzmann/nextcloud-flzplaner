@@ -35,9 +35,9 @@ namespace {
         throw new RuntimeException('Der Processing-Katalog enthält personenbezogene Laufzeitdaten.');
     }
     $encodedCatalog = json_encode($catalog->toArray(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-    if (!str_contains($encodedCatalog, 'App-lokaler Freigabevorgang durch Datenschutzbeauftragte im Filzmann Assistenzplanung')
+    if (!str_contains($encodedCatalog, 'App-lokaler Freigabevorgang durch Datenschutzbeauftragte oder zuständige Einsatzbegleitung im Filzmann Assistenzplanung')
         || str_contains($encodedCatalog, 'Freigabevorgang im Nextcloud-Adminbereich')) {
-        throw new RuntimeException('Der Processing-Katalog projiziert die DPO-Freigabesteuerung nicht korrekt.');
+        throw new RuntimeException('Der Processing-Katalog projiziert die DPO-/Team-EB-Freigabesteuerung nicht korrekt.');
     }
 
     $registration = new RegisterProcessingMetadataProvidersEvent();

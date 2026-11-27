@@ -19,6 +19,18 @@ foreach (['transition-status', 'add-self', 'save-note', 'settings-form', 'set-ca
         throw new RuntimeException('Dem Browser-Smoke fehlt ein Oberflächenvertrag: ' . $contract);
     }
 }
+foreach ([
+    "width: 1200, height: 800",
+    "wideLayout.desktopDisplay, 'block'",
+    "wideLayout.mobileDisplay, 'none'",
+    "width: 700, height: 700",
+    "narrowLayout.desktopDisplay, 'none'",
+    "narrowLayout.mobileDisplay, 'grid'",
+] as $contract) {
+    if (!str_contains($browser, $contract)) {
+        throw new RuntimeException('Der Browser-Smoke belegt die exklusive Desktop-/Mobilprojektion nicht: ' . $contract);
+    }
+}
 foreach (["['flz_planer_shift_slots', ['team_code' => \$teamCode]]", "['flz_planer_month_plans', ['team_code' => \$teamCode]]"] as $contract) {
     if (!str_contains($probe, $contract)) {
         throw new RuntimeException('Der Cleanup-Probe entfernt nicht alle durch initiale Browserloads erzeugten Testmonate.');

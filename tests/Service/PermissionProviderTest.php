@@ -21,18 +21,22 @@ namespace {
     use OCA\FlzPlaner\Permission\PlanerPermissionProviderListener;
     use OCA\FlzPlaner\Permission\PlanerPermissionSourceInterface;
     use OCA\FlzPermissionMatrix\PublicApi\V1\RegisterPermissionProvidersEvent;
-    $source=new class implements PlanerPermissionSourceInterface { public function teamGroupIds():array{return ['flz-ASN-A','flz-ASN-B'];} public function ebGroupId():string{return 'flz-EB';} };
+    $source=new class implements PlanerPermissionSourceInterface { public function teamGroupIds():array{return ['ASN-A','ASN-B'];} public function ebGroupId():string{return 'EB';} };
     $provider=new PlanerPermissionProvider($source); $result=$provider->collect(); $by=[]; foreach($result->rules as $rule)$by[$rule->permission][]=$rule;
     if(count($by['plan.team.read']??[])!==2)throw new RuntimeException('Jedes vorhandene Team braucht eine Leseregel.');
-    $coordinate=$by['plan.team.coordinate'][0]??null;
-    if($coordinate?->condition->operator!=='all'||array_map(fn($c)=>$c->groupId,$coordinate->condition->children)!==['flz-ASN-A','flz-EB'])throw new RuntimeException('Koordination muss Team UND EB verlangen.');
+    foreach (['plan.assignment.manage-team','plan.team-settings.manage','plan.status.transition','plan.workload.read-team','plan.fixed-conflict.resolve'] as $permission) {
+        $rule=$by[$permission][0]??null;
+        if($rule?->condition->operator!=='all'||array_map(fn($c)=>$c->groupId,$rule->condition->children)!==['ASN-A','EB'])throw new RuntimeException("{$permission} muss als getrennte Berechtigung Team UND EB verlangen.");
+    }
+    if(isset($by['plan.team.coordinate']))throw new RuntimeException('Die Sammelberechtigung plan.team.coordinate darf getrennte Fachrechte nicht überlagern.');
     if(($by['plan.assignment.manage-own'][0]->condition->operator??null)!=='all')throw new RuntimeException('Eigene Zuweisungen müssen zusätzlich an das Team gebunden bleiben.');
     if(count($by['plan.assignment.preference.manage-own']??[])!==2)throw new RuntimeException('Eigene Schichtreaktionen und -anmerkungen brauchen je Team eine eigene Regel.');
     if(count($by['plan.fixed-shift.manage-own']??[])!==2)throw new RuntimeException('Eigene regelmäßige Schichten brauchen je Team eine eigene Regel.');
     if(count($by['plan.fixed-conflict.resolve']??[])!==2)throw new RuntimeException('Die EB-Konfliktlösung braucht je Team eine eigene Regel.');
     if(count($by['plan.workload.manage-own']??[])!==2)throw new RuntimeException('Persönliche Schichtgrenzen brauchen je Team eine eigene Regel.');
     if(count($by['plan.workload.read-team']??[])!==2)throw new RuntimeException('Die EB-Auslastungsübersicht braucht je Team eine explizite Leseregel.');
-    $demo=$by['plan.demo.manage'][0]??null;if($demo?->condition->operator!=='all'||array_map(fn($c)=>$c->operator,$demo->condition->children)!==['nextcloud-admin','app-admin-grant'])throw new RuntimeException('Demo-Verwaltung muss native Administration und aktive App-Freigabe verlangen.');
+    $demo=$by['plan.demo.manage'][0]??null;if($demo?->condition->operator!=='nextcloud-admin')throw new RuntimeException('Die rein synthetische Demo-Verwaltung muss ausschließlich native Administration verlangen.');
+    $grants=$by['plan.admin-grant.manage'][0]??null;if($grants?->condition->operator!=='any')throw new RuntimeException('Temporäre Adminfreigaben müssen DPO oder zuständige Team-EB abbilden.');
     $event=new RegisterPermissionProvidersEvent();$listener=new PlanerPermissionProviderListener($provider);if(!$listener instanceof \OCP\EventDispatcher\IEventListener)throw new RuntimeException('Der PermissionProvider-Listener erfüllt den Nextcloud-EventListener-Vertrag nicht.');$listener->handle($event);if(($event->providers[0]??null)!==$provider)throw new RuntimeException('Lazy-Registrierung fehlt.');
     echo "Planer permission provider tests passed\n";
 }

@@ -17,7 +17,7 @@ const responses = new Map([
 
 global.window = {};
 
-require('../../../localbase/js/models/model.js');
+require('../../js/shared/model.js');
 require('../../js/models/assistant.js');
 require('../../js/models/shift-candidate.js');
 require('../../js/models/shift-definition.js');
@@ -25,7 +25,7 @@ require('../../js/models/shift-slot.js');
 require('../../js/models/team-settings.js');
 require('../../js/models/team.js');
 require('../../js/models/day-note.js');
-require('../../../localbase/js/repositories/repository.js');
+require('../../js/shared/repository.js');
 
 window.FlzPlaner.api = {
     request(path, options = {}) {

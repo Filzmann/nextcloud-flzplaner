@@ -6,30 +6,36 @@ namespace OCA\FlzPlaner\Controller;
 
 use OCA\FlzPlaner\AppInfo\Application;
 use OCA\FlzPlaner\Service\PlanerDemoPackService;
-use OCA\FlzPlaner\Service\TemporaryAdminAccessChecker;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IGroupManager;
+use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
 /** Zweck: Startet den Assistenzplaner-Demo-Pack ausschließlich mit Admin- und CSRF-Schutz. */
 final class DemoAdminController extends Controller {
-    public function __construct(IRequest $request, private IUserSession $session, private IGroupManager $groups, private PlanerDemoPackService $demoPack, private LoggerInterface $logger, private TemporaryAdminAccessChecker $temporaryAdminAccess) { parent::__construct(Application::APP_ID, $request); }
+    public function __construct(IRequest $request, private IUserSession $session, private IGroupManager $groups, private PlanerDemoPackService $demoPack, private LoggerInterface $logger, private ?IL10N $l10n = null) { parent::__construct(Application::APP_ID, $request); }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
     public function install(mixed $confirmed = false): JSONResponse {
-        if (!$this->isAdmin()) return new JSONResponse(['error' => 'Keine Berechtigung.'], Http::STATUS_FORBIDDEN);
-        if ($confirmed !== true) return new JSONResponse(['error' => 'Die Installation muss ausdrücklich bestätigt werden.'], Http::STATUS_BAD_REQUEST);
+        if (!$this->isAdmin()) return new JSONResponse(['error' => $this->t('Keine Berechtigung.')], Http::STATUS_FORBIDDEN);
+        if ($confirmed !== true) return new JSONResponse(['error' => $this->t('Die Installation muss ausdrücklich bestätigt werden.')], Http::STATUS_BAD_REQUEST);
         try {
             return new JSONResponse(['result' => $this->demoPack->install()]);
         } catch (\Throwable $error) {
             $this->logger->error('Assistenzplaner-Demo-Pack konnte nicht installiert werden.', ['exception' => $error]);
-            return new JSONResponse(['error' => 'Demo-Daten konnten nicht installiert werden.'], Http::STATUS_INTERNAL_SERVER_ERROR);
+            return new JSONResponse(['error' => $this->t('Demo-Daten konnten nicht installiert werden.')], Http::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
     private function isAdmin(): bool {
         $user = $this->session->getUser();
-        return $user !== null && $this->groups->isAdmin($user->getUID()) && $this->temporaryAdminAccess->hasActiveGrant($user->getUID());
+        return $user !== null && $this->groups->isAdmin($user->getUID());
     }
 }

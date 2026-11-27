@@ -1,5 +1,5 @@
 (function() {
-    const { Repository } = window.LocalBase.repositories;
+    const { Repository } = window.OCA.FlzPlaner.Shared.repositories;
     const { ShiftDefinition, ShiftSlot, Team } = window.FlzPlaner.models;
 
     class PlanRepository extends Repository {

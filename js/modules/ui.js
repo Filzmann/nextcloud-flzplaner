@@ -1,8 +1,10 @@
 (function() {
-    const { Notice, byId, esc } = window.LocalBase.ui;
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
+    const { Notice, byId, esc } = window.OCA.FlzPlaner.Shared.ui;
     const notice = new Notice('flz-planer-notice');
-    const weekday = ['', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-    const monthName = ['', 'Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+    const weekday = ['', translate('flzplaner', 'Mo'), translate('flzplaner', 'Di'), translate('flzplaner', 'Mi'), translate('flzplaner', 'Do'), translate('flzplaner', 'Fr'), translate('flzplaner', 'Sa'), translate('flzplaner', 'So')];
+    const monthName = ['', translate('flzplaner', 'Jan'), translate('flzplaner', 'Feb'), translate('flzplaner', 'Mrz'), translate('flzplaner', 'Apr'), translate('flzplaner', 'Mai'), translate('flzplaner', 'Jun'), translate('flzplaner', 'Jul'), translate('flzplaner', 'Aug'), translate('flzplaner', 'Sep'), translate('flzplaner', 'Okt'), translate('flzplaner', 'Nov'), translate('flzplaner', 'Dez')];
 
     function dateShort(date) {
         const parts = String(date).split('-');
@@ -23,10 +25,10 @@
 
     function statusLabel(status) {
         if (status === 'approved') {
-            return 'genehmigt';
+            return translate('flzplaner', 'genehmigt');
         }
         if (status === 'planned') {
-            return 'geplant';
+            return translate('flzplaner', 'geplant');
         }
         return '';
     }
@@ -36,16 +38,16 @@
         const minimum = finiteOrNull(minimumValue);
         const maximum = finiteOrNull(maximumValue);
         if (!hasCapacityLimits(minimum, maximum)) {
-            return `<span class="flz-planer-capacity flz-planer-capacity--plain" title="${esc(count)} Schichten">${esc(count)}</span>`;
+            return `<span class="flz-planer-capacity flz-planer-capacity--plain" title="${esc(count)} ${translate('flzplaner', 'Schichten')}">${esc(count)}</span>`;
         }
         if (minimum !== null && count < minimum) {
-            return `<span class="flz-planer-capacity flz-planer-capacity--under" title="${esc(count)} von mindestens ${esc(minimum)}">&lt;${esc(minimum)}</span>`;
+            return `<span class="flz-planer-capacity flz-planer-capacity--under" title="${esc(count)} ${translate('flzplaner', 'von mindestens')} ${esc(minimum)}">&lt;${esc(minimum)}</span>`;
         }
         if (maximum !== null) {
             const status = count > maximum ? 'over' : 'within';
-            return `<span class="flz-planer-capacity flz-planer-capacity--${status}" title="${esc(count)} von maximal ${esc(maximum)}">${esc(count)}/${esc(maximum)}</span>`;
+            return `<span class="flz-planer-capacity flz-planer-capacity--${status}" title="${esc(count)} ${translate('flzplaner', 'von maximal')} ${esc(maximum)}">${esc(count)}/${esc(maximum)}</span>`;
         }
-        return `<span class="flz-planer-capacity flz-planer-capacity--within" title="${esc(count)} Schichten">${esc(count)}</span>`;
+        return `<span class="flz-planer-capacity flz-planer-capacity--within" title="${esc(count)} ${translate('flzplaner', 'Schichten')}">${esc(count)}</span>`;
     }
 
     function hasCapacityLimits(minimumValue, maximumValue) {
@@ -64,7 +66,7 @@
         notice.show(message);
     }
 
-    function showError(error, fallback = 'Die Aktion konnte nicht ausgeführt werden.') {
+    function showError(error, fallback = translate('flzplaner', 'Die Aktion konnte nicht ausgeführt werden.')) {
         notice.error(error, fallback);
     }
 

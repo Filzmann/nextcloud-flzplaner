@@ -5,7 +5,7 @@ base_url="${FLZP_BASE_URL:-https://nextcloud-dev.ddev.site}"
 ddev_project="${FLZP_DDEV_PROJECT:-$(cd "$(dirname "$0")/../../nextcloud-dev" && pwd)}"
 suffix="$(date +%s)$$"
 team_code="P${suffix: -15}"
-team_group="flz-ASN-$team_code"
+team_group="ASN-$team_code"
 month='2098-11'
 actor="flz-planer-browser-$suffix-eb"
 assistant="flz-planer-browser-$suffix-assistant"
@@ -56,8 +56,8 @@ create_user() {
     occ group:adduser "$team_group" "$uid" >/dev/null
 }
 
-if ! occ group:info flz-EB >/dev/null 2>&1; then
-    echo 'Die bestehende EB-Rollengruppe flz-EB fehlt; der Smoke verändert die Organisationskonfiguration nicht.' >&2
+if ! occ group:info EB >/dev/null 2>&1; then
+    echo 'Die bestehende EB-Rollengruppe EB fehlt; der Smoke verändert die Organisationskonfiguration nicht.' >&2
     exit 1
 fi
 
@@ -65,7 +65,7 @@ occ group:add "$team_group" >/dev/null
 create_user "$actor"
 create_user "$assistant"
 create_user "$member"
-occ group:adduser flz-EB "$actor" >/dev/null
+occ group:adduser EB "$actor" >/dev/null
 
 mkdir -p "$chrome_profile"
 google-chrome \

@@ -35,6 +35,9 @@ Offene Zielbereiche:
 
 ## Repository und gemeinsamer Arbeitsablauf
 
+- Lokalisierung (ZM-06): Sichtbare Texte ausschließlich über Nextcloud-l10n — deutsche Quelltexte via `IL10N::t()`/`window.t('flzplaner', …)`, Kataloge `l10n/en.*` und `l10n/en_GB.*` (Englisch); technische IDs bleiben unübersetzt. `tests/Ui/L10nCatalogContractTest.php` erzwingt das Rohtext-Gate (siehe `docs/l10n-inventory.md`).
+
+
 - Dieses Verzeichnis ist ein eigenstaendiges Git-Repository fuer die FLZ-App `flzplaner`.
 - Andere eigene Nextcloud-Apps, zum Beispiel `brtop`, leben in eigenen Repositories.
 - Diese Datei und lokal referenzierte Skills bilden bei einem direkten Start in diesem Repository die vollständige Repository-Steuerung.
@@ -62,20 +65,31 @@ Gruppenschema fuer `flzplaner`:
 
 Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer Teamname, maximale Kürzellänge, EB-Rollengruppe und Bereiche stammen aus der gemeinsamen `FlzOrganizationDefinition` und dürfen nicht zusätzlich im FlzPlaner festverdrahtet werden.
 
-- Assistenznehmer-Gruppen: `flz-ASN-<Kuerzel>`, zum Beispiel `flz-ASN-TeamA`, `flz-ASN-TeamB`, `flz-ASN-TeamC`.
+- Assistenznehmer-Gruppen: `ASN-<Kuerzel>`, zum Beispiel `ASN-TeamA`, `ASN-TeamB`, `ASN-TeamC`.
 - `<Kuerzel>` ist das Kuerzel eines Assistenznehmers und darf Unicode-Buchstaben sowie Ziffern enthalten.
-- EB-Rechte: Nutzer*innen, die zugleich in der Assistenznehmer-Gruppe und der gemeinsamen Rollengruppe `flz-EB` sind. Rollen-/Bereichskombinationen werden nicht als eigene Gruppen akzeptiert.
-- Bereichszuordnungen werden app-uebergreifend separat als `flz-Bereich-<Name>` gepflegt; kombinierte Rollen-/Bereichsgruppen werden dynamisch abgeleitet.
+- EB-Rechte: Nutzer*innen, die zugleich in der Assistenznehmer-Gruppe und der gemeinsamen Rollengruppe `EB` sind. Rollen-/Bereichskombinationen werden nicht als eigene Gruppen akzeptiert.
+- Bereichszuordnungen werden app-uebergreifend separat als `Bereich-<Name>` gepflegt; kombinierte Rollen-/Bereichsgruppen werden dynamisch abgeleitet.
 - FlzPlaner und Filzmann Urlaubsplanung verwenden dieselben Assistenzteam-Gruppen; separate Suffix-Gruppen werden nicht unterstützt.
 - Der app-eigene Adminabschnitt installiert Demo-Inhalte nur nach ausdrücklicher Bestätigung. Das Pack legt Team A, Team B und Team C mit ausschließlich synthetischen lokalen Konten und Standardschichten an; WordPress-Bestandsdaten werden nicht importiert.
-- Native Nextcloud-Administration allein erteilt kein Recht auf den fachlichen
-  Demo-Datenpfad. Dafür ist je Admin eine app-lokale Freigabe von höchstens 24
+- Der ausschließlich synthetische Demo-Pack ist eine technische Funktion für
+  native Nextcloud-Admins und benötigt keine fachliche Vollzugriffsfreigabe.
+  Reale fachliche Planungsdaten bleiben davon strikt getrennt. Für deren
+  Admin-Vollzugriff ist je Admin eine app-lokale Freigabe von höchstens 24
   Stunden erforderlich; Beginn, geplantes Ende und Widerruf werden
-  protokolliert. Ausschließlich Mitglieder der kanonischen Nextcloud-Gruppe
-  `Datenschutzbeauftragte` dürfen die Freigabe in der Hauptoberfläche erteilen
-  oder widerrufen; nativer Adminstatus allein reicht dafür nicht. Der sichere
-  Eintrittshinweis erscheint nur für betroffene native Administrationskonten
-  und verlinkt die Steuerung nur bei zusätzlicher Datenschutzrolle.
+  protokolliert. Mitglieder der kanonischen Nextcloud-Gruppe
+  `Datenschutzbeauftragte` sowie zuständige Einsatzbegleitungen mit aktueller
+  Assistenzteam-Mitgliedschaft dürfen die Freigabe in der Hauptoberfläche
+  erteilen oder widerrufen; nativer Adminstatus allein reicht dafür nicht.
+  Die EB-Ausnahme setzt bei jeder Lese-, Erteilungs- und Widerrufsaktion die
+  aktuelle Schnittmenge aus kanonischer EB-Rollengruppe und mindestens einer
+  aktuell ermittelten Assistenzteam-Gruppe voraus. Unbekannte Gruppen und
+  Quellen- oder Prüffehler bleiben fail-closed. Der Verlust einer der beiden
+  Mitgliedschaften entzieht die Freigabeverwaltung sofort; eine bereits
+  erteilte Adminfreigabe endet weiterhin durch Ablauf, Verlust des nativen
+  Adminstatus oder Widerruf einer aktuell berechtigten Person.
+  Der sichere Eintrittshinweis erscheint nur für betroffene native
+  Administrationskonten und verlinkt die Steuerung nur, wenn das Konto selbst
+  zur Freigabeverwaltung berechtigt ist.
 - Fremde oder LDAP-verwaltete Konten werden nicht als Demokonten übernommen. Bestehende read-only LDAP-Team- oder Rollengruppen brechen die Demo-Installation im Preflight vor jeder Mutation ab.
 - Ausschließlich lokal erzeugte Test- und Demokonten erhalten initial ihr
   jeweiliges Benutzerkürzel als Passwort. Diese bewusst einfache Vorgabe darf
@@ -93,8 +107,15 @@ Die folgenden IDs sind initiale Standardwerte. Assistenzteam-Präfix, sichtbarer
   Suite-Einstellung verschoben.
 - FlzPlaner-spezifische API-Pfade, Modelle, Workflows und Darstellung bleiben
   in diesem Repository.
-- Gemeinsame Bausteine werden erst nach LocalBase verschoben, wenn mindestens
-  zwei Apps denselben semantischen und testbaren Vertrag benötigen.
+- Gemeinsame Bausteine werden erst in ein versioniertes Shared-Paket oder
+  einen öffentlichen Laufzeitvertrag überführt, wenn mindestens zwei Apps
+  denselben semantischen und testbaren Vertrag benötigen.
+- Der Frontend-Unterbau verwendet `ApiClient`, `Model`, `Repository` und die
+  kleinen UI-Primitives aus dem app-lokal gebündelten Kategorie-A-Paket
+  `flz_shared` unter `window.OCA.FlzPlaner.Shared`. Private LocalBase-
+  Browserassets und benachbarte Paketpfade sind keine Laufzeitabhängigkeit.
+  Organisations-, Kalender-, Event-, Navigations- und Demo-Verträge bleiben
+  davon getrennte Kategorie-B-Laufzeitverträge.
 - WordPress-Kompatibilität und parallele Urlaubspersistenz sind unzulässig.
 - Der `PersonalDataProvider` registriert sich lazy über den öffentlichen
   Standalone-V1-Vertrag von `flz_data_protection` und weist eigene
