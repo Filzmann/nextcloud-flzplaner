@@ -6,7 +6,7 @@ $root = dirname(__DIR__, 2);
 $bundleRoot = $root . '/js/shared';
 $violations = [];
 
-foreach (['api-client.js', 'model.js', 'repository.js', 'ui.js', 'LICENSE', 'flz-shared.lock.json'] as $asset) {
+foreach (['api-client.js', 'model.js', 'overlay.js', 'repository.js', 'ui.js', 'LICENSE', 'flz-shared.lock.json'] as $asset) {
     if (!is_file($bundleRoot . '/' . $asset)) {
         $violations[] = 'js/shared/' . $asset . ': app-lokales Kategorie-A-Artefakt fehlt';
     }
@@ -39,7 +39,7 @@ if (is_file($licensePath)) {
 
 $indexTemplate = (string)file_get_contents($root . '/templates/index.php');
 $adminTemplate = (string)file_get_contents($root . '/templates/admin.php');
-foreach (['api-client', 'model', 'repository', 'ui'] as $asset) {
+foreach (['api-client', 'model', 'overlay', 'repository', 'ui'] as $asset) {
     if (!str_contains($indexTemplate, "addScript('flzplaner', 'shared/{$asset}')")) {
         $violations[] = "templates/index.php: shared/{$asset} wird nicht app-lokal geladen";
     }
@@ -50,6 +50,7 @@ if (!str_contains($adminTemplate, "addScript('flzplaner', 'shared/api-client')")
 
 $loadOrder = [
     'shared/api-client' => 'admin-access',
+    'shared/overlay' => 'admin-access',
     'shared/ui' => 'modules/ui',
     'shared/model' => 'models/assistant',
     'shared/repository' => 'repositories/plan-repository',

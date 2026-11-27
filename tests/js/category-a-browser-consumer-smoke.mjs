@@ -50,6 +50,7 @@ const context = vm.createContext({
 for (const relative of [
     'js/shared/api-client.js',
     'js/shared/model.js',
+    'js/shared/overlay.js',
     'js/shared/repository.js',
     'js/shared/ui.js',
     'js/modules/api.js',
@@ -68,7 +69,7 @@ for (const relative of [
 }
 
 const shared = window.OCA?.FlzPlaner?.Shared;
-if (!shared?.api?.ApiClient || !shared?.models?.Model || !shared?.repositories?.Repository || !shared?.ui?.Notice) {
+if (!shared?.api?.ApiClient || !shared?.models?.Model || !shared?.repositories?.Repository || !shared?.ui?.Notice || !shared?.ui?.Overlay || !shared?.ui?.AdminAccessOverlay) {
     throw new Error('Das app-lokale Browser-Bundle stellt seine Primitives nicht vollständig isoliert bereit.');
 }
 if ('LocalBase' in window) {
