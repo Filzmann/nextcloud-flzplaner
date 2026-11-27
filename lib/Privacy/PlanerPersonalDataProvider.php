@@ -24,7 +24,7 @@ final class PlanerPersonalDataProvider implements PersonalDataProvider {
     /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
     private function t(string $text): string
     {
-        return $this->l10n?->t($text) ?? $text;
+        return isset($this->l10n) ? $this->l10n->t($text) : $text;
     }
 
     public function descriptor(): ProviderDescriptor {
