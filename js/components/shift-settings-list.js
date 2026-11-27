@@ -1,4 +1,6 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
     const { esc } = window.FlzPlaner.ui;
 
     function renderReadonly(shifts) {
@@ -14,7 +16,7 @@
             <div id="flz-planer-shift-list" class="flz-planer-shift-list">
                 ${(shifts || []).map((shift, index) => shiftRow(shift, index)).join('')}
             </div>
-            <button type="button" class="flz-planer-small" data-action="add-shift-row">+ Schicht</button>
+            <button type="button" class="flz-planer-small" data-action="add-shift-row">+ ${translate('flzplaner', 'Schicht')}</button>
         `;
     }
 
@@ -30,11 +32,11 @@
         return `
             <div class="flz-planer-shift-row" data-shift-row>
                 <input name="shiftKey" type="hidden" value="${esc(shift.key || newShiftKey(index))}">
-                <label>Name <input name="shiftLabel" type="text" maxlength="64" required value="${esc(shift.label || ('Schicht ' + (index + 1)))}"></label>
-                <label>Von <input name="shiftStart" type="time" required value="${esc(shift.startsAt || '08:00')}"></label>
-                <label>Bis <input name="shiftEnd" type="time" required value="${esc(shift.endsAt || '14:00')}"></label>
-                <label class="flz-planer-check"><input name="shiftEnabled" type="checkbox" ${shift.enabled === false ? '' : 'checked'}> aktiv</label>
-                <button type="button" class="flz-planer-small" aria-label="Schicht ${esc(shift.label || ('Schicht ' + (index + 1)))} entfernen" data-action="remove-shift-row">&times;</button>
+                <label>${translate('flzplaner', 'Name')} <input name="shiftLabel" type="text" maxlength="64" required value="${esc(shift.label || (translate('flzplaner', 'Schicht ') + (index + 1)))}"></label>
+                <label>${translate('flzplaner', 'Von')} <input name="shiftStart" type="time" required value="${esc(shift.startsAt || '08:00')}"></label>
+                <label>${translate('flzplaner', 'Bis')} <input name="shiftEnd" type="time" required value="${esc(shift.endsAt || '14:00')}"></label>
+                <label class="flz-planer-check"><input name="shiftEnabled" type="checkbox" ${shift.enabled === false ? '' : 'checked'}> ${translate('flzplaner', 'aktiv')}</label>
+                <button type="button" class="flz-planer-small" aria-label="${translate('flzplaner', 'Schicht')} ${esc(shift.label || (translate('flzplaner', 'Schicht ') + (index + 1)))} ${translate('flzplaner', 'entfernen')}" data-action="remove-shift-row">&times;</button>
             </div>
         `;
     }
@@ -48,7 +50,7 @@
         const index = list.querySelectorAll('[data-shift-row]').length;
         list.insertAdjacentHTML('beforeend', shiftRow({
             key: newShiftKey(index),
-            label: 'Schicht ' + (index + 1),
+            label: translate('flzplaner', 'Schicht ') + (index + 1),
             startsAt: '08:00',
             endsAt: '14:00',
             enabled: true

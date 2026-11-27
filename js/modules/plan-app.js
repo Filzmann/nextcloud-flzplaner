@@ -1,5 +1,7 @@
 (function() {
     'use strict';
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
 
     /**
      * Zweck: Orchestriert Ladezustand und fachliche UI-Workflows der Assistenzplanung.
@@ -45,10 +47,10 @@
                 this.render();
                 if (this.state.selectedTeamCode) await this.reloadActive();
                 else {
-                    this.showNotice(`Keine Assistenzteam-Gruppe mit dem konfigurierten Präfix ${this.state.organization.teamGroupPrefix || ''} gefunden.`);
+                    this.showNotice(translate('flzplaner', 'Keine Assistenzteam-Gruppe mit dem konfigurierten Präfix {prefix} gefunden.', {prefix: this.state.organization.teamGroupPrefix || ''}));
                     this.render();
                 }
-            } catch (error) { this.showError(error, 'Dienstplanung konnte nicht geladen werden.'); }
+            } catch (error) { this.showError(error, translate('flzplaner', 'Dienstplanung konnte nicht geladen werden.')); }
         }
 
         applyState(data, initial = false) {
@@ -70,7 +72,7 @@
                     await this.loadMonth(loadVersion);
                 }
             } catch (error) {
-                if (loadVersion === this.loadVersion) this.showError(error, 'Ansicht konnte nicht geladen werden.');
+                if (loadVersion === this.loadVersion) this.showError(error, translate('flzplaner', 'Ansicht konnte nicht geladen werden.'));
             } finally {
                 if (loadVersion === this.loadVersion) {
                     this.state.loading = false;
@@ -129,7 +131,7 @@
                     await this.repository.addSelected(team, month, slot, targetUid);
                 } else if (action === 'remove-candidate') {
                     const fixed=button.closest('[data-candidate-chip]')?.dataset.fixed==='true';
-                    if (fixed && !window.confirm('Diese feste Schicht wirklich entfernen? Sie wird für dieses Datum dauerhaft als nicht möglich gespeichert.')) return;
+                    if (fixed && !window.confirm(translate('flzplaner', 'Diese feste Schicht wirklich entfernen? Sie wird für dieses Datum dauerhaft als nicht möglich gespeichert.'))) return;
                     await this.repository.removeCandidate(team, month, slot, button.dataset.targetUid || '');
                 }
                 else if (action === 'transition-status') await this.repository.transitionStatus(team, month, button.dataset.targetStatus || '');
@@ -155,8 +157,8 @@
                 this.showError(
                     error,
                     mutationCompleted
-                        ? 'Die Änderung wurde gespeichert, aber der Monatsplan konnte nicht neu geladen werden.'
-                        : 'Aktion konnte nicht ausgeführt werden.'
+                        ? translate('flzplaner', 'Die Änderung wurde gespeichert, aber der Monatsplan konnte nicht neu geladen werden.')
+                        : translate('flzplaner', 'Aktion konnte nicht ausgeführt werden.')
                 );
             }
             finally {
@@ -170,7 +172,7 @@
             this.settingsSaving = true;
             let mutationCompleted = false;
             try {
-                if (values.shifts.length === 0) throw new Error('Mindestens eine Schicht muss konfiguriert sein.');
+                if (values.shifts.length === 0) throw new Error(translate('flzplaner', 'Mindestens eine Schicht muss konfiguriert sein.'));
                 await this.repository.saveSettings(this.state.selectedTeamCode, values.displayName, values.meetingDay, values.shifts);
                 mutationCompleted = true;
                 this.state.monthPlan = null;
@@ -181,8 +183,8 @@
                 this.showError(
                     error,
                     mutationCompleted
-                        ? 'Die Einstellungen wurden gespeichert, aber die Ansicht konnte nicht neu geladen werden.'
-                        : 'Einstellungen konnten nicht gespeichert werden.'
+                        ? translate('flzplaner', 'Die Einstellungen wurden gespeichert, aber die Ansicht konnte nicht neu geladen werden.')
+                        : translate('flzplaner', 'Einstellungen konnten nicht gespeichert werden.')
                 );
             } finally {
                 this.settingsSaving = false;
@@ -199,7 +201,7 @@
                 mutationCompleted = true;
                 this.applyState(await this.repository.state());
             } catch (error) {
-                this.showError(error, mutationCompleted ? 'Grenzen wurden gespeichert, aber die Ansicht konnte nicht neu geladen werden.' : 'Persönliche Grenzen konnten nicht gespeichert werden.');
+                this.showError(error, mutationCompleted ? translate('flzplaner', 'Grenzen wurden gespeichert, aber die Ansicht konnte nicht neu geladen werden.') : translate('flzplaner', 'Persönliche Grenzen konnten nicht gespeichert werden.'));
             } finally {
                 this.settingsSaving = false;
                 this.render();
@@ -212,7 +214,7 @@
             try {
                 await this.repository.savePersonalRegularShifts(this.state.selectedTeamCode,rules);
                 this.applyState(await this.repository.state());
-            } catch (error) { this.showError(error,'Regelmäßige Schichten konnten nicht gespeichert werden.'); }
+            } catch (error) { this.showError(error,translate('flzplaner', 'Regelmäßige Schichten konnten nicht gespeichert werden.')); }
             finally { this.settingsSaving=false; this.render(); }
         }
     }

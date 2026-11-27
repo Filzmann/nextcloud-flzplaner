@@ -11,13 +11,21 @@ use OCA\LocalBase\Calendar\AbsenceInterval;
 use OCA\LocalBase\Calendar\AbsenceQueryEvent;
 use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\IL10N;
 
 /** Aggregiert optionale Abwesenheiten und Kalenderbelegungen ohne Schreibwirkung oder fremde Detaildaten. */
 class PlanningHintService {
     public function __construct(
         private IEventDispatcher $events,
         private FlzPlanerLogger $logger,
+        private ?IL10N $l10n = null,
     ) {}
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
+    }
 
     /** @param list<string> $employeeUids
      *  @return array<string, list<array{employeeUid:string,type:string,marker:string,label:string,blocks:bool}>>
@@ -87,8 +95,8 @@ class PlanningHintService {
                         [
                             'employeeUid' => $employeeUid,
                             'type' => 'calendar',
-                            'marker' => $isShift ? 'Dienst/Büro' : 'K',
-                            'label' => $isShift ? 'Dienst/Büro' : 'Termin',
+                            'marker' => $isShift ? $this->t('Dienst/Büro') : 'K',
+                            'label' => $isShift ? $this->t('Dienst/Büro') : $this->t('Termin'),
                             'blocks' => $isShift,
                         ]
                     );

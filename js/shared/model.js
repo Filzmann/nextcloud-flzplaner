@@ -1,4 +1,6 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
     window.OCA = window.OCA || {};
     window.OCA.FlzPlaner = window.OCA.FlzPlaner || {};
     window.OCA.FlzPlaner.Shared = window.OCA.FlzPlaner.Shared || {};
@@ -20,7 +22,7 @@
         }
 
         toArray() {
-            throw new Error(`${this.constructor.name} muss toArray implementieren.`);
+            throw new Error(`${this.constructor.name} ${translate('flzplaner', 'muss toArray implementieren.')}`);
         }
 
         to_array() {
@@ -28,7 +30,7 @@
         }
 
         save() {
-            throw new Error(`${this.constructor.name} kann nicht direkt gespeichert werden.`);
+            throw new Error(`${this.constructor.name} ${translate('flzplaner', 'kann nicht direkt gespeichert werden.')}`);
         }
     }
 

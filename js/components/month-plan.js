@@ -1,4 +1,6 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
     const { esc, dateShort, dayHeader, renderCapacity, hasCapacityLimits } = window.FlzPlaner.ui;
     const { render: renderAssignmentControl } = window.FlzPlaner.assignmentControl;
     const { render: renderCandidateChip } = window.FlzPlaner.candidateChip;
@@ -6,7 +8,7 @@
 
     function render(plan, currentUser) {
         if (!plan || !plan.team) {
-            return '<p>Kein Assistenznehmer gewählt.</p>';
+            return `<p>${translate('flzplaner', 'Kein Assistenznehmer gewählt.')}</p>`;
         }
 
         const team = plan.team;
@@ -22,9 +24,9 @@
         return `
             <section class="flz-planer-section">
                 <div class="flz-planer-section-head">
-                    <h2>${esc(team.displayName || team.code)} - ${esc(plan.month)}${personalWorkload ? `<span class="flz-planer-personal-month-capacity" aria-label="Monatsauslastung">${renderCapacity(personalWorkload.monthCount, personalWorkload.monthlyMin, personalWorkload.monthlyMax)}</span>` : ''}</h2>
+                    <h2>${esc(team.displayName || team.code)} - ${esc(plan.month)}${personalWorkload ? `<span class="flz-planer-personal-month-capacity" aria-label="${translate('flzplaner', 'Monatsauslastung')}">${renderCapacity(personalWorkload.monthCount, personalWorkload.monthlyMin, personalWorkload.monthlyMax)}</span>` : ''}</h2>
                     <div class="flz-planer-plan-meta">
-                        ${team.settings && team.settings.meetingDay ? `<span class="flz-planer-badge">Treffen ${esc(dateShort(team.settings.meetingDay))}</span>` : ''}
+                        ${team.settings && team.settings.meetingDay ? `<span class="flz-planer-badge">${translate('flzplaner', 'Treffen')} ${esc(dateShort(team.settings.meetingDay))}</span>` : ''}
                         ${renderStatus(status, canCoordinate)}
                     </div>
                 </div>
@@ -33,11 +35,11 @@
                         <table class="flz-planer-table flz-planer-month-table">
                         <thead>
                             <tr>
-                                <th scope="col" class="flz-planer-week-column"><span class="flz-planer-visually-hidden">Kalenderwoche</span></th>
-                                <th scope="col" class="flz-planer-vacation-column">Urlaub</th>
-                                <th scope="col">Tag</th>
+                                <th scope="col" class="flz-planer-week-column"><span class="flz-planer-visually-hidden">${translate('flzplaner', translate('flzplaner', 'Kalenderwoche'))}</span></th>
+                                <th scope="col" class="flz-planer-vacation-column">${translate('flzplaner', 'Urlaub')}</th>
+                                <th scope="col">${translate('flzplaner', 'Tag')}</th>
                                 ${segments.map(segment => `<th scope="col">${esc(segment.label)}<small>${esc(segment.startsAt)}-${esc(segment.endsAt)}</small></th>`).join('')}
-                                <th scope="col">Bemerkungen</th>
+                                <th scope="col">${translate('flzplaner', 'Bemerkungen')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -46,7 +48,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="flz-planer-mobile-plan" role="list" aria-label="Wunschplan nach Tagen">
+                <div class="flz-planer-mobile-plan" role="list" aria-label="${translate('flzplaner', 'Wunschplan nach Tagen')}">
                     ${days.map(day => mobileDay(day, segments, team, currentUser, canCoordinate, mutable)).join('')}
                 </div>
             </section>
@@ -54,14 +56,14 @@
     }
 
     function renderStatus(status, canCoordinate) {
-        const labels = { draft: 'Entwurf', planned: 'Geplant', approved: 'Genehmigt' };
+        const labels = { draft: translate('flzplaner', 'Entwurf'), planned: translate('flzplaner', 'Geplant'), approved: translate('flzplaner', 'Genehmigt') };
         const actions = {
-            draft: [['planned', 'Als geplant festschreiben']],
-            planned: [['draft', 'Auf Entwurf zurücksetzen'], ['approved', 'Genehmigen']],
-            approved: [['planned', 'Genehmigung aufheben']],
+            draft: [['planned', translate('flzplaner', 'Als geplant festschreiben')]],
+            planned: [['draft', translate('flzplaner', 'Auf Entwurf zurücksetzen')], ['approved', translate('flzplaner', 'Genehmigen')]],
+            approved: [['planned', translate('flzplaner', 'Genehmigung aufheben')]],
         };
         return `<div class="flz-planer-plan-status" data-plan-status="${esc(status)}">
-            <span class="flz-planer-badge">Status: ${esc(labels[status] || status)}</span>
+            <span class="flz-planer-badge">${translate('flzplaner', 'Status:')} ${esc(labels[status] || status)}</span>
             ${canCoordinate ? (actions[status] || []).map(([target, label]) => `<button type="button" class="flz-planer-small" data-action="transition-status" data-target-status="${esc(target)}">${esc(label)}</button>`).join('') : ''}
         </div>`;
     }
@@ -135,10 +137,10 @@
     function renderVacationCell(group) {
         if (!group) return '';
         if (!group.hints.length) {
-            return `<td rowspan="${esc(group.span)}" class="flz-planer-vacation-cell flz-planer-vacation-cell--empty" aria-label="Kein Urlaub"></td>`;
+            return `<td rowspan="${esc(group.span)}" class="flz-planer-vacation-cell flz-planer-vacation-cell--empty" aria-label="${translate('flzplaner', 'Kein Urlaub')}"></td>`;
         }
         const entries = group.hints.map(hint => `${hint.marker || 'U'} ${hint.displayName || hint.employeeUid || ''}`);
-        return `<td rowspan="${esc(group.span)}" class="flz-planer-vacation-cell" aria-label="Urlaub: ${entries.map(esc).join(', ')}"><div class="flz-planer-vacation-label">${entries.map(entry => `<span class="flz-planer-vacation-entry">${esc(entry)}</span>`).join('')}</div></td>`;
+        return `<td rowspan="${esc(group.span)}" class="flz-planer-vacation-cell" aria-label="${translate('flzplaner', 'Urlaub:')} ${entries.map(esc).join(', ')}"><div class="flz-planer-vacation-label">${entries.map(entry => `<span class="flz-planer-vacation-entry">${esc(entry)}</span>`).join('')}</div></td>`;
     }
 
     function renderWeekCell(group, workload) {
@@ -150,7 +152,7 @@
         const statusClass = capacity?.status ? ` flz-planer-capacity--${capacity.status}` : '';
         const capacityLabel = capacity ? `<span>${esc(capacity.text)}</span>` : '';
         const title = capacity ? ` title="${esc(capacity.title)}"` : '';
-        return `<th scope="rowgroup" rowspan="${esc(group.span)}" class="flz-planer-week-cell${statusClass}"${title} aria-label="${esc(label || 'Kalenderwoche')}${capacity ? `, ${esc(capacity.title)}` : ''}"><span>KW</span><strong>${esc(number)}</strong>${capacityLabel}</th>`;
+        return `<th scope="rowgroup" rowspan="${esc(group.span)}" class="flz-planer-week-cell${statusClass}"${title} aria-label="${esc(label || translate('flzplaner', 'Kalenderwoche'))}${capacity ? `, ${esc(capacity.title)}` : ''}"><span>KW</span><strong>${esc(number)}</strong>${capacityLabel}</th>`;
     }
 
     function weekCapacity(week, workload) {
@@ -180,7 +182,7 @@
         const labels = Object.fromEntries(segments.map(segment => [segment.key, segment.label]));
         const entries = [];
         for (const slot of day.slots || []) {
-            const shiftLabel = labels[slot.segmentKey] || slot.segmentKey || 'Schicht';
+            const shiftLabel = labels[slot.segmentKey] || slot.segmentKey || translate('flzplaner', 'Schicht');
             for (const candidate of slot.candidates || []) {
                 const editable = mutable && candidate.isSelf;
                 if (!candidate.note && !editable) continue;
@@ -195,15 +197,15 @@
         const preference = ['favorite', 'emergency'].includes(candidate.preference) ? candidate.preference : 'neutral';
         const note = candidate.note || '';
         return `<div class="flz-planer-shift-note${note ? '' : ' flz-planer-shift-note--empty'}" data-candidate-note-entry data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}" data-current-preference="${esc(preference)}">
-            ${note ? `<div class="flz-planer-shift-note-display"><p><strong>${esc(displayName)}, ${esc(shiftLabel)}:</strong> ${esc(note)}</p>${editable ? `<div class="flz-planer-shift-note-actions"><button type="button" class="flz-planer-icon-button" aria-label="Anmerkung bearbeiten" title="Anmerkung bearbeiten" data-action="open-candidate-note-editor" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">✎</button><button type="button" class="flz-planer-icon-button" aria-label="Anmerkung löschen" title="Anmerkung löschen" data-action="delete-candidate-note" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">&times;</button></div>` : ''}</div>` : ''}
-            ${editable ? `<div class="flz-planer-shift-note-editor" hidden><label>Anmerkung <textarea maxlength="500" rows="2" data-candidate-note>${esc(note)}</textarea></label><div><button type="button" class="flz-planer-small" data-action="save-candidate-note" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">Speichern</button><button type="button" class="flz-planer-small" data-action="close-candidate-note-editor" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">Abbrechen</button></div></div>` : ''}
+            ${note ? `<div class="flz-planer-shift-note-display"><p><strong>${esc(displayName)}, ${esc(shiftLabel)}:</strong> ${esc(note)}</p>${editable ? `<div class="flz-planer-shift-note-actions"><button type="button" class="flz-planer-icon-button" aria-label="${translate('flzplaner', 'Anmerkung bearbeiten')}" title="${translate('flzplaner', 'Anmerkung bearbeiten')}" data-action="open-candidate-note-editor" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">✎</button><button type="button" class="flz-planer-icon-button" aria-label="${translate('flzplaner', 'Anmerkung löschen')}" title="${translate('flzplaner', 'Anmerkung löschen')}" data-action="delete-candidate-note" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">&times;</button></div>` : ''}</div>` : ''}
+            ${editable ? `<div class="flz-planer-shift-note-editor" hidden><label>${translate('flzplaner', 'Anmerkung')} <textarea maxlength="500" rows="2" data-candidate-note>${esc(note)}</textarea></label><div><button type="button" class="flz-planer-small" data-action="save-candidate-note" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">${translate('flzplaner', 'Speichern')}</button><button type="button" class="flz-planer-small" data-action="close-candidate-note-editor" data-slot-id="${esc(slotId)}" data-target-uid="${esc(candidate.uid)}">${translate('flzplaner', 'Abbrechen')}</button></div></div>` : ''}
         </div>`;
     }
 
     function renderHints(hints) {
         if (!hints.length) return '';
-        return `<div class="flz-planer-day-hints" aria-label="Planungshinweise">${hints.map(hint =>
-            `<span class="flz-planer-hint" title="${esc(hint.label || 'Hinweis')}">${esc(hint.marker || '•')} ${esc(hint.displayName || hint.employeeUid || '')}</span>`
+        return `<div class="flz-planer-day-hints" aria-label="${translate('flzplaner', 'Planungshinweise')}">${hints.map(hint =>
+            `<span class="flz-planer-hint" title="${esc(hint.label || translate('flzplaner', 'Hinweis'))}">${esc(hint.marker || '•')} ${esc(hint.displayName || hint.employeeUid || '')}</span>`
         ).join('')}</div>`;
     }
 
@@ -221,7 +223,7 @@
         const selfUid = currentUser && currentUser.uid ? currentUser.uid : '';
         const hasSelf = candidates.some(candidate => candidate.uid === selfUid);
         const selfAction = mutable && !canCoordinate && !hasSelf && !slot.selfUnavailable
-            ? `<button type="button" class="flz-planer-small" data-action="add-self" data-slot-id="${esc(slot.id)}">+ ich</button>`
+            ? `<button type="button" class="flz-planer-small" data-action="add-self" data-slot-id="${esc(slot.id)}">+ ${translate('flzplaner', '+ ich')}</button>`
             : '';
 
         return `
@@ -231,7 +233,7 @@
                 ${renderFixedConflict(slot, candidates, canCoordinate, mutable)}
                 <div class="flz-planer-cell-actions">
                     ${selfAction}
-                    ${slot.selfUnavailable && !canCoordinate ? '<span class="flz-planer-badge">Nicht verfügbar</span>' : ''}
+                    ${slot.selfUnavailable && !canCoordinate ? `<span class="flz-planer-badge">${translate('flzplaner', 'Nicht verfügbar')}</span>` : ''}
                     ${canCoordinate && mutable ? renderAssignmentControl(slot, team, candidates, surface) : ''}
                 </div>
         `;
@@ -242,13 +244,13 @@
         return `<article class="flz-planer-mobile-day" role="listitem">
             <header class="flz-planer-mobile-day-head">
                 <h3>${dayHeader(day)}<small>${esc(day.date)}</small></h3>
-                <span class="flz-planer-badge">${esc(day.weekLabel || 'Kalenderwoche')}</span>
+                <span class="flz-planer-badge">${esc(day.weekLabel || translate('flzplaner', 'Kalenderwoche'))}</span>
             </header>
             ${renderHints(day.hints || [])}
             <div class="flz-planer-mobile-shifts">
                 ${segments.map(segment => mobileShift(day, segment, slotsByKey[segment.key], team, currentUser, canCoordinate, mutable)).join('')}
             </div>
-            <section class="flz-planer-mobile-notes" aria-label="Bemerkungen">
+            <section class="flz-planer-mobile-notes" aria-label="${translate('flzplaner', 'Bemerkungen')}">
                 <div class="flz-planer-eb-note">${renderDayNoteControl(day, canCoordinate && mutable)}</div>
                 ${renderCandidateNotes(day, segments, mutable)}
             </section>
@@ -259,7 +261,7 @@
         const headingId = `flz-planer-mobile-shift-${esc(day.date)}-${esc(segment.key)}`;
         return `<section class="flz-planer-mobile-shift" aria-labelledby="${headingId}">
             <h4 id="${headingId}">${esc(segment.label)} <small>${esc(segment.startsAt)}–${esc(segment.endsAt)}</small></h4>
-            ${slot ? slotContents(slot, team, currentUser, canCoordinate, mutable, 'mobile') : '<p>Keine Schicht angelegt.</p>'}
+            ${slot ? slotContents(slot, team, currentUser, canCoordinate, mutable, 'mobile') : `<p>${translate('flzplaner', 'Keine Schicht angelegt.')}</p>`}
         </section>`;
     }
 
@@ -267,7 +269,7 @@
         const conflict=slot.fixedConflict;
         if (!conflict) return '';
         const labels=(conflict.candidateUids||[]).map(uid=>candidates.find(candidate=>candidate.uid===uid)?.displayName||uid);
-        return `<div class="flz-planer-fixed-conflict" role="alert"><strong>Konflikt bei festen Schichten</strong><span>${labels.map(esc).join(', ')}</span>${conflict.status==='escalated'?'<span class="flz-planer-badge">An EB weitergegeben</span>':''}${mutable&&conflict.canReport?`<button type="button" class="flz-planer-small" data-action="report-fixed-conflict" data-slot-id="${esc(slot.id)}">An EB weitergeben</button>`:''}${mutable&&canCoordinate&&conflict.canResolve?(conflict.candidateUids||[]).map(uid=>`<button type="button" class="flz-planer-small" data-action="resolve-fixed-conflict" data-slot-id="${esc(slot.id)}" data-kept-uid="${esc(uid)}">${esc(candidates.find(candidate=>candidate.uid===uid)?.displayName||uid)} fest behalten</button>`).join(''):''}</div>`;
+        return `<div class="flz-planer-fixed-conflict" role="alert"><strong>${translate('flzplaner', 'Konflikt bei festen Schichten')}</strong><span>${labels.map(esc).join(', ')}</span>${conflict.status==='escalated'?`<span class="flz-planer-badge">${translate('flzplaner', 'An EB weitergegeben')}</span>`:''}${mutable&&conflict.canReport?`<button type="button" class="flz-planer-small" data-action="report-fixed-conflict" data-slot-id="${esc(slot.id)}">${translate('flzplaner', 'An EB weitergeben')}</button>`:''}${mutable&&canCoordinate&&conflict.canResolve?(conflict.candidateUids||[]).map(uid=>`<button type="button" class="flz-planer-small" data-action="resolve-fixed-conflict" data-slot-id="${esc(slot.id)}" data-kept-uid="${esc(uid)}">${esc(candidates.find(candidate=>candidate.uid===uid)?.displayName||uid)} ${translate('flzplaner', 'fest behalten')}</button>`).join(''):''}</div>`;
     }
 
     window.FlzPlaner = window.FlzPlaner || {};

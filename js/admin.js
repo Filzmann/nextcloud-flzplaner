@@ -1,5 +1,7 @@
 (function() {
     'use strict';
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
     const confirmation = document.getElementById('flz-planer-demo-confirm');
     const button = document.getElementById('flz-planer-demo-install');
     const notice = document.getElementById('flz-planer-demo-notice');
@@ -11,15 +13,15 @@
         button.disabled = true;
         notice.hidden = false;
         notice.className = 'flz-planer-admin-notice';
-        notice.textContent = 'Demo-Pack wird geprüft und installiert …';
+        notice.textContent = translate('flzplaner', 'Demo-Pack wird geprüft und installiert …');
         try {
             const response = await client.request('/api/admin/demo-pack/install', { method: 'POST', body: '{"confirmed":true}' });
             notice.classList.add('is-success');
-            notice.textContent = `${response.result.teams.join(', ')} wurden als Demoteams angelegt.`;
+            notice.textContent = `${response.result.teams.join(', ')} ${translate('flzplaner', 'wurden als Demoteams angelegt.')}`;
             confirmation.checked = false;
         } catch (error) {
             notice.classList.add('is-error');
-            notice.textContent = error.message || 'Das Demo-Pack konnte nicht installiert werden.';
+            notice.textContent = error.message || translate('flzplaner', 'Das Demo-Pack konnte nicht installiert werden.');
             button.disabled = false;
         }
     });

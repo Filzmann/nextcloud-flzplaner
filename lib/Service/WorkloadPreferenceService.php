@@ -7,11 +7,18 @@ namespace OCA\FlzPlaner\Service;
 use DateTimeImmutable;
 use OCA\FlzPlaner\Model\Team;
 use OCA\FlzPlaner\Store\ShiftPlanStore;
+use OCP\IL10N;
 
 final class WorkloadPreferenceService {
     private const MAX_LIMIT = 100;
 
-    public function __construct(private ShiftPlanStore $store) {
+    public function __construct(private ShiftPlanStore $store, private ?IL10N $l10n = null) {
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     public function personal(Team $team, string $uid): array {
@@ -27,13 +34,13 @@ final class WorkloadPreferenceService {
             throw new \DomainException('Nur schichtfähige Teammitglieder dürfen persönliche Schichtgrenzen speichern.');
         }
         $limits = [
-            'weeklyMin' => $this->normalizeLimit($weeklyMin, 'Wöchentliches Minimum'),
-            'weeklyMax' => $this->normalizeLimit($weeklyMax, 'Wöchentliches Maximum'),
-            'monthlyMin' => $this->normalizeLimit($monthlyMin, 'Monatliches Minimum'),
-            'monthlyMax' => $this->normalizeLimit($monthlyMax, 'Monatliches Maximum'),
+            'weeklyMin' => $this->normalizeLimit($weeklyMin, $this->t('Wöchentliches Minimum')),
+            'weeklyMax' => $this->normalizeLimit($weeklyMax, $this->t('Wöchentliches Maximum')),
+            'monthlyMin' => $this->normalizeLimit($monthlyMin, $this->t('Monatliches Minimum')),
+            'monthlyMax' => $this->normalizeLimit($monthlyMax, $this->t('Monatliches Maximum')),
         ];
-        $this->assertRange($limits['weeklyMin'], $limits['weeklyMax'], 'Woche');
-        $this->assertRange($limits['monthlyMin'], $limits['monthlyMax'], 'Monat');
+        $this->assertRange($limits['weeklyMin'], $limits['weeklyMax'], $this->t('Woche'));
+        $this->assertRange($limits['monthlyMin'], $limits['monthlyMax'], $this->t('Monat'));
         $this->store->saveWorkloadLimits($team->code, $uid, $limits);
 
         return $limits;
@@ -84,7 +91,7 @@ final class WorkloadPreferenceService {
         }
         $weekKeys = [];
         for ($day = $first; $day <= $last; $day = $day->modify('+1 day')) {
-            $weekKeys[$day->format('o-W')] = 'KW ' . $day->format('W');
+            $weekKeys[$day->format('o-W')] = $this->t('KW ') . $day->format('W');
         }
         $overview = [];
         foreach ($team->assistants() as $assistant) {

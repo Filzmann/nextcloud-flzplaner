@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- L10N-Migration (ZM-06): sichtbare Texte über Nextcloud-l10n (deutsche Quelltexte, Kataloge `l10n/en.*` + `l10n/en_GB.*`), inkl. `tests/Ui/L10nCatalogContractTest.php` und `docs/l10n-inventory.md`.
+
 - Der Category-A-Browser-Smoke ordnet ausgeführte Bundle-Dateien über ihre
   absoluten Quellpfade zuverlässig der JavaScript-Coverage zu.
 - Die zustandslosen Browserprimitives aus `flz_shared` 0.1.0 reproduzierbar

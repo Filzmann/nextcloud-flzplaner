@@ -1,10 +1,12 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
     const { esc, dateShort } = window.FlzPlaner.ui;
     const { renderReadonly, renderEditor } = window.FlzPlaner.shiftSettingsList;
 
     function render(team) {
         if (!team) {
-            return '<p>Kein Assistenznehmer gewählt.</p>';
+            return `<p>${translate('flzplaner', 'Kein Assistenznehmer gewählt.')}</p>`;
         }
 
         const settings = team.settings || {};
@@ -12,28 +14,28 @@
         const personal = team.personalWorkload || {};
         const regular = team.personalRegularShifts || [];
         const regularKeys = new Set(regular.map(rule => `${rule.weekday}|${rule.segmentKey}`));
-        const weekdays = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+        const weekdays = [translate('flzplaner', 'Montag'),translate('flzplaner', 'Dienstag'),translate('flzplaner', 'Mittwoch'),translate('flzplaner', 'Donnerstag'),translate('flzplaner', 'Freitag'),translate('flzplaner', 'Samstag'),translate('flzplaner', 'Sonntag')];
         const regularForm = team.canSetRegularShifts ? `<section class="flz-planer-personal-settings" aria-labelledby="flz-planer-regular-shifts-heading">
-            <h3 id="flz-planer-regular-shifts-heading">Meine regelmäßigen festen Schichten</h3>
-            <p>Diese Schichten werden in offenen Monatsplänen automatisch fest eingetragen.</p>
+            <h3 id="flz-planer-regular-shifts-heading">${translate('flzplaner', 'Meine regelmäßigen festen Schichten')}</h3>
+            <p>${translate('flzplaner', 'Diese Schichten werden in offenen Monatsplänen automatisch fest eingetragen.')}</p>
             <form id="personal-regular-shifts-form" class="flz-planer-settings-form"><div class="flz-planer-regular-shifts-grid">
                 ${weekdays.map((label,index)=>`<fieldset><legend>${label}</legend>${shifts.filter(shift=>shift.enabled !== false).map(shift=>`<label><input type="checkbox" name="regularShift" value="${esc(`${index+1}|${shift.key}`)}"${regularKeys.has(`${index+1}|${shift.key}`)?' checked':''}> ${esc(shift.label)}</label>`).join('')}</fieldset>`).join('')}
-            </div><button type="submit">Regelmäßige Schichten speichern</button></form>
+            </div><button type="submit">${translate('flzplaner', 'Regelmäßige Schichten speichern')}</button></form>
         </section>` : '';
         const personalForm = team.canSetPersonalWorkload ? `
             <section class="flz-planer-personal-settings" aria-labelledby="flz-planer-personal-settings-heading">
-                <h3 id="flz-planer-personal-settings-heading">Meine gewünschten Schichten</h3>
-                <p>Leere Felder bedeuten, dass keine Grenze gilt.</p>
+                <h3 id="flz-planer-personal-settings-heading">${translate('flzplaner', 'Meine gewünschten Schichten')}</h3>
+                <p>${translate('flzplaner', 'Leere Felder bedeuten, dass keine Grenze gilt.')}</p>
                 <form id="personal-workload-form" class="flz-planer-settings-form">
-                    <fieldset><legend>Pro Kalenderwoche</legend>
-                        ${limitInput('weeklyMin', 'Minimum', personal.weeklyMin)}
-                        ${limitInput('weeklyMax', 'Maximum', personal.weeklyMax)}
+                    <fieldset><legend>${translate('flzplaner', 'Pro Kalenderwoche')}</legend>
+                        ${limitInput('weeklyMin', translate('flzplaner', 'Minimum'), personal.weeklyMin)}
+                        ${limitInput('weeklyMax', translate('flzplaner', 'Maximum'), personal.weeklyMax)}
                     </fieldset>
-                    <fieldset><legend>Pro Monat</legend>
-                        ${limitInput('monthlyMin', 'Minimum', personal.monthlyMin)}
-                        ${limitInput('monthlyMax', 'Maximum', personal.monthlyMax)}
+                    <fieldset><legend>${translate('flzplaner', 'Pro Monat')}</legend>
+                        ${limitInput('monthlyMin', translate('flzplaner', 'Minimum'), personal.monthlyMin)}
+                        ${limitInput('monthlyMax', translate('flzplaner', 'Maximum'), personal.monthlyMax)}
                     </fieldset>
-                    <button type="submit">Persönliche Grenzen speichern</button>
+                    <button type="submit">${translate('flzplaner', 'Persönliche Grenzen speichern')}</button>
                 </form>
             </section>` : '';
 
@@ -44,9 +46,9 @@
                         <h2>${esc(team.displayName || team.code)}</h2>
                     </div>
                     <dl class="flz-planer-settings-readonly">
-                        <dt>Assistentinnentreffen</dt>
+                        <dt>${translate('flzplaner', 'Assistentinnentreffen')}</dt>
                         <dd>${settings.meetingDay ? esc(dateShort(settings.meetingDay)) : '-'}</dd>
-                        <dt>Schichten</dt>
+                        <dt>${translate('flzplaner', 'Schichten')}</dt>
                         <dd>${renderReadonly(shifts)}</dd>
                     </dl>
                     ${regularForm}${personalForm}
@@ -60,13 +62,13 @@
                     <h2>${esc(team.displayName || team.code)}</h2>
                 </div>
                 <form id="settings-form" class="flz-planer-settings-form">
-                    <label>Anzeigename <input name="displayName" type="text" maxlength="255" required value="${esc(team.displayName || team.code)}"></label>
-                    <label>Assistentinnentreffen <input name="meetingDay" type="date" value="${esc(settings.meetingDay || '')}"></label>
+                    <label>${translate('flzplaner', 'Anzeigename')} <input name="displayName" type="text" maxlength="255" required value="${esc(team.displayName || team.code)}"></label>
+                    <label>${translate('flzplaner', 'Assistentinnentreffen')} <input name="meetingDay" type="date" value="${esc(settings.meetingDay || '')}"></label>
                     <fieldset>
-                        <legend>Schichten</legend>
+                        <legend>${translate('flzplaner', 'Schichten')}</legend>
                         ${renderEditor(shifts)}
                     </fieldset>
-                    <button type="submit">Speichern</button>
+                    <button type="submit">${translate('flzplaner', 'Speichern')}</button>
                 </form>
                 ${regularForm}${personalForm}
             </section>

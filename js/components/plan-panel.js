@@ -1,5 +1,7 @@
 (function() {
     'use strict';
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
 
     /** Zweck: Kapselt Paneldarstellung, lokale Schichtlistenaktionen und das Team-Einstellungsformular. */
     class PlanPanel {
@@ -16,15 +18,15 @@
             if (this.workloadOverlay) {
                 this.workloadOverlay.hidden = !workloadOpen;
                 this.workloadOverlay.innerHTML = workloadOpen
-                    ? `<button type="button" class="flz-planer-overlay-close" aria-label="Auslastung schließen" title="Schließen" data-action="close-workload">&times;</button>${this.renderWorkload(state.monthPlan, state.currentUser)}`
+                    ? `<button type="button" class="flz-planer-overlay-close" aria-label="${translate('flzplaner', 'Auslastung schließen')}" title="${translate('flzplaner', 'Schließen')}" data-action="close-workload">&times;</button>${this.renderWorkload(state.monthPlan, state.currentUser)}`
                     : '';
             }
             if (state.loading) {
-                this.panel.innerHTML = '<p class="flz-planer-loading">Lade...</p>';
+                this.panel.innerHTML = `<p class="flz-planer-loading">${translate('flzplaner', 'Lade...')}</p>`;
                 return;
             }
             if (!state.selectedTeamCode) {
-                this.panel.innerHTML = '<p>Keine Assistenznehmer-Gruppen.</p>';
+                this.panel.innerHTML = `<p>${translate('flzplaner', 'Keine Assistenznehmer-Gruppen.')}</p>`;
                 return;
             }
             if (state.activeView === 'settings') {

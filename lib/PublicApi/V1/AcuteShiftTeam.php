@@ -20,7 +20,7 @@ final class AcuteShiftTeam {
         private array $shiftTemplates,
         private array $assistants,
     ) {
-        if (trim($teamCode) === '' || trim($displayName) === '' || trim($bureauKey) === '') throw new InvalidArgumentException('Team, name and bureau are required.');
+        if (trim($teamCode) === '' || trim($displayName) === '' || trim($bureauKey) === '') throw new InvalidArgumentException('Team, Name und Büro sind erforderlich.');
     }
 
     public function contractVersion(): string { return self::CONTRACT_VERSION; }

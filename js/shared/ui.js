@@ -1,4 +1,6 @@
 (function() {
+    const translate = typeof t === 'function' ? t : (_app, text, params) => Object.entries(params || {}).reduce((s, [k, v]) => s.split('{' + k + '}').join(String(v)), text)
+
     window.OCA = window.OCA || {};
     window.OCA.FlzPlaner = window.OCA.FlzPlaner || {};
     window.OCA.FlzPlaner.Shared = window.OCA.FlzPlaner.Shared || {};
@@ -23,7 +25,7 @@
         return text === '' ? null : text;
     }
 
-    function errorMessage(error, fallback = 'Die Aktion konnte nicht ausgeführt werden.') {
+    function errorMessage(error, fallback = translate('flzplaner', 'Die Aktion konnte nicht ausgeführt werden.')) {
         if (typeof error === 'string') {
             return textOrNull(error) || fallback;
         }
@@ -71,7 +73,7 @@
         info(message) { this.show(message, 'info'); }
         success(message) { this.show(message, 'success'); }
         warning(message) { this.show(message, 'warning'); }
-        error(error, fallback = 'Die Aktion konnte nicht ausgeführt werden.') { this.show(errorMessage(error, fallback), 'error'); }
+        error(error, fallback = translate('flzplaner', 'Die Aktion konnte nicht ausgeführt werden.')) { this.show(errorMessage(error, fallback), 'error'); }
         clear() { this.show(''); }
     }
 

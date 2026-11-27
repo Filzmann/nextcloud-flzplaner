@@ -17,6 +17,7 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\IL10N;
 use OCP\IRequest;
 
 class ApiController extends Controller {
@@ -28,9 +29,16 @@ class ApiController extends Controller {
         private FlzPlanerLogger $logger,
         private ApiResponder $responder,
         private WorkloadPreferenceService $workloadPreferences,
-        private FixedShiftService $fixedShifts
+        private FixedShiftService $fixedShifts,
+        private ?IL10N $l10n = null
     ) {
         parent::__construct(Application::APP_ID, $request);
+    }
+
+    /** Lokalisierung fachlicher Texte; im Test ohne IL10N identity. */
+    private function t(string $text): string
+    {
+        return $this->l10n?->t($text) ?? $text;
     }
 
     #[NoAdminRequired, NoCSRFRequired]
@@ -53,7 +61,7 @@ class ApiController extends Controller {
                 'organization' => $this->teamAccess->organizationContract(),
                 'defaultMonth' => date('Y-m'),
                 'defaultYear' => (int)date('Y'),
-                'notice' => 'Assistenzteams und Koordinationsrechte folgen den gemeinsamen Filzmann-Organisationseinstellungen.',
+                'notice' => $this->t('Assistenzteams und Koordinationsrechte folgen den gemeinsamen Filzmann-Organisationseinstellungen.'),
             ];
         }, [$this->logger, 'error'], 'state');
     }
