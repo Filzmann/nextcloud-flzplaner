@@ -22,10 +22,6 @@ jobs:
       matrix:
         php-version: ['8.3', '8.5']
     steps:
-      - name: App auschecken
-        uses: actions/checkout@v7
-        with:
-          path: app
       - name: Test-Harness (Parent) auschecken
         uses: actions/checkout@v7
         with:
@@ -33,6 +29,17 @@ jobs:
           ref: main
           path: '.'
           clean: false
+      - name: Test-Harness (Parent) auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/br-nextcloud-apps
+          ref: main
+          path: '.'
+          clean: false
+      - name: App auschecken
+        uses: actions/checkout@v7
+        with:
+          path: app
       - name: Organisationsprovider für Vertragstests auschecken
         uses: actions/checkout@v7
         with:
@@ -71,13 +78,6 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: app
-      - name: Test-Harness (Parent) auschecken
-        uses: actions/checkout@v7
-        with:
-          repository: Filzmann/br-nextcloud-apps
-          ref: main
-          path: '.'
-          clean: false
       - name: Organisationsprovider für Vertragstests auschecken
         uses: actions/checkout@v7
         with:
