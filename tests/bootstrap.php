@@ -8,9 +8,8 @@ $appRoot = dirname(__DIR__);
 
 spl_autoload_register(static function (string $class) use ($workspaceRoot, $appRoot): void {
     $prefixes = [
-        'OCA\\LocalBase\\Tests\\Support\\' => $workspaceRoot . '/localbase/tests/Support/',
+        'OCA\\LocalBase\\Tests\\Support\\' => $workspaceRoot . '/test-harness/Support/',
         'OCA\\FlzOrganization\\' => $workspaceRoot . '/flz_organization/lib/',
-        'OCA\\LocalBase\\' => $workspaceRoot . '/localbase/lib/',
         'OCA\\FlzDataProtection\\' => $appRoot . '/tests/stubs/FlzDataProtection/',
         'OCA\\FlzPlaner\\' => $appRoot . '/lib/',
     ];
@@ -28,5 +27,5 @@ spl_autoload_register(static function (string $class) use ($workspaceRoot, $appR
     }
 });
 
-require_once $workspaceRoot . '/localbase/tests/Support/assertions.php';
+require_once $workspaceRoot . '/test-harness/Support/assertions.php';
 require_once __DIR__ . '/Service/helpers.php';
