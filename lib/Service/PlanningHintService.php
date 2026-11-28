@@ -7,9 +7,9 @@ namespace OCA\FlzPlaner\Service;
 use DateTimeImmutable;
 use DateTimeZone;
 use OCA\FlzPlaner\Model\ShiftSlot;
-use OCA\LocalBase\Calendar\AbsenceInterval;
-use OCA\LocalBase\Calendar\AbsenceQueryEvent;
-use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
+use OCA\FlzOrganization\PublicApi\V1\AbsenceInterval;
+use OCA\FlzOrganization\PublicApi\V1\AbsenceQueryEvent;
+use OCA\FlzOrganization\PublicApi\V1\ScheduleConflictQueryEvent;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IL10N;
 

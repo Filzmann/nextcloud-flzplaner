@@ -4,25 +4,24 @@ declare(strict_types=1);
 
 namespace OCA\FlzPlaner\Service;
 
-use OCA\LocalBase\Organization\FlzOrganizationDefinition;
-use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
-use OCA\LocalBase\Service\DemoAccountProvisioningService;
+use OCA\FlzPlaner\Model\PlanerOrganizationDefinition;
+use OCA\FlzPlaner\Vendor\Filzmann\Shared\Service\DemoAccountProvisioningService;
 
 /**
  * Zweck: Installiert die neutralen Assistenzteams Team A, Team B und Team C mit lokalen Demokonten.
- * Vertrag: Bestehende fremde Konten und read-only LDAP-Gruppen werden vom LocalBase-Preflight vor jeder Änderung abgewiesen.
+ * Vertrag: Bestehende fremde Konten und read-only LDAP-Gruppen werden vom Provisioning-Preflight vor jeder Änderung abgewiesen.
  */
 final class PlanerDemoPackService {
     public function __construct(
         private DemoAccountProvisioningService $accounts,
         private TeamSettingsService $settings,
         private ShiftConfigService $shiftConfig,
-        private ?FlzOrganizationSettingsService $organization = null,
+        private ?PlanerOrganizationGateway $organization = null,
     ) {}
 
     /** @return array{accounts:array,teams:list<string>} */
     public function install(): array {
-        $definition = $this->organization?->definition() ?? FlzOrganizationDefinition::defaults();
+        $definition = $this->organization?->definitionOrDefaults() ?? PlanerOrganizationDefinition::defaults();
         $teamCodes = ['A', 'B', 'C'];
         $ebGroup = $definition->roleGroupId('eb');
         $fixtures = [];
@@ -43,7 +42,7 @@ final class PlanerDemoPackService {
             }
         }
 
-        $accounts = $this->accounts->provision('flz-full-suite-demo', $fixtures);
+        $accounts = $this->accounts->provision('flzplaner-demo', $fixtures);
         foreach ($teamCodes as $teamCode) {
             $this->settings->save($teamCode, "Team {$teamCode}", $this->shiftConfig->defaults());
         }

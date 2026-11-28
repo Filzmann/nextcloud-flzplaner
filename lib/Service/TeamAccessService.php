@@ -6,8 +6,8 @@ namespace OCA\FlzPlaner\Service;
 
 use OCA\FlzPlaner\Model\Assistant;
 use OCA\FlzPlaner\Model\Team;
-use OCA\LocalBase\Organization\FlzOrganizationDefinition;
-use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
+use OCA\FlzPlaner\Model\PlanerOrganizationDefinition;
+
 use OCP\IGroupManager;
 use OCP\IUserSession;
 
@@ -21,7 +21,7 @@ class TeamAccessService {
         private IGroupManager $groupManager,
         private IUserSession $userSession,
         private TeamSettingsService $settingsService,
-        private ?FlzOrganizationSettingsService $organization = null,
+        private ?PlanerOrganizationGateway $organization = null,
         private ?PlanerPermissionPolicy $permissionPolicy = null,
     ) {
     }
@@ -207,8 +207,8 @@ class TeamAccessService {
         ];
     }
 
-    private function definition(): FlzOrganizationDefinition {
-        return $this->organization?->definition() ?? FlzOrganizationDefinition::defaults();
+    private function definition(): PlanerOrganizationDefinition {
+        return $this->organization?->definitionOrDefaults() ?? PlanerOrganizationDefinition::defaults();
     }
 
     private function policy(): PlanerPermissionPolicy {
