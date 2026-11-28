@@ -35,6 +35,12 @@ jobs:
           repository: Filzmann/nextcloud-localbase
           ref: ${{ env.LOCALBASE_TEST_REF }}
           path: localbase
+      - name: Organisationsprovider für Vertragstests auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-flz-organization
+          ref: bcd5b03fab962feef08720d13ee340b043855488
+          path: flz_organization
       - name: PHP einrichten
         uses: shivammathur/setup-php@v2
         with:
@@ -73,6 +79,12 @@ jobs:
           repository: Filzmann/nextcloud-localbase
           ref: ${{ env.LOCALBASE_TEST_REF }}
           path: localbase
+      - name: Organisationsprovider für Vertragstests auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/nextcloud-flz-organization
+          ref: bcd5b03fab962feef08720d13ee340b043855488
+          path: flz_organization
       - name: Node.js einrichten
         uses: actions/setup-node@v6
         with:

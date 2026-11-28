@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\FlzPlaner\PublicApi\V1;
 
 use OCA\FlzPlaner\Service\TeamSettingsService;
-use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
+use OCA\FlzPlaner\Service\PlanerOrganizationGateway;
 use OCP\IGroupManager;
 
 /** Öffentlicher read-only V1-Katalog; unzugeordnete Teams werden fail-closed nicht ausgeliefert. */
@@ -20,7 +20,7 @@ final class AcuteShiftCatalogProvider {
     public function teamsForBureaux(array $bureauKeys): array {
         $bureauKeys = array_fill_keys(array_map('strval', $bureauKeys), true);
         if ($bureauKeys === []) return [];
-        $definition = $this->organization->definition();
+        $definition = $this->organization->definitionOrDefaults();
         $prefix = $definition->teamGroupPrefix();
         $ebGroup = $definition->roleGroupId('eb');
         $result = [];

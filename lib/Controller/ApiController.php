@@ -12,7 +12,7 @@ use OCA\FlzPlaner\Service\TeamSettingsService;
 use OCA\FlzPlaner\Service\WorkloadPreferenceService;
 use OCA\FlzPlaner\Service\FixedShiftService;
 use OCA\FlzPlaner\Service\PlanerPermissionPolicy;
-use OCA\LocalBase\Controller\ApiResponder;
+use OCA\FlzPlaner\Vendor\Filzmann\Shared\Controller\ApiResponder;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;

@@ -1,0 +1,19 @@
+{
+    "schema": 1,
+    "app_id": "flzplaner",
+    "app_namespace": "FlzPlaner",
+    "php_namespace": "OCA\\FlzPlaner\\Vendor\\Filzmann\\Shared",
+    "browser_global": "window.OCA.FlzPlaner.Shared",
+    "packages": {
+        "php": {
+            "name": "filzmann/shared-runtime",
+            "version": "0.2.0",
+            "sha256": "ff892d12d9196d5a7b41b2b303f25cd3e458e8aa2092cb7db6a942a5fa3a187d"
+        },
+        "browser": {
+            "name": "@filzmann/shared-browser",
+            "version": "0.1.0",
+            "sha256": "1c40294520dbfc9fd82c6696075ee14a65b0c9798fad05797ba00bebbe34a4d7"
+        }
+    }
+}

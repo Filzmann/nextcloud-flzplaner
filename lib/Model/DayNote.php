@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\FlzPlaner\Model;
 
-use OCA\LocalBase\Model\ModelApiTrait;
+use OCA\FlzPlaner\Vendor\Filzmann\Shared\Model\ModelApiTrait;
 
 class DayNote {
     use ModelApiTrait;

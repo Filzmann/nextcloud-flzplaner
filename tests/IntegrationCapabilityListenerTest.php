@@ -10,13 +10,13 @@ namespace {
 
     use OCA\FlzPlaner\Listener\IntegrationCapabilityQueryListener;
     use OCA\FlzPlaner\Privacy\PlanerPrivacyProviderListener;
-    use OCA\LocalBase\Integration\FlzIntegrationCapabilities;
-    use OCA\LocalBase\Integration\IntegrationCapabilityQueryEvent;
+    use OCA\FlzOrganization\PublicApi\V1\IntegrationCapabilities;
+    use OCA\FlzOrganization\PublicApi\V1\IntegrationCapabilityQueryEvent;
 
-    $event = new IntegrationCapabilityQueryEvent(FlzIntegrationCapabilities::all());
+    $event = new IntegrationCapabilityQueryEvent(IntegrationCapabilities::all());
     (new IntegrationCapabilityQueryListener())->handle($event);
-    if ($event->providersFor(FlzIntegrationCapabilities::ASSISTANT_SCHEDULE_READ) !== ['flzplaner']) throw new RuntimeException('Assistenzplanfähigkeit fehlt.');
-    if ($event->isAvailable(FlzIntegrationCapabilities::ABSENCE_READ)) throw new RuntimeException('Assistenzplaner meldet eine fremde Fähigkeit.');
+    if ($event->providersFor(IntegrationCapabilities::ASSISTANT_SCHEDULE_READ) !== ['flzplaner']) throw new RuntimeException('Assistenzplanfähigkeit fehlt.');
+    if ($event->isAvailable(IntegrationCapabilities::ABSENCE_READ)) throw new RuntimeException('Assistenzplaner meldet eine fremde Fähigkeit.');
 
     $application = file_get_contents(__DIR__ . '/../lib/AppInfo/Application.php');
     if ($application === false || !str_contains($application, 'PlanerPrivacyProviderListener::class')) throw new RuntimeException('Filzmann Assistenzplanung registriert den Datenschutzprovider nicht im Bootstrap.');

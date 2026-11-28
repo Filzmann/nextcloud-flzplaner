@@ -1,6 +1,9 @@
 OC.L10N.register(
     "flzplaner",
     {
+  "Ungültiger Organisationsteam-Code.":"Invalid organization team code.",
+  "Ungültige Organisationsteam-Definition.":"Ungültige Organisationsteam-Definition.",
+  "Ungültige Organisationsdefinition.":"Ungültige Organisationsdefinition.",
     " Uhr" : "",
     "+ ich" : "+ me",
     "Abbrechen" : "Cancel",

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\FlzPlaner\Service;
 
-use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
+
 use OCP\IGroupManager;
 use OCP\IUserSession;
 
@@ -13,7 +13,7 @@ final class TeamBureauAssignmentService {
     public function __construct(
         private IGroupManager $groups,
         private IUserSession $session,
-        private FlzOrganizationSettingsService $organization,
+        private PlanerOrganizationGateway $organization,
         private TeamSettingsService $settings,
         private TeamBureauAssignmentPolicy $policy,
     ) {}
@@ -21,7 +21,7 @@ final class TeamBureauAssignmentService {
     public function assign(string $teamCode, string $bureauKey): array {
         $user = $this->session->getUser();
         if ($user === null) throw new \DomainException('Nicht angemeldet.');
-        $definition = $this->organization->definition();
+        $definition = $this->organization->definitionOrDefaults();
         $teamCode = $definition->normalizeTeamCode($teamCode);
         $targetArea = $definition->areaGroupId($bureauKey);
         if ($targetArea === null) throw new \InvalidArgumentException('Der Bürobereich ist unbekannt.');

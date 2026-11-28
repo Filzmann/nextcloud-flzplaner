@@ -1,0 +1,17 @@
+{
+    "name": "flzplaner/flz-shared-runtime-bundle",
+    "description": "Generated app-local FLZ shared runtime bundle.",
+    "type": "library",
+    "license": "AGPL-3.0-or-later",
+    "require": {
+        "php": ">=8.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "OCA\\FlzPlaner\\Vendor\\Filzmann\\Shared\\": "src/"
+        }
+    },
+    "config": {
+        "autoloader-suffix": "FlzPlanerFlzShared0b728a03b8661c8c"
+    }
+}

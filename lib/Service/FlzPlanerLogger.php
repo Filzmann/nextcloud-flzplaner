@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\FlzPlaner\Service;
 
 use OCA\FlzPlaner\AppInfo\Application;
-use OCA\LocalBase\Service\AppLogger;
+use OCA\FlzPlaner\Vendor\Filzmann\Shared\Service\AppLogger;
 use Throwable;
 
 class FlzPlanerLogger {

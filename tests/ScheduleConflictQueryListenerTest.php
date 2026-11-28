@@ -16,7 +16,7 @@ namespace {
 
     use OCA\FlzPlaner\Listener\ScheduleConflictQueryListener;
     use OCA\FlzPlaner\Repository\ShiftPlanRepository;
-    use OCA\LocalBase\Calendar\ScheduleConflictQueryEvent;
+    use OCA\FlzOrganization\PublicApi\V1\ScheduleConflictQueryEvent;
     use function OCA\FlzPlaner\Tests\assertSameValue;
 
     final class ConflictShiftPlanRepositoryFake extends ShiftPlanRepository {

@@ -7,14 +7,14 @@ namespace OCA\FlzPlaner\Store;
 use OCA\FlzPlaner\Model\TeamSettings;
 use OCA\FlzPlaner\Repository\TeamSettingsRepository;
 use OCA\FlzPlaner\Service\ShiftConfigService;
-use OCA\LocalBase\Organization\FlzOrganizationDefinition;
-use OCA\LocalBase\Organization\FlzOrganizationSettingsService;
+use OCA\FlzPlaner\Model\PlanerOrganizationDefinition;
+use OCA\FlzPlaner\Service\PlanerOrganizationGateway;
 
 class TeamSettingsStore {
     public function __construct(
         private TeamSettingsRepository $repository,
         private ShiftConfigService $shiftConfig,
-        private ?FlzOrganizationSettingsService $organization = null,
+        private ?PlanerOrganizationGateway $organization = null,
     ) {
     }
 
@@ -74,7 +74,7 @@ class TeamSettingsStore {
     }
 
     private function defaultDisplayName(string $teamCode): string {
-        $definition = $this->organization?->definition() ?? FlzOrganizationDefinition::defaults();
+        $definition = $this->organization?->definitionOrDefaults() ?? PlanerOrganizationDefinition::defaults();
         return $definition->teamLabelPrefix() . ' ' . $teamCode;
     }
 }

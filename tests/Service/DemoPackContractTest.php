@@ -10,7 +10,7 @@ $routes = file_get_contents($root . '/appinfo/routes.php');
 $info = file_get_contents($root . '/appinfo/info.xml');
 $template = file_get_contents($root . '/templates/admin.php');
 if (in_array(false, [$service, $command, $controller, $routes, $info, $template], true)) throw new RuntimeException('Planer-Demo-Pack ist unvollständig.');
-foreach (['DemoAccountProvisioningService', "->provision('flz-full-suite-demo'", "['A', 'B', 'C']", 'TeamSettingsService', 'ShiftConfigService'] as $contract) if (!str_contains($service, $contract)) throw new RuntimeException("Planer-Demo-Vertrag fehlt: {$contract}");
+foreach (['DemoAccountProvisioningService', "->provision('flzplaner-demo'", "['A', 'B', 'C']", 'TeamSettingsService', 'ShiftConfigService'] as $contract) if (!str_contains($service, $contract)) throw new RuntimeException("Planer-Demo-Vertrag fehlt: {$contract}");
 foreach (['PlanerDemoPackService', '->install()'] as $contract) if (!str_contains($command, $contract)) throw new RuntimeException("Demo-Command delegiert nicht: {$contract}");
 foreach (['/api/admin/demo-pack/install', "'verb' => 'POST'"] as $contract) if (!str_contains($routes, $contract)) throw new RuntimeException("Demo-Route fehlt: {$contract}");
 foreach (['<command>OCA\\FlzPlaner\\Command\\SeedDemoCommand</command>', '<admin>OCA\\FlzPlaner\\Settings\\Admin</admin>', '<admin-section>OCA\\FlzPlaner\\Settings\\AdminSection</admin-section>'] as $contract) if (!str_contains($info, $contract)) throw new RuntimeException("Admin-/Command-Registrierung fehlt: {$contract}");
