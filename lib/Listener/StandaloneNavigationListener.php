@@ -11,7 +11,7 @@ use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\IUserSession;
 use OCP\Navigation\Events\LoadAdditionalEntriesEvent;
-use OCP\Navigation\INavigationManager;
+use OCP\INavigationManager;
 
 /** @template-implements IEventListener<LoadAdditionalEntriesEvent> */
 final class StandaloneNavigationListener implements IEventListener {
