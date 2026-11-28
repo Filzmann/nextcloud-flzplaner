@@ -3,7 +3,7 @@ const {
     FakeButton,
     FakeElement,
     createElementMap,
-} = require('../../../localbase/tests/js/helpers/fake-dom.js');
+} = require('../../../test-harness/js/helpers/fake-dom.js');
 
 const elements = createElementMap([
     'team-select',

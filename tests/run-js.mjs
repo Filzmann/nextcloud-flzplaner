@@ -1,6 +1,6 @@
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runJavaScriptSuite } from '../../localbase/tests/Support/js-runner.mjs';
+import { runJavaScriptSuite } from '../../test-harness/Support/js-runner.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
