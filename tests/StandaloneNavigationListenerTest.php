@@ -27,7 +27,7 @@ namespace OCP {
         interface IL10N { public function t(string $text, array $parameters = []): string; }
     }
 }
-namespace OCP\Navigation {
+namespace OCP {
     if (!interface_exists(INavigationManager::class)) {
         interface INavigationManager { public const TYPE_APPS = 'link'; public function add(callable $entry): void; }
     }
@@ -47,7 +47,7 @@ namespace {
     use OCP\IUser;
     use OCP\IUserSession;
     use OCP\Navigation\Events\LoadAdditionalEntriesEvent;
-    use OCP\Navigation\INavigationManager;
+    use OCP\INavigationManager;
 
     $l10n = new class implements IL10N { public function t(string $text, array $parameters = []): string { return $text; } };
     $user = new class implements IUser { public function getUID(): string { return 'navigation-user'; } };
