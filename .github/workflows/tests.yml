@@ -29,13 +29,6 @@ jobs:
           ref: main
           path: '.'
           clean: false
-      - name: Test-Harness (Parent) auschecken
-        uses: actions/checkout@v7
-        with:
-          repository: Filzmann/br-nextcloud-apps
-          ref: main
-          path: '.'
-          clean: false
       - name: App auschecken
         uses: actions/checkout@v7
         with:
@@ -74,6 +67,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
+      - name: Test-Harness (Parent) auschecken
+        uses: actions/checkout@v7
+        with:
+          repository: Filzmann/br-nextcloud-apps
+          ref: main
+          path: '.'
+          clean: false
       - name: App auschecken
         uses: actions/checkout@v7
         with:
